@@ -6,11 +6,11 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>../presentacionRestaurante</module>
-        <module>../persistenciaRestaurante</module>
+        <module>../dominioRestaurante</module>
         <module>../dtosRestaurante</module>
         <module>../negocioRestaurante</module>
-        <module>../dominioRestaurante</module>
+        <module>../persistenciaRestaurante</module>
+        <module>../presentacionRestaurante</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
