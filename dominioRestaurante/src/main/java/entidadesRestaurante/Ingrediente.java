@@ -4,6 +4,7 @@
  */
 package entidadesRestaurante;
 
+import enumEntidades.UnidadMedida;
 import javax.persistence.*;
 
 /**
@@ -18,5 +19,11 @@ public class Ingrediente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "")
     private Long id;
+    
+    @Column(name = "nombre_ingrediente", length = 100, nullable = false)
+    private String nombre;
+    
+    
+    
     
 }
