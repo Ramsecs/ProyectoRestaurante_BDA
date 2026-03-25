@@ -12,9 +12,6 @@ import entidadesRestaurante.Cliente;
 import entidadesRestaurante.ClienteFrecuente;
 import excepcionesRestaurante.NegocioException;
 import excepcionesRestaurante.PersistenciaException;
-import java.time.LocalDate;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import validadores.Validaciones;
 
 /**
@@ -27,7 +24,7 @@ public class ClienteBO implements IClienteBO{
     private Validaciones validar = new Validaciones();
     
     @Override
-    public Cliente registrarCliente(ClienteDTO cliente) throws NegocioException {
+    public boolean registrarCliente(ClienteDTO cliente) throws NegocioException {
             ClienteAdapter clienteAdap = new ClienteAdapter();
         
         if (!validar.validarNombres(cliente.getNombre())) {
@@ -46,10 +43,16 @@ public class ClienteBO implements IClienteBO{
             throw new NegocioException("El correo del cliente esta mal escrito.");
         }
         
-        ClienteFrecuente clienteIncribir = clienteAdap.DTOAEntidad(cliente);
+        ClienteFrecuente clienteIncribir = clienteAdap.DTOAEntidadClienteFrecuente(cliente);
         
         try {
-            return clienteDAO.registrarCliente(clienteIncribir);
+            Cliente cliente_recibido = clienteDAO.registrarCliente(clienteIncribir);
+            
+            if (cliente_recibido == null) {
+                return false;
+            }
+            return true;
+            
         } catch (PersistenciaException ex) {
             throw new NegocioException("Ocurrio un error en negocio al intentar registrar el cliente.");
         }

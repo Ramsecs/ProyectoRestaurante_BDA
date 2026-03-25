@@ -5,9 +5,7 @@
 package objetosNegocioRestaurante;
 
 import dtosDelRestaurante.ClienteDTO;
-import entidadesRestaurante.Cliente;
 import excepcionesRestaurante.NegocioException;
-import java.time.LocalDate;
 
 /**
  *
@@ -15,6 +13,6 @@ import java.time.LocalDate;
  */
 public interface IClienteBO {
     
-    public Cliente registrarCliente(ClienteDTO cliente) throws NegocioException;
+    public boolean registrarCliente(ClienteDTO cliente) throws NegocioException;
     
 }

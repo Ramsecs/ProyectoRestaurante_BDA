@@ -1,1 +1,5 @@
 entidadesRestaurante\Ingrediente.class
+entidadesRestaurante\Cliente.class
+entidadesRestaurante\ClienteFrecuente.class
+entidadesRestaurante\Comanda.class
+enumEntidades\UnidadMedida.class

@@ -7,6 +7,7 @@ package entidadesRestaurante;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import javax.persistence.*;
 
 /**
@@ -21,7 +22,6 @@ public class Cliente implements Serializable{
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_cliente")
     protected Long id;
     
     @Column(name = "nombres", length = 100, nullable = false)
@@ -41,6 +41,9 @@ public class Cliente implements Serializable{
     
     @Column(name = "fecha_registro", nullable = false)
     protected LocalDate fecha_registro;
+    
+    @OneToMany(mappedBy = "cliente", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    private List<Comanda> comandas;
 
     public Cliente() {
     }

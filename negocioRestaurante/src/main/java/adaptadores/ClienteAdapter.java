@@ -14,7 +14,12 @@ import java.time.LocalDate;
  */
 public class ClienteAdapter {
     
-    public ClienteFrecuente DTOAEntidad(ClienteDTO cliente){
+    /**
+     * 
+     * @param cliente
+     * @return ClienteFrecuente
+     */
+    public ClienteFrecuente DTOAEntidadClienteFrecuente(ClienteDTO cliente){
         
         if (cliente == null) {
             return null;
@@ -33,4 +38,22 @@ public class ClienteAdapter {
         
     }
     
+    
+    public ClienteDTO EntidadADTOCliente(ClienteFrecuente cliente){
+        
+        if (cliente == null) {
+            return null;
+        }
+        
+        ClienteDTO clienteDTO = new ClienteDTO();
+        clienteDTO.setNombre(cliente.getNombre());
+        clienteDTO.setApellido_paterno(cliente.getApellido_paterno());
+        clienteDTO.setApellido_materno(cliente.getApellido_materno());
+        clienteDTO.setCorreo(cliente.getCorreo());
+        clienteDTO.setTelefono(cliente.getTelefono());
+        clienteDTO.setFecha_registro(cliente.getFecha_registro());
+        
+        return clienteDTO;
+        
+    }
 }

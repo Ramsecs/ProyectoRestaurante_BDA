@@ -13,7 +13,7 @@ import javax.persistence.TypedQuery;
 
 /**
  *
- * @author RAMSES
+ * @author RAMSES y JOSMARA
  */
 public class ClienteDAO implements IClienteDAO{
     
