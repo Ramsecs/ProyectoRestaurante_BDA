@@ -39,7 +39,7 @@ public class Cliente implements Serializable{
     @Column(name = "telefono", length = 10, nullable = true)
     protected String telefono;
     
-    @Column(name = "telefono", nullable = false)
+    @Column(name = "fecha_registro", nullable = false)
     protected LocalDate fecha_registro;
 
     public Cliente() {
