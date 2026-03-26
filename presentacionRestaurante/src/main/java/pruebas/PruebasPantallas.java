@@ -5,7 +5,7 @@
 package pruebas;
 
 import javax.swing.SwingUtilities;
-import pantallas.VentanaMenuAdmin;
+import pantallas.*;
 
 /**
  *
@@ -19,7 +19,7 @@ public class PruebasPantallas {
     public static void main(String[] args) {
         // TODO code application logic here
         SwingUtilities.invokeLater(() -> {
-            new VentanaMenuAdmin().setVisible(true);
+            new VentanaMenuCliente().setVisible(true);
         });
     }
     

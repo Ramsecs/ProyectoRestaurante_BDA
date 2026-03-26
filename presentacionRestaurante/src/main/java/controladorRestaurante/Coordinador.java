@@ -4,24 +4,19 @@
  */
 package controladorRestaurante;
 
-import daosRestaurante.ClienteDAO;
-import daosRestaurante.IClienteDAO;
-import objetosNegocioRestaurante.ClienteBO;
-import objetosNegocioRestaurante.IClienteBO;
-
 /**
  *
  * @author RAMSES
  */
 public class Coordinador {
     
-    private final IClienteDAO clienteDAO;
-    private final IClienteBO clienteBO;
-    
-    public Coordinador(){
-        this.clienteBO = new ClienteBO();
-        this.clienteDAO = new ClienteDAO();
-    }
+//    private final IClienteDAO clienteDAO;
+//    private final IClienteBO clienteBO;
+//    
+//    public Coordinador(){
+//        this.clienteBO = new ClienteBO();
+//        this.clienteDAO = new ClienteDAO();
+//    }
     
     
     

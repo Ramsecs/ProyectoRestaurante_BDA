@@ -25,7 +25,7 @@ public class VentanaMenuAdmin extends JFrame {
         //CONFIGURACION BASE----------------------------------------------------
         setTitle("Menú de Administrador - Sistema Restaurante");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 800);
+        setSize(800, 650);
         setLocationRelativeTo(null); //Para que este siempre centrado
 
         initComponents();
@@ -33,7 +33,7 @@ public class VentanaMenuAdmin extends JFrame {
     }
 
     private void initComponents() {
-        //Primero usamos la clase PanelFondo que ya tienene las implementaciones
+        //Primero usamos la clase PanelFondo
         //necesarias para tener de fondo una imagen
         PanelFondo panel_con_fondo = new PanelFondo();
         panel_con_fondo.setLayout(new GridBagLayout()); // Para centrar el cuadro blanco
@@ -44,6 +44,7 @@ public class VentanaMenuAdmin extends JFrame {
         PanelRedondeado cuadro_blanco = new PanelRedondeado(50, Color.WHITE);
         cuadro_blanco.setLayout(new BorderLayout(0, 30));
         cuadro_blanco.setBorder(new javax.swing.border.EmptyBorder(40, 50, 40, 50));
+        cuadro_blanco.setPreferredSize(new Dimension(600, 600));
 
         //Tercero que es el titulo de la etiqueta que aparece en el menu 
         Font fuenteTitulo = cargarFuenteAgbalumo(35f);
@@ -51,6 +52,9 @@ public class VentanaMenuAdmin extends JFrame {
         lbl_titulo.setFont(fuenteTitulo);
         lbl_titulo.setForeground(Color.BLACK);
         cuadro_blanco.add(lbl_titulo, BorderLayout.NORTH);
+        lbl_titulo.setHorizontalAlignment(SwingConstants.CENTER);
+        // También es buena idea asegurar que el texto ocupe todo el ancho disponible
+        lbl_titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         //Cuarto, ACOMODO DE LOS BOTONES (NO MOVER)       
         JPanel panel_botones = new JPanel(new GridLayout(3, 2, 25, 25)); // 25px de espacio entre botones
@@ -59,12 +63,13 @@ public class VentanaMenuAdmin extends JFrame {
         //Quinto, creación de los botones 
         //Si agregan botones este es el formato 
         // Formato: BotonMenuAdministrador(texto, ruta, color, ancho_icono, alto_icono)
-        BotonMenuAdministrador btn_ingrediente = new BotonMenuAdministrador(null, "/imagenes/ingredientePNG.png", verde, 80, 80);
-        BotonMenuAdministrador btn_comanda = new BotonMenuAdministrador(null, "/imagenes/comandaPNG.png", verde, 80, 80);
-        BotonMenuAdministrador btn_producto = new BotonMenuAdministrador(null, "/imagenes/productoPNG.png", verde, 80, 80);
-        BotonMenuAdministrador btn_cliente = new BotonMenuAdministrador(null, "/imagenes/clientePNG.png", verde, 80, 80);
-        BotonMenuAdministrador btn_reporte = new BotonMenuAdministrador(null, "/imagenes/reportePNG.png", verde, 80, 80);
-        BotonMenuAdministrador btn_volver = new BotonMenuAdministrador(null, "/imagenes/8.png", rojo, 80, 80);
+        Font fuente_botones = cargarFuenteAgbalumo(20f);
+        BotonMenuAdministrador btn_ingrediente = new BotonMenuAdministrador("Ingredientes", "/imagenes/ingredientePNG.png", verde, 80, 80, fuente_botones);
+        BotonMenuAdministrador btn_comanda = new BotonMenuAdministrador("Comandas", "/imagenes/comandaPNG.png", verde, 80, 80, fuente_botones);
+        BotonMenuAdministrador btn_producto = new BotonMenuAdministrador("Productos", "/imagenes/productoPNG.png", verde, 80, 80, fuente_botones);
+        BotonMenuAdministrador btn_cliente = new BotonMenuAdministrador("Clientes", "/imagenes/clientePNG.png", verde, 80, 80, fuente_botones);
+        BotonMenuAdministrador btn_reporte = new BotonMenuAdministrador("Reportes", "/imagenes/reportePNG.png", verde, 80, 80, fuente_botones);
+        BotonMenuAdministrador btn_volver = new BotonMenuAdministrador("Volver", "/imagenes/volverPNG.png", rojo, 80, 80, fuente_botones);
 
         //Agregar botones al panel 
         panel_botones.add(btn_ingrediente);

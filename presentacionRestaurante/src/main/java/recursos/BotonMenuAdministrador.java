@@ -12,13 +12,13 @@ import javax.swing.*;
  *
  * @author josma
  */
-
 public class BotonMenuAdministrador extends JButton {
 
     private int radio_esquinas = 25; // Redondez de las esquinas de los botones
     private Color color_fondo;
     private Color color_original;
     private int ancho_icono, alto_icono;
+    private Font fuente_especial;
 
     /**
      * Constructor del botón con auto-escalado de imagen.
@@ -32,11 +32,12 @@ public class BotonMenuAdministrador extends JButton {
      * @param alto_icono_deseado El alto máximo que quieres para el icono (ej:
      * 50).
      */
-    public BotonMenuAdministrador(String texto, String ruta_icono, Color color, int ancho_icono_deseado, int alto_icono_deseado) {
+    public BotonMenuAdministrador(String texto, String ruta_icono, Color color, int ancho_icono_deseado, int alto_icono_deseado, Font fuente_especial) {
         this.color_fondo = color;
         this.color_original = color;
         this.ancho_icono = ancho_icono_deseado;
         this.alto_icono = alto_icono_deseado;
+        this.fuente_especial = fuente_especial;
 
         //Aqui estamos haciendo el escalado de las imagenes ya que algunas son muy grandes
         if (ruta_icono != null && !ruta_icono.isEmpty()) {
@@ -54,6 +55,12 @@ public class BotonMenuAdministrador extends JButton {
             setText(texto);
             setForeground(Color.WHITE); // Texto siempre blanco
             setFont(new Font("SansSerif", Font.BOLD, 14));
+            if (fuente_especial != null) {
+                setFont(fuente_especial);
+            } else {
+                // Fuente de respaldo por si acaso
+                setFont(new Font("SansSerif", Font.BOLD, 14));
+            }
             // Posicionar texto debajo del icono
             setHorizontalTextPosition(SwingConstants.CENTER);
             setVerticalTextPosition(SwingConstants.BOTTOM);
@@ -99,37 +106,37 @@ public class BotonMenuAdministrador extends JButton {
      * Método de utilidad para redimensionar una imagen de forma suave.
      */
     private ImageIcon escalarImagen(ImageIcon icono_original, int ancho, int alto) {
-    // 1. Obtenemos la imagen base
-    Image imgOriginal = icono_original.getImage();
-    
-    // 2. Escalamos la imagen
-    // Este metodo es sincrono y se encarga de todo el suavizado.
-    Image img_escalada = imgOriginal.getScaledInstance(ancho, alto, Image.SCALE_SMOOTH);
-    
-    // 3. Devolvemos la nueva imagen escalada como ImageIcon
-    return new ImageIcon(img_escalada);
-}
+        // 1. Obtenemos la imagen base
+        Image imgOriginal = icono_original.getImage();
+
+        // 2. Escalamos la imagen
+        // Este metodo es sincrono y se encarga de todo el suavizado.
+        Image img_escalada = imgOriginal.getScaledInstance(ancho, alto, Image.SCALE_SMOOTH);
+
+        // 3. Devolvemos la nueva imagen escalada como ImageIcon
+        return new ImageIcon(img_escalada);
+    }
 
     @Override
-protected void paintComponent(Graphics g) {
-    Graphics2D g2 = (Graphics2D) g.create();
-    
-    // Activar suavizado para TODO lo que se dibuje en este botón (incluyendo el icono)
-    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
 
-    // Dibuja el fondo redondeado
-    g2.setColor(color_fondo);
-    g2.fillRoundRect(0, 0, getWidth(), getHeight(), radio_esquinas, radio_esquinas);
+        // Activar suavizado para TODO lo que se dibuje en este botón (incluyendo el icono)
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
-    // Importante: No cerramos g2 todavía si queremos que afecte al super
-    g2.dispose();
-    
-    // Para que el icono también se beneficie del suavizado:
-    Graphics2D g2_super = (Graphics2D) g;
-    g2_super.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g2_super.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-    
-    super.paintComponent(g); 
-}
+        // Dibuja el fondo redondeado
+        g2.setColor(color_fondo);
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), radio_esquinas, radio_esquinas);
+
+        // Importante: No cerramos g2 todavía si queremos que afecte al super
+        g2.dispose();
+
+        // Para que el icono también se beneficie del suavizado:
+        Graphics2D g2_super = (Graphics2D) g;
+        g2_super.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2_super.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+
+        super.paintComponent(g);
+    }
 }
