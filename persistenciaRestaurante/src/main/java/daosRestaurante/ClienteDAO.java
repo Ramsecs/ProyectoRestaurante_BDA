@@ -126,6 +126,7 @@ public class ClienteDAO implements IClienteDAO {
         }
     }
 
+    @Override
     public Cliente buscarPorId(Long id) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
         try {

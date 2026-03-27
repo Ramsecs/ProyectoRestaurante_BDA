@@ -7,6 +7,7 @@ package daosRestaurante;
 import entidadesRestaurante.Cliente;
 import excepcionesRestaurante.PersistenciaException;
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
@@ -54,5 +55,75 @@ public class ClienteDAOIT {
             clienteDAO.registrarCliente(null);
         }, "Se esperaba PersistenciaException al enviar un objeto nulo");
 
+    }
+@Test
+    @DisplayName("Debe buscar clientes por filtro")
+    public void testBuscarCliente() {
+        String filtro = "Ramses";
+
+        try {
+            List<Object[]> resultados = clienteDAO.buscarCliente(filtro);
+
+            assertNotNull(resultados, "La lista de resultados no deberia ser nula");
+            if (!resultados.isEmpty()) {
+                Object[] fila = resultados.get(0);
+    
+                assertTrue(fila[0] instanceof Cliente, "El primer elemento debe ser un objeto Cliente");
+                Cliente c = (Cliente) fila[0];
+                assertTrue(c.getNombre().toLowerCase().contains(filtro) || 
+                           c.getCorreo().toLowerCase().contains(filtro));
+                
+                System.out.println("Cliente encontrado: " + c.getNombre() + " Comandas: " + fila[1]);
+            }
+        } catch (PersistenciaException e) {
+            fail("Error al buscar cliente: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("Debe modificar los datos de un cliente existente")
+    public void testModificarCliente() {
+        try {
+            Long idExistente = 1L; 
+            Cliente cliente = clienteDAO.buscarPorId(idExistente);
+            
+            assertNotNull(cliente, "Para probar modificacion debe existir el ID 1 en la BD");
+
+            String nuevoNombre = "Tilin";
+            cliente.setNombre(nuevoNombre);
+
+            Cliente actualizado = clienteDAO.modificarCliente(cliente);
+
+            assertEquals(nuevoNombre, actualizado.getNombre(), "El nombre no se actualizo correctamente");
+            
+        } catch (PersistenciaException e) {
+            fail("Error al modificar cliente: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("Debe encontrar un cliente por su ID")
+    public void testBuscarPorId() {
+        try {
+            Long id = 1L;
+            Cliente encontrado = clienteDAO.buscarPorId(id);
+
+            assertNotNull(encontrado, "El cliente con ID " + id + " debe existir");
+            assertEquals(id, encontrado.getId(), "El ID retornado no coincide con el buscado");
+            
+        } catch (PersistenciaException e) {
+            fail("Error al buscar por ID: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("retorna null a un id que no existe")
+    public void testBuscarPorIdInexistente() {
+        try {
+            Cliente resultado = clienteDAO.buscarPorId(873102973L);
+            assertNull(resultado, "Debe retornar null para el id inexistente");
+        } catch (PersistenciaException e) {
+            fail("debe retornar null");
+        }
     }
 }
