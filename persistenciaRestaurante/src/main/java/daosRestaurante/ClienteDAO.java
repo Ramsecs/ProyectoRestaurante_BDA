@@ -41,50 +41,84 @@ public class ClienteDAO implements IClienteDAO{
      */
     @Override
     public Cliente registrarCliente(Cliente cliente) throws PersistenciaException{
-        EntityManager mana = ConexionBD.crearConexion();
+        EntityManager em = ConexionBD.crearConexion();
         
         try{
             
-            mana.getTransaction().begin();
-            mana.persist(cliente);
-            mana.getTransaction().commit();
+            em.getTransaction().begin();
+            em.persist(cliente);
+            em.getTransaction().commit();
             return cliente;
             
         }catch(Exception ex){
-            mana.getTransaction().rollback();
+            em.getTransaction().rollback();
             throw new PersistenciaException("Ocurrio un error al querer registrar el cliente.");
         }finally{
-            mana.close();
+            em.close();
         }
     }
     
     /**
-     * Este metodo queda pendiente de hacer para la busqueda de cliente con sus demas filtros
-     * @param cliente
+     * Este metodo permite hacer la busqueda de los clientes que coincidan con el string
+     * de busqueda, que busca por nombre, apellidos (implementación extra), correo y teléfono.
+     * @param filtro_busqueda
      * @return List 
      * @throws PersistenciaException 
      */
     @Override
-    public Cliente buscarCliente(Cliente cliente) throws PersistenciaException{
+    public List<Cliente> buscarCliente(String filtro_busqueda) throws PersistenciaException{
         
-        EntityManager mana = ConexionBD.crearConexion();
-        
-        String sentencia = "SELECT c FROM Cliente c WHERE c.id = :id_cliente";
+        EntityManager em = ConexionBD.crearConexion();
+        //LOWER nos sirve para que NO importe si se escriben mayusculas o minusculas
+        String sentenciaJPQL = "SELECT c, COUNT(com), SUM(com.total_venta) " + 
+                "FROM Cliente c LEFT JOIN c.comandas com" + 
+                "LOWER(c.nombre) LIKE :filtro OR " +
+                "LOWER(c.apellido_paterno) LIKE :filtro OR " + 
+                "LOWER(c.apellido_materno) LIKE :filtro OR " +
+                "LOWER(c.correo) LIKE :filtro OR " +
+                "c.telefono LIKE :filtro" +
+                "GROUP BY c";
         
         try{
             
-            TypedQuery<Cliente> query = mana.createQuery(sentencia, Cliente.class);
-            query.setParameter("id_cliente", cliente.getId());
-            Cliente lista = query.getSingleResult();
-            return lista;
+            TypedQuery<Cliente> query = em.createQuery(sentenciaJPQL, Cliente.class);
+            //El % nos ayuda a que se permita buscar por asi decir lo que sea antes y despues 
+            //del texto
+            query.setParameter("filtro", "%" + filtro_busqueda.toLowerCase() + "%");
+            //Devolvemos la lista con los resultados del filtro de busqueda
+            return query.getResultList();
             
         }catch(Exception ex){
-            mana.getTransaction().rollback();
-            throw new PersistenciaException("Ocurrio un error al querer registrar el cliente.");
+            em.getTransaction().rollback();
+            throw new PersistenciaException("Ocurrio un error al querer aplicar los filtros de busqueda");
         }finally{
-            mana.close();
+            em.close();
         }
         
+    }
+    /**
+     * Mediante este metodo se permite modifcar al cliente con EntityManager
+     * @param cliente
+     * @return Cliente
+     * @throws PersistenciaException 
+     */
+    @Override
+    public Cliente modificarCliente(Cliente cliente) throws PersistenciaException {
+        EntityManager em = ConexionBD.crearConexion();
+        
+        try{
+            
+            em.getTransaction().begin();
+            em.merge(cliente);
+            em.getTransaction().commit();
+            return cliente;
+            
+        }catch(Exception ex){
+            em.getTransaction().rollback();
+            throw new PersistenciaException("Ocurrio un error al querer registrar el cliente.");
+        }finally{
+            em.close();
+        }
     }
     
 }
