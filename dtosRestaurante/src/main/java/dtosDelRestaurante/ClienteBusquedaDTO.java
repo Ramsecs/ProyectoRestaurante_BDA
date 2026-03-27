@@ -16,13 +16,14 @@ public class ClienteBusquedaDTO {
     private String correo;
     private String telefono;
     private String tipo_cliente;
+    private Integer puntos;
     private Integer visitas;
     private double total_acumulado;
 
     public ClienteBusquedaDTO() {
     }
 
-    public ClienteBusquedaDTO(Long id, String nombre, String apellido_paterno, String apellido_materno, String correo, String telefono, String tipo_cliente, Integer visitas, double total_acumulado) {
+    public ClienteBusquedaDTO(Long id, String nombre, String apellido_paterno, String apellido_materno, String correo, String telefono, String tipo_cliente, Integer puntos, Integer visitas, double total_acumulado) {
         this.id = id;
         this.nombre = nombre;
         this.apellido_paterno = apellido_paterno;
@@ -30,9 +31,12 @@ public class ClienteBusquedaDTO {
         this.correo = correo;
         this.telefono = telefono;
         this.tipo_cliente = tipo_cliente;
+        this.puntos = puntos;
         this.visitas = visitas;
         this.total_acumulado = total_acumulado;
     }
+
+    
 
     public Long getId() {
         return id;
@@ -106,8 +110,18 @@ public class ClienteBusquedaDTO {
         this.total_acumulado = total_acumulado;
     }
 
+    public Integer getPuntos() {
+        return puntos;
+    }
+
+    public void setPuntos(Integer puntos) {
+        this.puntos = puntos;
+    }
+
     @Override
     public String toString() {
-        return "ClienteDTO{" + "id=" + id + ", nombre=" + nombre + ", apellido_paterno=" + apellido_paterno + ", apellido_materno=" + apellido_materno + ", correo=" + correo + ", telefono=" + telefono + ", tipo_cliente=" + tipo_cliente + ", visitas=" + visitas + ", total_acumulado=" + total_acumulado + '}';
+        return "ClienteBusquedaDTO{" + "id=" + id + ", nombre=" + nombre + ", apellido_paterno=" + apellido_paterno + ", apellido_materno=" + apellido_materno + ", correo=" + correo + ", telefono=" + telefono + ", tipo_cliente=" + tipo_cliente + ", puntos=" + puntos + ", visitas=" + visitas + ", total_acumulado=" + total_acumulado + '}';
     }
+
+    
 }
