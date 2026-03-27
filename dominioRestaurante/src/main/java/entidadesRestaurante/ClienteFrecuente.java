@@ -25,13 +25,13 @@ public class ClienteFrecuente extends Cliente implements Serializable{
         super();
     }
 
-    public ClienteFrecuente(Integer puntos, String nombre, String apellido_paterno, String apellido_materno, String correo, String telefono, LocalDate fecha_registro) {
-        super(nombre, apellido_paterno, apellido_materno, correo, telefono, fecha_registro);
+    public ClienteFrecuente(Integer puntos, String nombre, String apellido_paterno, String apellido_materno, String correo, String telefono) {
+        super(nombre, apellido_paterno, apellido_materno, correo, telefono);
         this.puntos = puntos;
     }
 
-    public ClienteFrecuente(Integer puntos, Long id, String nombre, String apellido_paterno, String apellido_materno, String correo, String telefono, LocalDate fecha_registro) {
-        super(id, nombre, apellido_paterno, apellido_materno, correo, telefono, fecha_registro);
+    public ClienteFrecuente(Integer puntos, Long id, String nombre, String apellido_paterno, String apellido_materno, String correo, String telefono) {
+        super(id, nombre, apellido_paterno, apellido_materno, correo, telefono);
         this.puntos = puntos;
     }
 
