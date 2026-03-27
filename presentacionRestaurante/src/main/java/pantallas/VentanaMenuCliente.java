@@ -15,6 +15,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.*;
+import observadorRestaurante.Observador;
 import recursos.*;
 
 /**
@@ -24,6 +25,16 @@ import recursos.*;
 public class VentanaMenuCliente extends JFrame {
 
     private final Coordinador coordinador;
+    //Observador 
+    private Observador metiche; 
+    //Enchufe  o puerta para que nuestro observador pueda funcionar, es un setter de Intefaz
+    // es como decir que la ventana es el radio y el observador la frecuencia
+    //la ventana puede estar activa, pero si no esta vinculada con el observador nadie
+    //escucha lo que grita. El this.metiche es la variable que guarda ese alguien 
+    public void setConexionObservador(Observador metiche) {
+        this.metiche = metiche;
+    }
+    
     private List<ClienteBusquedaDTO> listaClientesActual;
     private ClienteDTO clienteDTO;
     private final Color naranja = new Color(255, 184, 77);
@@ -37,6 +48,7 @@ public class VentanaMenuCliente extends JFrame {
     private TextFieldPersonalizado txt_apellido_materno;
     private TextFieldPersonalizado txt_correo;
     private TextFieldPersonalizado txt_telefono;
+    private TextFieldPersonalizado txt_buscador;
 
     public VentanaMenuCliente(Coordinador coordinador) {
         this.coordinador = coordinador;
@@ -90,7 +102,7 @@ public class VentanaMenuCliente extends JFrame {
         cuadro_blanco.add(lbl_buscar, gbc);
 
         gbc.gridy = 2;
-        TextFieldPersonalizado txt_buscador = new TextFieldPersonalizado(20);
+        txt_buscador = new TextFieldPersonalizado(20);
         txt_buscador.setPreferredSize(new Dimension(0, 35)); // Altura fija
         cuadro_blanco.add(txt_buscador, gbc);
 
@@ -189,6 +201,15 @@ public class VentanaMenuCliente extends JFrame {
         gbc_fondo.insets = new Insets(40, 60, 40, 60);
 
         panel_fondo.add(cuadro_blanco, gbc_fondo);
+        
+        
+        
+        
+        
+        
+        
+        
+        
 //==============================================ACTIONS LISTENER================        
         btn_volver.addActionListener(a -> {
             coordinador.regresarMenuMesero();
@@ -286,8 +307,6 @@ public class VentanaMenuCliente extends JFrame {
         txt_apellido_materno.setText("");
         txt_correo.setText("");
         txt_telefono.setText("");
-
-        // Opcional: Poner el foco de nuevo en el nombre para el siguiente registro
         txt_nombre.requestFocus();
     }
 
@@ -305,22 +324,23 @@ public class VentanaMenuCliente extends JFrame {
         // El materno a veces es opcional, pero nombre, paterno, correo y tel son ley.
         if (nombre.isEmpty() || paterno_apellido.isEmpty() || materno_apellido.isEmpty() || telefono.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No puede haber campos obligatorios vacíos", "Validación", JOptionPane.WARNING_MESSAGE);
-            coordinador.buscarClientes(""); // Revertir cambio visual
+            notificarError(); //metodo para refrescar la tabla
             return;
         }
+        //VALIDACION DEL CORREO PARA QUE LO ACEPTE NULL
+        String correo_final = null; 
         if (!correo.isEmpty()) {
             if (!correo.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$")) {
-                JOptionPane.showMessageDialog(this, "El correo debe ser válido.");
-                coordinador.buscarClientes("");
+                JOptionPane.showMessageDialog(this, "El formato del correo no es válido");
+                notificarError();
                 return;
             }
-        } else {
-            correo = null;
+            correo_final = correo; 
         }
 
         if (!telefono.matches("\\d{10}")) {
             JOptionPane.showMessageDialog(this, "El teléfono debe contener exactamente 10 dígitos numéricos", "Error de Formato", JOptionPane.ERROR_MESSAGE);
-            coordinador.buscarClientes("");
+            notificarError();
             return;
         }
 
@@ -337,9 +357,21 @@ public class VentanaMenuCliente extends JFrame {
         cliente_editado.setNombre((String) modelo_tabla.getValueAt(fila, 0));
         cliente_editado.setApellido_paterno((String) modelo_tabla.getValueAt(fila, 1));
         cliente_editado.setApellido_materno((String) modelo_tabla.getValueAt(fila, 2));
-        cliente_editado.setCorreo((String) modelo_tabla.getValueAt(fila, 3));
+        cliente_editado.setCorreo(correo_final);
         cliente_editado.setTelefono((String) modelo_tabla.getValueAt(fila, 4));
-
-        coordinador.actualizarCliente(cliente_editado);
+        
+        //Aqui entra en accion el observador (metiche) 
+        
+        if (this.metiche != null) {
+            this.metiche.updated(cliente_editado);
+        }
+    }
+    
+    //Metodo para reevertir cambios visuales dentro de la tabla 
+    
+    private void notificarError(){
+        if (coordinador != null) {
+            coordinador.buscarClientes(txt_buscador.getText().trim());
+        }
     }
 }

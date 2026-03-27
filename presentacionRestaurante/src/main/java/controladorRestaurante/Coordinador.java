@@ -11,13 +11,14 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import objetosNegocioRestaurante.ClienteBO;
 import objetosNegocioRestaurante.IClienteBO;
+import observadorRestaurante.Observador;
 import pantallas.*;
 
 /**
  *
  * @author RAMSES
  */
-public class Coordinador {
+public class Coordinador implements Observador{
 
 //Capas de negocio (BOs)
     private final IClienteBO clienteBO;
@@ -63,6 +64,7 @@ public class Coordinador {
 
         if (ventana_menu_cliente == null) {
             ventana_menu_cliente = new VentanaMenuCliente(this);
+            ventana_menu_cliente.setConexionObservador(this);
         }
         //PARA QUE APAREZA LA TABLA CON LOS CLIENTES
         this.buscarClientes("");
@@ -138,5 +140,10 @@ public class Coordinador {
             // que el mesero hizo en la celda y que no se guardó.
             this.buscarClientes("");
         }
+    }
+
+    @Override
+    public void updated(ClienteBusquedaDTO clienteDTO) {
+        this.actualizarCliente(clienteDTO);
     }
 }
