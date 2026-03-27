@@ -46,16 +46,13 @@ public class ClienteBO implements IClienteBO{
         if (!validar.validarNombres(cliente.getNombre())) {
             throw new NegocioException("El nombre del cliente esta mal escrito.");
         }
-        if (validar.validarTelefono(cliente.getTelefono())) {
-            throw new NegocioException("El telefono del cliente esta mal escrito.");
-        }
-        if (validar.validarApellidos(cliente.getApellido_paterno())) {
+        if (!validar.validarApellidos(cliente.getApellido_paterno())) {
             throw new NegocioException("El apellido materno del usuario esta mal escrito.");
         }
-        if (validar.validarApellidos(cliente.getApellido_materno())) {
+        if (!validar.validarApellidos(cliente.getApellido_materno())) {
             throw new NegocioException("El apellido paterno del usuario esta mal escrito.");
         }
-        if (validar.validarCorreo(cliente.getCorreo())) {
+        if (!validar.validarCorreo(cliente.getCorreo())) {
             throw new NegocioException("El correo del cliente esta mal escrito.");
         }
         

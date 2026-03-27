@@ -5,8 +5,10 @@
 package pantallas;
 
 import controladorRestaurante.Coordinador;
+import dtosDelRestaurante.ClienteDTO;
 import java.awt.*;
 import java.io.*;
+import java.time.LocalDate;
 import javax.swing.*;
 import javax.swing.table.*;
 import recursos.*;
@@ -17,7 +19,7 @@ import recursos.*;
  */
 public class VentanaMenuCliente extends JFrame {
     private final Coordinador coordinador;
-
+    private ClienteDTO clienteDTO;
     private final Color naranja = new Color(255, 184, 77);
     private final Color verde = new Color(116, 155, 87);
     private final Color rojo = new Color(188, 55, 30);
@@ -26,6 +28,7 @@ public class VentanaMenuCliente extends JFrame {
 
     public VentanaMenuCliente(Coordinador coordinador) {
         this.coordinador = coordinador;
+        this.clienteDTO = new ClienteDTO();
         //CONFIGURACION BASE----------------------------------------------------
         setTitle("Gestión de Clientes - Sistema Restaurante");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -129,8 +132,8 @@ public class VentanaMenuCliente extends JFrame {
         JLabel lbl_apelldio_paterno = new JLabel("Apellido Paterno:");
         lbl_apelldio_paterno.setFont(fuente_rabbits_pequena);
         panel_agregar.add(lbl_apelldio_paterno);
-        TextFieldPersonalizado txt_apellido_patenro = new TextFieldPersonalizado(10);
-        panel_agregar.add(txt_apellido_patenro);
+        TextFieldPersonalizado txt_apellido_paterno = new TextFieldPersonalizado(10);
+        panel_agregar.add(txt_apellido_paterno);
 
         JLabel lbl_apellido_materno = new JLabel("Apellido Materno:");
         lbl_apellido_materno.setFont(fuente_rabbits_pequena);
@@ -182,10 +185,29 @@ public class VentanaMenuCliente extends JFrame {
         gbc_fondo.insets = new Insets(40, 60, 40, 60);
 
         panel_fondo.add(cuadro_blanco, gbc_fondo);
-        
+//==============================================ACTIONS LISTENER================        
         btn_volver.addActionListener(a -> {
             coordinador.regresarMenuAdmin();
         });
+        
+        btn_agregar.addActionListener(a ->{
+            if (txt_nombre.getText().trim().isEmpty() || txt_apellido_paterno.getText().trim().isEmpty() || 
+                    txt_apellido_materno.getText().trim().isEmpty() || txt_correo.getText().trim().isEmpty() || 
+                    txt_telefono.getText().trim().isEmpty()) {
+                
+                JOptionPane.showMessageDialog(null, "Los campos no pueden ser nulos");
+                return;
+            }
+            clienteDTO.setNombre(txt_nombre.getText());
+            clienteDTO.setApellido_paterno(txt_apellido_paterno.getText());
+            clienteDTO.setApellido_materno(txt_apellido_materno.getText());
+            clienteDTO.setCorreo(txt_correo.getText());
+            clienteDTO.setTelefono(txt_telefono.getText());
+            clienteDTO.setFecha_registro(LocalDate.now());
+            
+            coordinador.agregarClienteFrecuente(clienteDTO);
+        });
+        
 
     }
 }

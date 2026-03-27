@@ -4,9 +4,12 @@
  */
 package controladorRestaurante;
 
+import dtosDelRestaurante.ClienteDTO;
+import excepcionesRestaurante.NegocioException;
+import javax.swing.JOptionPane;
 import objetosNegocioRestaurante.ClienteBO;
 import objetosNegocioRestaurante.IClienteBO;
-import pantallas.VentanaMenuAdmin;
+import pantallas.VentanaMenuMesero;
 import pantallas.VentanaMenuCliente;
 
 /**
@@ -19,7 +22,8 @@ public class Coordinador {
     private final IClienteBO clienteBO;
     
     //Ventanas que se usaran para la navegacion
-    private VentanaMenuAdmin ventana_menu_admin;
+    private VentanaMenuMesero ventana_menu_admin;
+    private VentanaMenuMesero ventana_menu_mesero;
     private VentanaMenuCliente ventana_menu_cliente;
     
     public Coordinador(){
@@ -31,10 +35,19 @@ public class Coordinador {
      */
     public void iniciarMenuAdmin(){
         if (ventana_menu_admin == null) {
-            ventana_menu_admin = new VentanaMenuAdmin(this);
+            ventana_menu_admin = new VentanaMenuMesero(this);
         }
         
         ventana_menu_admin.setVisible(true);
+        
+    }
+    
+    public void iniciarMenuMesero(){
+        if (ventana_menu_mesero == null) {
+            ventana_menu_mesero = new VentanaMenuMesero(this);
+        }
+        
+        ventana_menu_mesero.setVisible(true);
         
     }
 
@@ -58,7 +71,7 @@ public class Coordinador {
     
     /**
      * Metodo para regresar de la pantalla del menu de clientes para ir a la pantalla de menu administrador
-     */
+    * */
     public void regresarMenuAdmin(){
         if (ventana_menu_cliente != null) {
             ventana_menu_cliente.dispose();
@@ -70,5 +83,18 @@ public class Coordinador {
         }
     }
     
+    /**
+     *
+     * 
+     * */
     
+    public void agregarClienteFrecuente(ClienteDTO clienteDTO){
+        
+        try{
+            clienteBO.registrarCliente(clienteDTO);
+        }catch(NegocioException e){
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+        
+    }
 }
