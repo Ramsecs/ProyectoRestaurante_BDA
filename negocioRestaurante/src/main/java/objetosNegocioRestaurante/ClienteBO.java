@@ -58,7 +58,7 @@ public class ClienteBO implements IClienteBO {
         if (!validar.validarApellidos(cliente.getApellido_materno())) {
             throw new NegocioException("El apellido paterno del usuario esta mal escrito.");
         }
-        if (cliente.getCorreo() != null) {
+        if (cliente.getCorreo() != null && cliente.getCorreo().trim().isEmpty()) {
             if (!validar.validarCorreo(cliente.getCorreo())) {
                 throw new NegocioException("El correo del cliente esta mal escrito.");
             }

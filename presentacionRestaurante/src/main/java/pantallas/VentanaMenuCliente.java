@@ -13,6 +13,7 @@ import java.util.List;
 import java.time.LocalDate;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.*;
 import recursos.*;
 
@@ -23,23 +24,24 @@ import recursos.*;
 public class VentanaMenuCliente extends JFrame {
 
     private final Coordinador coordinador;
+    private List<ClienteBusquedaDTO> listaClientesActual;
     private ClienteDTO clienteDTO;
     private final Color naranja = new Color(255, 184, 77);
     private final Color verde = new Color(116, 155, 87);
     private final Color rojo = new Color(188, 55, 30);
     private DefaultTableModel modelo_tabla;
     private TablaEstilizada tabla;
-    
+
     private TextFieldPersonalizado txt_nombre;
     private TextFieldPersonalizado txt_apellido_paterno;
     private TextFieldPersonalizado txt_apellido_materno;
     private TextFieldPersonalizado txt_correo;
     private TextFieldPersonalizado txt_telefono;
-    
+
     public VentanaMenuCliente(Coordinador coordinador) {
         this.coordinador = coordinador;
         this.clienteDTO = new ClienteDTO();
-     
+
         //CONFIGURACION BASE----------------------------------------------------
         setTitle("Gestión de Clientes - Sistema Restaurante");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -196,9 +198,13 @@ public class VentanaMenuCliente extends JFrame {
             if (txt_nombre.getText().trim().isEmpty() || txt_apellido_paterno.getText().trim().isEmpty()
                     || txt_apellido_materno.getText().trim().isEmpty()
                     || txt_telefono.getText().trim().isEmpty()) {
-
+                
                 JOptionPane.showMessageDialog(null, "Los campos no pueden ser nulos");
                 return;
+            }
+            
+            if (txt_correo.getText().trim().isEmpty()) {
+                clienteDTO.setCorreo(null);
             }
             clienteDTO.setNombre(txt_nombre.getText());
             clienteDTO.setApellido_paterno(txt_apellido_paterno.getText());
@@ -235,9 +241,25 @@ public class VentanaMenuCliente extends JFrame {
                 coordinador.buscarClientes(filtro);
             }
         });
+
+//==================MODIFICACION================================================
+// Escucha cambios en las celdas de la tabla
+        modelo_tabla.addTableModelListener(e -> {
+            // Solo actuamos si el evento es una ACTUALIZACIÓN
+            if (e.getType() == TableModelEvent.UPDATE) {
+                int fila = e.getFirstRow();
+                int columna = e.getColumn();
+
+                //sOLO SE EDITA SI ESTA DENTRO DE LAS PERMITIDAS
+                if (columna >= 0 && columna <= 4) {
+                    ejecutarActualizacionDesdeTabla(fila);
+                }
+            }
+        });
     }
 
     public void actualizarTabla(List<ClienteBusquedaDTO> lista) {
+        this.listaClientesActual = lista;
         //1. Limpiamos la tabla
         modelo_tabla.setRowCount(0);
         //2. Recorremos la lista de DTOs que nos mando el BO por medio del cordi
@@ -266,5 +288,57 @@ public class VentanaMenuCliente extends JFrame {
 
         // Opcional: Poner el foco de nuevo en el nombre para el siguiente registro
         txt_nombre.requestFocus();
+    }
+
+    private void ejecutarActualizacionDesdeTabla(int fila) {
+
+        //PRIMERO VALIDACIONES =============================
+        // 1. Extraer los datos de la fila editada
+        String nombre = modelo_tabla.getValueAt(fila, 0).toString().trim();
+        String paterno_apellido = modelo_tabla.getValueAt(fila, 1).toString().trim();
+        String materno_apellido = modelo_tabla.getValueAt(fila, 2).toString().trim();
+        String correo = modelo_tabla.getValueAt(fila, 3).toString().trim();
+        String telefono = modelo_tabla.getValueAt(fila, 4).toString().trim();
+
+        // --- VALIDACIÓN A: CAMPOS NULOS O VACÍOS ---
+        // El materno a veces es opcional, pero nombre, paterno, correo y tel son ley.
+        if (nombre.isEmpty() || paterno_apellido.isEmpty() || materno_apellido.isEmpty() || telefono.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No puede haber campos obligatorios vacíos", "Validación", JOptionPane.WARNING_MESSAGE);
+            coordinador.buscarClientes(""); // Revertir cambio visual
+            return;
+        }
+        if (!correo.isEmpty()) {
+            if (!correo.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$")) {
+                JOptionPane.showMessageDialog(this, "El correo debe ser válido.");
+                coordinador.buscarClientes("");
+                return;
+            }
+        } else {
+            correo = null;
+        }
+
+        if (!telefono.matches("\\d{10}")) {
+            JOptionPane.showMessageDialog(this, "El teléfono debe contener exactamente 10 dígitos numéricos", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+            coordinador.buscarClientes("");
+            return;
+        }
+
+        //======================================================================
+        // 1. Buscamos el DTO original en la lista que creamos para usarla como tipo espejo
+        //fue como la manera más segura que encontre
+        ClienteBusquedaDTO cliente_original = listaClientesActual.get(fila);
+        Long id_real = cliente_original.getId();
+
+        // 2. Creamos el DTO con los nuevos datos de la tabla
+        ClienteBusquedaDTO cliente_editado = new ClienteBusquedaDTO();
+        cliente_editado.setId(id_real); // Le pasamos el ID que rescatamos de la lista
+
+        cliente_editado.setNombre((String) modelo_tabla.getValueAt(fila, 0));
+        cliente_editado.setApellido_paterno((String) modelo_tabla.getValueAt(fila, 1));
+        cliente_editado.setApellido_materno((String) modelo_tabla.getValueAt(fila, 2));
+        cliente_editado.setCorreo((String) modelo_tabla.getValueAt(fila, 3));
+        cliente_editado.setTelefono((String) modelo_tabla.getValueAt(fila, 4));
+
+        coordinador.actualizarCliente(cliente_editado);
     }
 }
