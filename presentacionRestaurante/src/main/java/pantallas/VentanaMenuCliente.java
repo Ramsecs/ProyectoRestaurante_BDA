@@ -205,11 +205,12 @@ public class VentanaMenuCliente extends JFrame {
             
             if (txt_correo.getText().trim().isEmpty()) {
                 clienteDTO.setCorreo(null);
+            }else{
+                clienteDTO.setCorreo(txt_correo.getText());
             }
             clienteDTO.setNombre(txt_nombre.getText());
             clienteDTO.setApellido_paterno(txt_apellido_paterno.getText());
             clienteDTO.setApellido_materno(txt_apellido_materno.getText());
-            clienteDTO.setCorreo(txt_correo.getText());
             clienteDTO.setTelefono(txt_telefono.getText());
             clienteDTO.setFecha_registro(LocalDate.now());
 

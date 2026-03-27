@@ -18,7 +18,7 @@ public class Validaciones {
     
     public boolean validarCorreo(String correo){
         
-        Pattern patt = Pattern.compile("[a-zA-Z0-9._]{1,10}[?<=@][a-zA-Z0-9._]{1,20}");
+        Pattern patt = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
         Matcher match = patt.matcher(correo);
         
         if (match.find()) {
