@@ -4,8 +4,10 @@
  */
 package objetosNegocioRestaurante;
 
+import dtosDelRestaurante.ClienteBusquedaDTO;
 import dtosDelRestaurante.ClienteDTO;
 import excepcionesRestaurante.NegocioException;
+import java.util.List;
 
 /**
  *
@@ -14,5 +16,6 @@ import excepcionesRestaurante.NegocioException;
 public interface IClienteBO {
     
     public boolean registrarCliente(ClienteDTO cliente) throws NegocioException;
-    
+    public List<ClienteBusquedaDTO> buscarClientes(String filtro) throws NegocioException;
+    public void actualizarDatosCliente(ClienteBusquedaDTO clienteDTO) throws NegocioException;
 }

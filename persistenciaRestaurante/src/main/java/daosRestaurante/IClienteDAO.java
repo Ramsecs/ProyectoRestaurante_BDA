@@ -15,7 +15,7 @@ import java.util.List;
 public interface IClienteDAO {
     
     public Cliente registrarCliente(Cliente cliente) throws PersistenciaException;
-    public List<Cliente> buscarCliente(String filtro_busqueda) throws PersistenciaException;
+    public List<Object[]> buscarCliente(String filtro_busqueda) throws PersistenciaException;
     public Cliente modificarCliente(Cliente cliente) throws PersistenciaException;
-    
+    public Cliente buscarPorId(Long id) throws PersistenciaException;
 }

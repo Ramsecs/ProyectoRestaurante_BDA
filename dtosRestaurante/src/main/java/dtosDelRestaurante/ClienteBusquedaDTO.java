@@ -15,22 +15,20 @@ public class ClienteBusquedaDTO {
     private String apellido_materno;
     private String correo;
     private String telefono;
-    private String tipo_cliente;
     private Integer puntos;
-    private Integer visitas;
-    private double total_acumulado;
+    private Long visitas;
+    private Double total_acumulado;
 
     public ClienteBusquedaDTO() {
     }
 
-    public ClienteBusquedaDTO(Long id, String nombre, String apellido_paterno, String apellido_materno, String correo, String telefono, String tipo_cliente, Integer puntos, Integer visitas, double total_acumulado) {
+    public ClienteBusquedaDTO(Long id, String nombre, String apellido_paterno, String apellido_materno, String correo, String telefono, Integer puntos, Long visitas, Double total_acumulado) {
         this.id = id;
         this.nombre = nombre;
         this.apellido_paterno = apellido_paterno;
         this.apellido_materno = apellido_materno;
         this.correo = correo;
         this.telefono = telefono;
-        this.tipo_cliente = tipo_cliente;
         this.puntos = puntos;
         this.visitas = visitas;
         this.total_acumulado = total_acumulado;
@@ -86,27 +84,21 @@ public class ClienteBusquedaDTO {
         this.telefono = telefono;
     }
 
-    public String getTipo_cliente() {
-        return tipo_cliente;
-    }
 
-    public void setTipo_cliente(String tipo_cliente) {
-        this.tipo_cliente = tipo_cliente;
-    }
 
-    public Integer getVisitas() {
+    public Long getVisitas() {
         return visitas;
     }
 
-    public void setVisitas(Integer visitas) {
+    public void setVisitas(Long visitas) {
         this.visitas = visitas;
     }
 
-    public double getTotal_acumulado() {
+    public Double getTotal_acumulado() {
         return total_acumulado;
     }
 
-    public void setTotal_acumulado(double total_acumulado) {
+    public void setTotal_acumulado(Double total_acumulado) {
         this.total_acumulado = total_acumulado;
     }
 
@@ -120,7 +112,7 @@ public class ClienteBusquedaDTO {
 
     @Override
     public String toString() {
-        return "ClienteBusquedaDTO{" + "id=" + id + ", nombre=" + nombre + ", apellido_paterno=" + apellido_paterno + ", apellido_materno=" + apellido_materno + ", correo=" + correo + ", telefono=" + telefono + ", tipo_cliente=" + tipo_cliente + ", puntos=" + puntos + ", visitas=" + visitas + ", total_acumulado=" + total_acumulado + '}';
+        return "ClienteBusquedaDTO{" + "id=" + id + ", nombre=" + nombre + ", apellido_paterno=" + apellido_paterno + ", apellido_materno=" + apellido_materno + ", correo=" + correo + ", telefono=" + telefono +  ", puntos=" + puntos + ", visitas=" + visitas + ", total_acumulado=" + total_acumulado + '}';
     }
 
     

@@ -5,11 +5,14 @@
 package pantallas;
 
 import controladorRestaurante.Coordinador;
+import dtosDelRestaurante.ClienteBusquedaDTO;
 import dtosDelRestaurante.ClienteDTO;
 import java.awt.*;
 import java.io.*;
+import java.util.List;
 import java.time.LocalDate;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
 import javax.swing.table.*;
 import recursos.*;
 
@@ -18,6 +21,7 @@ import recursos.*;
  * @author josma
  */
 public class VentanaMenuCliente extends JFrame {
+
     private final Coordinador coordinador;
     private ClienteDTO clienteDTO;
     private final Color naranja = new Color(255, 184, 77);
@@ -25,10 +29,17 @@ public class VentanaMenuCliente extends JFrame {
     private final Color rojo = new Color(188, 55, 30);
     private DefaultTableModel modelo_tabla;
     private TablaEstilizada tabla;
-
+    
+    private TextFieldPersonalizado txt_nombre;
+    private TextFieldPersonalizado txt_apellido_paterno;
+    private TextFieldPersonalizado txt_apellido_materno;
+    private TextFieldPersonalizado txt_correo;
+    private TextFieldPersonalizado txt_telefono;
+    
     public VentanaMenuCliente(Coordinador coordinador) {
         this.coordinador = coordinador;
         this.clienteDTO = new ClienteDTO();
+     
         //CONFIGURACION BASE----------------------------------------------------
         setTitle("Gestión de Clientes - Sistema Restaurante");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -103,16 +114,7 @@ public class VentanaMenuCliente extends JFrame {
         cuadro_blanco.add(scroll, gbc);
 
         //MODELO DE PRUEBA PARA LA TABLA========================================
-        modelo_tabla.addRow(new Object[]{"Julia", "Rivera", "Salazar", "juliancitopro@", "6441025765", "30", "15000", "10235.67"});
-        modelo_tabla.addRow(new Object[]{"Julia", "Rivera", "Salazar", "juliancitopro@", "6441025765", "30", "15000", "10235.67"});
-        modelo_tabla.addRow(new Object[]{"Julia", "Rivera", "Salazar", "juliancitopro@", "6441025765", "30", "15000", "10235.67"});
-        modelo_tabla.addRow(new Object[]{"Julia", "Rivera", "Salazar", "juliancitopro@", "6441025765", "30", "15000", "10235.67"});
-        modelo_tabla.addRow(new Object[]{"Julia", "Rivera", "Salazar", "juliancitopro@", "6441025765", "30", "15000", "10235.67"});
-        modelo_tabla.addRow(new Object[]{"Julia", "Rivera", "Salazar", "juliancitopro@", "6441025765", "30", "15000", "10235.67"});
-        modelo_tabla.addRow(new Object[]{"Julia", "Rivera", "Salazar", "juliancitopro@", "6441025765", "30", "15000", "10235.67"});
-        modelo_tabla.addRow(new Object[]{"Julia", "Rivera", "Salazar", "juliancitopro@", "6441025765", "30", "15000", "10235.67"});
         //======================================================================
-
         //----------------SECCIÓN PARA AGREGAR AL CLIENTE (panel)---------------
         PanelBordePunteado panel_agregar = new PanelBordePunteado();
         panel_agregar.setLayout(new GridLayout(0, 2, 10, 2));
@@ -126,31 +128,31 @@ public class VentanaMenuCliente extends JFrame {
         JLabel lbl_nombre = new JLabel("Nombre:");
         lbl_nombre.setFont(fuente_rabbits_pequena);
         panel_agregar.add(lbl_nombre);
-        TextFieldPersonalizado txt_nombre = new TextFieldPersonalizado(10);
+        txt_nombre = new TextFieldPersonalizado(10);
         panel_agregar.add(txt_nombre);
 
         JLabel lbl_apelldio_paterno = new JLabel("Apellido Paterno:");
         lbl_apelldio_paterno.setFont(fuente_rabbits_pequena);
         panel_agregar.add(lbl_apelldio_paterno);
-        TextFieldPersonalizado txt_apellido_paterno = new TextFieldPersonalizado(10);
+        txt_apellido_paterno = new TextFieldPersonalizado(10);
         panel_agregar.add(txt_apellido_paterno);
 
         JLabel lbl_apellido_materno = new JLabel("Apellido Materno:");
         lbl_apellido_materno.setFont(fuente_rabbits_pequena);
         panel_agregar.add(lbl_apellido_materno);
-        TextFieldPersonalizado txt_apellido_materno = new TextFieldPersonalizado(10);
+        txt_apellido_materno = new TextFieldPersonalizado(10);
         panel_agregar.add(txt_apellido_materno);
 
         JLabel lbl_correo = new JLabel("Correo (Opcional):");
         lbl_correo.setFont(fuente_rabbits_pequena);
         panel_agregar.add(lbl_correo);
-        TextFieldPersonalizado txt_correo = new TextFieldPersonalizado(10);
+        txt_correo = new TextFieldPersonalizado(10);
         panel_agregar.add(txt_correo);
 
         JLabel lbl_telefono = new JLabel("Teléfono:");
         lbl_telefono.setFont(fuente_rabbits_pequena);
         panel_agregar.add(lbl_telefono);
-        TextFieldPersonalizado txt_telefono = new TextFieldPersonalizado(10);
+        txt_telefono = new TextFieldPersonalizado(10);
         panel_agregar.add(txt_telefono);
 
         gbc.gridy = 4;
@@ -187,14 +189,14 @@ public class VentanaMenuCliente extends JFrame {
         panel_fondo.add(cuadro_blanco, gbc_fondo);
 //==============================================ACTIONS LISTENER================        
         btn_volver.addActionListener(a -> {
-            coordinador.regresarMenuAdmin();
+            coordinador.regresarMenuMesero();
         });
-        
-        btn_agregar.addActionListener(a ->{
-            if (txt_nombre.getText().trim().isEmpty() || txt_apellido_paterno.getText().trim().isEmpty() || 
-                    txt_apellido_materno.getText().trim().isEmpty() || txt_correo.getText().trim().isEmpty() || 
-                    txt_telefono.getText().trim().isEmpty()) {
-                
+
+        btn_agregar.addActionListener(a -> {
+            if (txt_nombre.getText().trim().isEmpty() || txt_apellido_paterno.getText().trim().isEmpty()
+                    || txt_apellido_materno.getText().trim().isEmpty()
+                    || txt_telefono.getText().trim().isEmpty()) {
+
                 JOptionPane.showMessageDialog(null, "Los campos no pueden ser nulos");
                 return;
             }
@@ -204,10 +206,65 @@ public class VentanaMenuCliente extends JFrame {
             clienteDTO.setCorreo(txt_correo.getText());
             clienteDTO.setTelefono(txt_telefono.getText());
             clienteDTO.setFecha_registro(LocalDate.now());
-            
-            coordinador.agregarClienteFrecuente(clienteDTO);
-        });
-        
 
+            coordinador.agregarClienteFrecuente(clienteDTO);
+            limpiarCampos();
+            //Refrescamos la tabla para ver al nuevo cliente
+            coordinador.buscarClientes("");
+        });
+
+//============================Busqueda tiempo real==============================
+        txt_buscador.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                buscar();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                buscar();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                buscar();
+            }
+
+            private void buscar() {
+                String filtro = txt_buscador.getText().trim();
+                coordinador.buscarClientes(filtro);
+            }
+        });
+    }
+
+    public void actualizarTabla(List<ClienteBusquedaDTO> lista) {
+        //1. Limpiamos la tabla
+        modelo_tabla.setRowCount(0);
+        //2. Recorremos la lista de DTOs que nos mando el BO por medio del cordi
+
+        for (ClienteBusquedaDTO dto : lista) {
+            Object[] fila = {
+                dto.getNombre(),
+                dto.getApellido_paterno(),
+                dto.getApellido_materno(),
+                dto.getCorreo(),
+                dto.getTelefono(),
+                dto.getVisitas(), // Long
+                dto.getPuntos(), // Integer
+                dto.getTotal_acumulado(), // Double
+            };
+            modelo_tabla.addRow(fila);
+        }
+    }
+
+    public void limpiarCampos() {
+        txt_nombre.setText("");
+        txt_apellido_paterno.setText("");
+        txt_apellido_materno.setText("");
+        txt_correo.setText("");
+        txt_telefono.setText("");
+
+        // Opcional: Poner el foco de nuevo en el nombre para el siguiente registro
+        txt_nombre.requestFocus();
     }
 }

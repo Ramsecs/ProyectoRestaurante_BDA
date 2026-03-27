@@ -26,7 +26,7 @@ public class VentanaMenuMesero extends JFrame {
     public VentanaMenuMesero(Coordinador coordinador) {
         this.coordinador = coordinador;
         //CONFIGURACION BASE----------------------------------------------------
-        setTitle("Menú de Administrador - Sistema Restaurante");
+        setTitle("Menú de Cliente - Sistema Restaurante");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 650);
         setLocationRelativeTo(null); //Para que este siempre centrado

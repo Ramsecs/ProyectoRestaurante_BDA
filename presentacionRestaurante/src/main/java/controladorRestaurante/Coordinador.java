@@ -4,13 +4,14 @@
  */
 package controladorRestaurante;
 
+import dtosDelRestaurante.ClienteBusquedaDTO;
 import dtosDelRestaurante.ClienteDTO;
 import excepcionesRestaurante.NegocioException;
+import java.util.List;
 import javax.swing.JOptionPane;
 import objetosNegocioRestaurante.ClienteBO;
 import objetosNegocioRestaurante.IClienteBO;
-import pantallas.VentanaMenuMesero;
-import pantallas.VentanaMenuCliente;
+import pantallas.*;
 
 /**
  *
@@ -22,7 +23,7 @@ public class Coordinador {
     private final IClienteBO clienteBO;
     
     //Ventanas que se usaran para la navegacion
-    private VentanaMenuMesero ventana_menu_admin;
+    private VentanaMenuAdmin ventana_menu_admin;
     private VentanaMenuMesero ventana_menu_mesero;
     private VentanaMenuCliente ventana_menu_cliente;
     
@@ -33,14 +34,14 @@ public class Coordinador {
     /**
      * Hacer visible la pantalla de menu admin, si esta no ha sido abierta entonces creamos una nueva
      */
-    public void iniciarMenuAdmin(){
-        if (ventana_menu_admin == null) {
-            ventana_menu_admin = new VentanaMenuMesero(this);
-        }
-        
-        ventana_menu_admin.setVisible(true);
-        
-    }
+//    public void iniciarMenuAdmin(){
+//        if (ventana_menu_admin == null) {
+//            ventana_menu_admin = new VentanaMenuAdmin(this);
+//        }
+//        
+//        ventana_menu_admin.setVisible(true);
+//        
+//    }
     
     public void iniciarMenuMesero(){
         if (ventana_menu_mesero == null) {
@@ -56,30 +57,32 @@ public class Coordinador {
      * Hacer visible la ventana de menu cliente donde es la edicion, registro, busqueda de clientes
      */
     public void mostrarMenuCliente(){
-        if (ventana_menu_admin != null) {
-            ventana_menu_admin.setVisible(false);
+        if (ventana_menu_mesero != null) {
+            ventana_menu_mesero.setVisible(false);
         }
         
         if (ventana_menu_cliente == null) {
             ventana_menu_cliente = new VentanaMenuCliente(this);
         }
-        
+        //PARA QUE APAREZA LA TABLA CON LOS CLIENTES
+        this.buscarClientes("");
         ventana_menu_cliente.setVisible(true);
         ventana_menu_cliente.toFront();
+        
         
     }
     
     /**
      * Metodo para regresar de la pantalla del menu de clientes para ir a la pantalla de menu administrador
     * */
-    public void regresarMenuAdmin(){
+    public void regresarMenuMesero(){
         if (ventana_menu_cliente != null) {
             ventana_menu_cliente.dispose();
         }
         
-        if (ventana_menu_admin != null) {
-            ventana_menu_admin.setVisible(true);
-            ventana_menu_admin.toFront();
+        if (ventana_menu_mesero != null) {
+            ventana_menu_mesero.setVisible(true);
+            ventana_menu_mesero.toFront();
         }
     }
     
@@ -92,6 +95,18 @@ public class Coordinador {
         
         try{
             clienteBO.registrarCliente(clienteDTO);
+            JOptionPane.showMessageDialog(null, "Se agrego el cliente");
+        }catch(NegocioException e){
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+        
+    }
+    
+    public void buscarClientes(String filtro){
+        
+        try{
+            List<ClienteBusquedaDTO> lista = clienteBO.buscarClientes(filtro);
+            ventana_menu_cliente.actualizarTabla(lista);
         }catch(NegocioException e){
             JOptionPane.showMessageDialog(null, e.getMessage());
         }
