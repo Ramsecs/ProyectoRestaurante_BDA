@@ -31,7 +31,7 @@ public class Coordinador {
      */
     public void iniciarMenuAdmin(){
         if (ventana_menu_admin == null) {
-            ventana_menu_admin = new VentanaMenuAdmin();
+            ventana_menu_admin = new VentanaMenuAdmin(this);
         }
         
         ventana_menu_admin.setVisible(true);
@@ -48,12 +48,24 @@ public class Coordinador {
         }
         
         if (ventana_menu_cliente == null) {
-            ventana_menu_cliente = new VentanaMenuCliente();
+            ventana_menu_cliente = new VentanaMenuCliente(this);
         }
         
         ventana_menu_cliente.setVisible(true);
         ventana_menu_cliente.toFront();
         
+    }
+    
+    
+    public void regresarMenuAdmin(){
+        if (ventana_menu_cliente != null) {
+            ventana_menu_cliente.dispose();
+        }
+        
+        if (ventana_menu_admin != null) {
+            ventana_menu_admin.setVisible(true);
+            ventana_menu_admin.toFront();
+        }
     }
     
     

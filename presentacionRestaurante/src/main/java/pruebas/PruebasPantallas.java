@@ -4,6 +4,7 @@
  */
 package pruebas;
 
+import controladorRestaurante.Coordinador;
 import javax.swing.SwingUtilities;
 import pantallas.*;
 
@@ -17,10 +18,10 @@ public class PruebasPantallas {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        
+        Coordinador coordinador = new Coordinador();
         // TODO code application logic here
-        SwingUtilities.invokeLater(() -> {
-            new VentanaMenuCliente().setVisible(true);
-        });
+        coordinador.iniciarMenuAdmin();
     }
     
 }

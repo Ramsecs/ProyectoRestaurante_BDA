@@ -4,6 +4,7 @@
  */
 package pantallas;
 
+import controladorRestaurante.Coordinador;
 import java.awt.*;
 import java.io.*;
 import javax.swing.*;
@@ -15,6 +16,7 @@ import recursos.*;
  * @author josma
  */
 public class VentanaMenuCliente extends JFrame {
+    private final Coordinador coordinador;
 
     private final Color naranja = new Color(255, 184, 77);
     private final Color verde = new Color(116, 155, 87);
@@ -22,7 +24,8 @@ public class VentanaMenuCliente extends JFrame {
     private DefaultTableModel modelo_tabla;
     private TablaEstilizada tabla;
 
-    public VentanaMenuCliente() {
+    public VentanaMenuCliente(Coordinador coordinador) {
+        this.coordinador = coordinador;
         //CONFIGURACION BASE----------------------------------------------------
         setTitle("Gestión de Clientes - Sistema Restaurante");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -179,6 +182,10 @@ public class VentanaMenuCliente extends JFrame {
         gbc_fondo.insets = new Insets(40, 60, 40, 60);
 
         panel_fondo.add(cuadro_blanco, gbc_fondo);
+        
+        btn_volver.addActionListener(a -> {
+            coordinador.regresarMenuAdmin();
+        });
 
     }
 }

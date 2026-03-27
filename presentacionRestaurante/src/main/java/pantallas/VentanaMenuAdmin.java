@@ -4,6 +4,7 @@
  */
 package pantallas;
 
+import controladorRestaurante.Coordinador;
 import java.awt.*;
 import java.io.InputStream;
 import javax.swing.*;
@@ -15,13 +16,15 @@ import recursos.*;
  * @author josma
  */
 public class VentanaMenuAdmin extends JFrame {
-
+    private final Coordinador coordinador;
+    
     //Estos son los colores de nuestra palata de colores
     private final Color verde = new Color(116, 155, 87);
     private final Color rojo = new Color(188, 55, 30);
     private final Color blanco = Color.WHITE;
 
-    public VentanaMenuAdmin() {
+    public VentanaMenuAdmin(Coordinador coordinador) {
+        this.coordinador = coordinador;
         //CONFIGURACION BASE----------------------------------------------------
         setTitle("Menú de Administrador - Sistema Restaurante");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -91,6 +94,11 @@ public class VentanaMenuAdmin extends JFrame {
         // --- ACCIONES DE LOS BOTONES ---
         btn_volver.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Regresando al inicio...");
+        });
+        
+        
+        btn_cliente.addActionListener(e -> {
+            coordinador.mostrarMenuCliente();
         });
     }
 
