@@ -23,7 +23,7 @@ public class Coordinador {
     private VentanaMenuCliente ventana_menu_cliente;
     
     public Coordinador(){
-        this.clienteBO = new ClienteBO();
+        this.clienteBO = ClienteBO.getInstanceClienteBO();
     }
      
     /**
@@ -39,13 +39,20 @@ public class Coordinador {
     }
 
     
-    
+    /**
+     * Hacer visible la ventana de menu cliente donde es la edicion, registro, busqueda de clientes
+     */
     public void mostrarMenuCliente(){
+        if (ventana_menu_admin != null) {
+            ventana_menu_admin.setVisible(false);
+        }
+        
         if (ventana_menu_cliente == null) {
             ventana_menu_cliente = new VentanaMenuCliente();
         }
         
         ventana_menu_cliente.setVisible(true);
+        ventana_menu_cliente.toFront();
         
     }
     

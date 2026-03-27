@@ -20,8 +20,24 @@ import validadores.Validaciones;
  */
 public class ClienteBO implements IClienteBO{
     
-    private IClienteDAO clienteDAO = new ClienteDAO();
+    //Singleton
+    private static ClienteBO clienteBO;
+    
+    private IClienteDAO clienteDAO = ClienteDAO.getInstanceClienteDAO();
     private Validaciones validar = new Validaciones();
+    
+    //Constructor privado
+    private ClienteBO(){
+        
+    }
+    //Metodo para el singleton
+    public static ClienteBO getInstanceClienteBO(){
+        if (clienteBO == null) {
+            clienteBO = new ClienteBO();
+        }
+        
+        return clienteBO;
+    }
     
     @Override
     public boolean registrarCliente(ClienteDTO cliente) throws NegocioException {

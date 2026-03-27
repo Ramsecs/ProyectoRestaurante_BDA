@@ -17,6 +17,20 @@ import javax.persistence.TypedQuery;
  */
 public class ClienteDAO implements IClienteDAO{
     
+    private static ClienteDAO clienteDAO;
+    
+    private ClienteDAO(){
+        
+    }
+    
+    public static ClienteDAO getInstanceClienteDAO(){
+        if (clienteDAO == null) {
+            clienteDAO = new ClienteDAO();
+        }
+        
+        return clienteDAO;
+    }
+    
     /**
      * Mediante este metodo registramos el cliente dentro de la base de datos, 
      * incluyendo los clientes frecuentes ya que siendo el cliente la clase padre 
