@@ -39,8 +39,15 @@ public class Cliente implements Serializable{
     @Column(name = "telefono", length = 10, nullable = true)
     protected String telefono;
     
-    @Column(name = "fecha_registro", nullable = false)
+    @Column(name = "fecha_registro", nullable = false, updatable = false)
     protected LocalDate fecha_registro;
+    
+    @PrePersist
+    protected void antesDePersistir() {
+        if (this.fecha_registro == null) {
+            this.fecha_registro = LocalDate.now();
+        }
+    }
     
     @OneToMany(mappedBy = "cliente", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     private List<Comanda> comandas;
@@ -48,23 +55,21 @@ public class Cliente implements Serializable{
     public Cliente() {
     }
 
-    public Cliente(String nombre, String apellido_paterno, String apellido_materno, String correo, String telefono, LocalDate fecha_registro) {
+    public Cliente(String nombre, String apellido_paterno, String apellido_materno, String correo, String telefono) {
         this.nombre = nombre;
         this.apellido_paterno = apellido_paterno;
         this.apellido_materno = apellido_materno;
         this.correo = correo;
         this.telefono = telefono;
-        this.fecha_registro = fecha_registro;
     }
 
-    public Cliente(Long id, String nombre, String apellido_paterno, String apellido_materno, String correo, String telefono, LocalDate fecha_registro) {
+    public Cliente(Long id, String nombre, String apellido_paterno, String apellido_materno, String correo, String telefono) {
         this.id = id;
         this.nombre = nombre;
         this.apellido_paterno = apellido_paterno;
         this.apellido_materno = apellido_materno;
         this.correo = correo;
         this.telefono = telefono;
-        this.fecha_registro = fecha_registro;
     }
 
     public Long getId() {
