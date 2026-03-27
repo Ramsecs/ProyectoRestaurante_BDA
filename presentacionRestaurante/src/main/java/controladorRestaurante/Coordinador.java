@@ -56,7 +56,9 @@ public class Coordinador {
         
     }
     
-    
+    /**
+     * Metodo para regresar de la pantalla del menu de clientes para ir a la pantalla de menu administrador
+     */
     public void regresarMenuAdmin(){
         if (ventana_menu_cliente != null) {
             ventana_menu_cliente.dispose();
