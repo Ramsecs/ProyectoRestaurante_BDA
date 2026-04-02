@@ -27,6 +27,7 @@ public class Coordinador implements Observador{
     private VentanaMenuAdmin ventana_menu_admin;
     private VentanaMenuMesero ventana_menu_mesero;
     private VentanaMenuCliente ventana_menu_cliente;
+    private VentanaMenuProducto ventana_menu_producto; 
 
     public Coordinador() {
         this.clienteBO = ClienteBO.getInstanceClienteBO();
@@ -36,14 +37,14 @@ public class Coordinador implements Observador{
      * Hacer visible la pantalla de menu admin, si esta no ha sido abierta
      * entonces creamos una nueva
      */
-//    public void iniciarMenuAdmin(){
-//        if (ventana_menu_admin == null) {
-//            ventana_menu_admin = new VentanaMenuAdmin(this);
-//        }
-//        
-//        ventana_menu_admin.setVisible(true);
-//        
-//    }
+    public void iniciarMenuAdmin(){
+        if (ventana_menu_admin == null) {
+            ventana_menu_admin = new VentanaMenuAdmin(this);
+        }
+        
+        ventana_menu_admin.setVisible(true);
+        
+    }
     public void iniciarMenuMesero() {
         if (ventana_menu_mesero == null) {
             ventana_menu_mesero = new VentanaMenuMesero(this);
@@ -71,6 +72,24 @@ public class Coordinador implements Observador{
         ventana_menu_cliente.setVisible(true);
         ventana_menu_cliente.toFront();
 
+    }
+    
+    /**
+     * Hacer visible la ventana del menu de Producto donde es la edicion, registro
+     * y busqueda de productos.
+     */
+    
+    public void mostrarMenuProducto(){
+        if (ventana_menu_admin != null) {
+            ventana_menu_admin.setVisible(false);
+        }
+        
+        if (ventana_menu_producto == null) {
+            ventana_menu_producto = new VentanaMenuProducto(this);
+        }
+        
+        ventana_menu_producto.setVisible(true);
+        ventana_menu_producto.toFront();
     }
 
     /**

@@ -26,7 +26,7 @@ public class VentanaMenuMesero extends JFrame {
     public VentanaMenuMesero(Coordinador coordinador) {
         this.coordinador = coordinador;
         //CONFIGURACION BASE----------------------------------------------------
-        setTitle("Menú de Cliente - Sistema Restaurante");
+        setTitle("Menú de Mesero - Sistema Restaurante");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 650);
         setLocationRelativeTo(null); //Para que este siempre centrado
@@ -51,7 +51,7 @@ public class VentanaMenuMesero extends JFrame {
 
         //Tercero que es el titulo de la etiqueta que aparece en el menu 
         Font fuenteTitulo = cargarFuenteAgbalumo(35f);
-        JLabel lbl_titulo = new JLabel("Menú de Administrador");
+        JLabel lbl_titulo = new JLabel("Menú de Mesero");
         lbl_titulo.setFont(fuenteTitulo);
         lbl_titulo.setForeground(Color.BLACK);
         cuadro_blanco.add(lbl_titulo, BorderLayout.NORTH);
