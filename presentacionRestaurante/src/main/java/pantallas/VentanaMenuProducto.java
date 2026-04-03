@@ -99,7 +99,7 @@ public class VentanaMenuProducto extends JFrame {
 
         //------------------------TABLA (FILA 3)--------------------------------
         gbc.gridy = 3;
-        gbc.weighty = 0.3;
+        gbc.weighty = 0.4;
         gbc.fill = GridBagConstraints.BOTH;
 
         String[] columnas = {"Ingredientes", "Nombre", "Precio", "Tipo", "Imagen"};
@@ -154,16 +154,18 @@ public class VentanaMenuProducto extends JFrame {
 
         // 3. Agregamos filas de prueba
         // Formato: {Nombre, Precio, Tipo, Imagen (ID o Ruta), Botón}
-        modelo.addRow(new Object[]{"Ver detalles", "Enchiladas Suizas", "150.00", "Platillo", "/imagenes/registrarPNG.png"});
-        modelo.addRow(new Object[]{"Ver detalles", "Tacos al Pastor", "120.00", "Platillo", "/imagenes/registrarPNG.png",});
-        modelo.addRow(new Object[]{"Ver detalles", "Limonada Natural", "45.00", "Bebida", "/imagenes/registrarPNG.png",});
-        modelo.addRow(new Object[]{"Ver detalles", "Pastel de Chocolate", "85.00", "Postre", "/imagenes/registrarPNG.png",});
-        modelo.addRow(new Object[]{"Ver detalles", "Hamburguesa Doble", "180.00", "Platillo", "/imagenes/registrarPNG.png",});
+        modelo.addRow(new Object[]{"Ver detalles", "Enchiladas Suizas", "150.00", "Platillo", "/imagenes/fondo.jpg"});
+        modelo.addRow(new Object[]{"Ver detalles", "Tacos al Pastor", "120.00", "Platillo", "/imagenes/hola.jpg",});
+        modelo.addRow(new Object[]{"Ver detalles", "Limonada Natural", "45.00", "Bebida", "/imagenes/fondo.jpg",});
+        modelo.addRow(new Object[]{"Ver detalles", "Pastel de Chocolate", "85.00", "Postre", "/imagenes/hola.jpg",});
+        modelo.addRow(new Object[]{"Ver detalles", "Hamburguesa Doble", "180.00", "Platillo", "/imagenes/fondo.jpg",});
+        
+
         //----------------SECCION PARA REGISTRAR PRODUCTO (FILA 4)--------------
 
         gbc.gridy = 4;
-        gbc.weighty = 0.2;
-        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Panel con borde punteado para agrupar el registro
         PanelBordePunteado panel_registro = new PanelBordePunteado();
@@ -173,8 +175,9 @@ public class VentanaMenuProducto extends JFrame {
         gbcReg.fill = GridBagConstraints.HORIZONTAL;
 
         //---------------SUBPANEL IZQUIERDO (Campos de texto)-------------------
-        JPanel panel_campos = new JPanel(new GridLayout(6, 1, 0, 2));
+        JPanel panel_campos = new JPanel(new GridLayout(6, 1, 0, 5));
         panel_campos.setOpaque(false);
+        panel_campos.setPreferredSize(new Dimension(300,200));
 
         JLabel lbl_nombre = new JLabel("Nombre:");
         lbl_nombre.setFont(fuente_rabbits_pequena);
@@ -186,15 +189,18 @@ public class VentanaMenuProducto extends JFrame {
 
         JLabel lbl_tipo = new JLabel("Tipo:");
         lbl_tipo.setFont(fuente_rabbits_pequena);
-        TextFieldPersonalizado txt_tipo = new TextFieldPersonalizado(15);
+
+        String[] opcionesTipo = {"Seleccionar...", "Platillo", "Bebida", "Postre"};
+        ComboBoxPersonalizado<String> combo_tipo = new ComboBoxPersonalizado<>(opcionesTipo);
+        combo_tipo.setPreferredSize(new Dimension(0, 35)); // Misma altura que tus textfields
 
         panel_campos.add(lbl_nombre);
         panel_campos.add(txt_nombre);
         panel_campos.add(lbl_precio);
         panel_campos.add(txt_precio);
         panel_campos.add(lbl_tipo);
-        panel_campos.add(txt_tipo);
-
+        panel_campos.add(combo_tipo);
+        
         gbcReg.gridx = 0;
         gbcReg.weightx = 0.6;
         panel_registro.add(panel_campos, gbcReg);
@@ -237,7 +243,7 @@ public class VentanaMenuProducto extends JFrame {
 
         //-------------------------BOTON VOLVER (FILA 5)------------------------
         gbc.gridy = 5;
-        gbc.weighty = 0.05;
+        gbc.weighty = 0.1;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
 

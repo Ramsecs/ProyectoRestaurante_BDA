@@ -14,18 +14,31 @@ import javax.swing.*;
  */
 public class ClaseImagen {
     //Metodo de ruta 
-    public static ImageIcon escalarImagen(String ruta, int ancho, int alto){
-        
-        if (ruta == null || ruta.isEmpty()) return null; 
-        
-        ImageIcon icono_original = new ImageIcon(ruta);
-        if (icono_original.getImageLoadStatus() != MediaTracker.COMPLETE){
-            return null; 
-        }       
-        Image imagen = icono_original.getImage();
-        Image nueva_imagen = imagen.getScaledInstance(ancho, alto, Image.SCALE_SMOOTH);
-        return new ImageIcon(nueva_imagen);
+    public static ImageIcon escalarImagen(String ruta, int ancho, int alto) {
+    try {
+        Image img;
+        // Si la ruta empieza con "/", es un recurso del proyecto (JAR/src)
+        if (ruta.startsWith("/")) {
+            java.net.URL imgURL = ClaseImagen.class.getResource(ruta);
+            if (imgURL != null) {
+                img = new ImageIcon(imgURL).getImage();
+            } else {
+                System.out.println("No se encontró el recurso en: " + ruta);
+                return null;
+            }
+        } else {
+            // Si no tiene "/", es una ruta absoluta del sistema (C:\Users...)
+            img = new ImageIcon(ruta).getImage();
+        }
+
+        // Escalado suave para que no se vea pixelado
+        Image nuevaImg = img.getScaledInstance(ancho, alto, Image.SCALE_SMOOTH);
+        return new ImageIcon(nuevaImg);
+    } catch (Exception e) {
+        System.err.println("Error al escalar imagen: " + e.getMessage());
+        return null;
     }
+}
     
     
     //Cuando ya tenemos el objeto File

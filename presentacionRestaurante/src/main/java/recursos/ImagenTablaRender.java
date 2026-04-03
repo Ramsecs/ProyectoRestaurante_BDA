@@ -5,6 +5,10 @@
 package recursos;
 
 import java.awt.Component;
+import java.awt.MediaTracker;
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
@@ -16,27 +20,39 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class ImagenTablaRender extends DefaultTableCellRenderer {
 
+    // Aquí guardaremos las imágenes ya escaladas para no repetir el trabajo
+    //Con esto estamos evitando que la ventana vaya lentisima
+    private final Map<String, ImageIcon> cacheImagenes = new HashMap<>();
+
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
 
         JLabel label = new JLabel();
         label.setHorizontalAlignment(SwingConstants.CENTER);
+        label.setOpaque(true);
 
         if (value != null) {
             String ruta = value.toString();
-            // Usamos la ClaseImagen para que la miniatura sea de 40x40 o bien, el alto de la fila
-            try {
-                label.setIcon(ClaseImagen.escalarImagen(ruta, 40, 40));
-            } catch (Exception e) {
-                label.setText("Error"); // Por si la ruta esta mal
+
+            //Si YA tenemos esta imagen en la memoria
+            if (cacheImagenes.containsKey(ruta)) {
+                label.setIcon(cacheImagenes.get(ruta));
+            } else {
+                //Si NO está, la escalamos UNA SOLA VEZ y la guardamos
+                ImageIcon icono = ClaseImagen.escalarImagen(ruta, 40, 40);
+                if (icono != null) {
+                    cacheImagenes.put(ruta, icono);
+                    label.setIcon(icono);
+                }
             }
         }
 
-        // Mantener el color de selección de la tabla
+        // Colores de selección
         if (isSelected) {
-            label.setOpaque(true);
             label.setBackground(table.getSelectionBackground());
+        } else {
+            label.setBackground(table.getBackground());
         }
 
         return label;
