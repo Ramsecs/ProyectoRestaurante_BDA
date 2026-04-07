@@ -5,7 +5,9 @@
 package entidadesRestaurante;
 
 import enumEntidades.EstadoComanda;
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 import javax.persistence.*;
 
 /**
@@ -14,7 +16,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "comanda")
-public class Comanda {
+public class Comanda  implements Serializable{
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +35,13 @@ public class Comanda {
     @ManyToOne
     @JoinColumn(name = "fk_cliente")
     private Cliente cliente;
+    
+    @OneToOne(mappedBy = "comanda")
+    private Mesa mesa;
+    
+    
+    @OneToMany(mappedBy = "comandas", cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE})
+    private List<ComandaProducto> lista_productos;
 
     public Comanda() {
     }
@@ -80,6 +89,14 @@ public class Comanda {
 
     public void setTotal_venta(Double total_venta) {
         this.total_venta = total_venta;
+    }
+
+    public List<ComandaProducto> getLista_productos() {
+        return lista_productos;
+    }
+
+    public void setLista_productos(List<ComandaProducto> lista_productos) {
+        this.lista_productos = lista_productos;
     }
 
     @Override

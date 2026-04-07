@@ -1,5 +1,6 @@
 entidadesRestaurante\Ingrediente.class
 entidadesRestaurante\Cliente.class
+entidadesRestaurante\Producto.class
 entidadesRestaurante\ClienteFrecuente.class
 entidadesRestaurante\Comanda.class
 enumEntidades\EstadoComanda.class
