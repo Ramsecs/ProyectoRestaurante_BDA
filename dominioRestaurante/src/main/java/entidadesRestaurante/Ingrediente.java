@@ -5,6 +5,7 @@
 package entidadesRestaurante;
 
 import enumEntidades.UnidadMedida;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.*;
@@ -15,7 +16,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "ingredientes")
-public class Ingrediente {
+public class Ingrediente  implements Serializable{
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
