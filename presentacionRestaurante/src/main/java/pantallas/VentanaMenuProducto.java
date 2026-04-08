@@ -134,6 +134,8 @@ public class VentanaMenuProducto extends JFrame {
         tabla.getColumnModel().getColumn(0).setCellRenderer(new BotonTablaRender(btn_detalles));
         TableColumn columna_ingredientes = tabla.getColumnModel().getColumn(0);
         columna_ingredientes.setCellEditor(new BotonTablaEditor(btn_detalles, e -> {
+            
+            coordinador.mostrarDialogoIngredientesVista(this);
             //AQUI TIENE QUE IR LA LOGICA PARA QUE SE ABRA LA VENTANA DE
             //INGREDIENTES PARA PODER VISUALIZARLOS 
             //DE MOMENTO SOLO CORROBORAMOS QUE FUNCIONE
@@ -190,7 +192,7 @@ public class VentanaMenuProducto extends JFrame {
         JLabel lbl_tipo = new JLabel("Tipo:");
         lbl_tipo.setFont(fuente_rabbits_pequena);
 
-        String[] opcionesTipo = {"Seleccionar...", "Platillo", "Bebida", "Postre"};
+        String[] opcionesTipo = {"Seleccionar", "Platillo", "Bebida", "Postre"};
         ComboBoxPersonalizado<String> combo_tipo = new ComboBoxPersonalizado<>(opcionesTipo);
         combo_tipo.setPreferredSize(new Dimension(0, 35)); // Misma altura que tus textfields
 
@@ -279,5 +281,6 @@ public class VentanaMenuProducto extends JFrame {
         });
 
         btn_volver.addActionListener(e -> coordinador.regresarMenuMesero());
+        btn_ingredientes.addActionListener(e -> coordinador.mostrarDialogoIngredientes(this));
     }
 }

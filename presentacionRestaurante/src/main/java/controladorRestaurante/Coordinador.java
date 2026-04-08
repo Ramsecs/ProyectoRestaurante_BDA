@@ -8,6 +8,7 @@ import dtosDelRestaurante.ClienteBusquedaDTO;
 import dtosDelRestaurante.ClienteDTO;
 import excepcionesRestaurante.NegocioException;
 import java.util.List;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import objetosNegocioRestaurante.ClienteBO;
 import objetosNegocioRestaurante.IClienteBO;
@@ -18,7 +19,7 @@ import pantallas.*;
  *
  * @author RAMSES
  */
-public class Coordinador implements Observador{
+public class Coordinador implements Observador {
 
 //Capas de negocio (BOs)
     private final IClienteBO clienteBO;
@@ -27,7 +28,7 @@ public class Coordinador implements Observador{
     private VentanaMenuAdmin ventana_menu_admin;
     private VentanaMenuMesero ventana_menu_mesero;
     private VentanaMenuCliente ventana_menu_cliente;
-    private VentanaMenuProducto ventana_menu_producto; 
+    private VentanaMenuProducto ventana_menu_producto;
 
     public Coordinador() {
         this.clienteBO = ClienteBO.getInstanceClienteBO();
@@ -37,14 +38,15 @@ public class Coordinador implements Observador{
      * Hacer visible la pantalla de menu admin, si esta no ha sido abierta
      * entonces creamos una nueva
      */
-    public void iniciarMenuAdmin(){
+    public void iniciarMenuAdmin() {
         if (ventana_menu_admin == null) {
             ventana_menu_admin = new VentanaMenuAdmin(this);
         }
-        
+
         ventana_menu_admin.setVisible(true);
-        
+
     }
+
     public void iniciarMenuMesero() {
         if (ventana_menu_mesero == null) {
             ventana_menu_mesero = new VentanaMenuMesero(this);
@@ -73,21 +75,20 @@ public class Coordinador implements Observador{
         ventana_menu_cliente.toFront();
 
     }
-    
+
     /**
-     * Hacer visible la ventana del menu de Producto donde es la edicion, registro
-     * y busqueda de productos.
+     * Hacer visible la ventana del menu de Producto donde es la edicion,
+     * registro y busqueda de productos.
      */
-    
-    public void mostrarMenuProducto(){
+    public void mostrarMenuProducto() {
         if (ventana_menu_admin != null) {
             ventana_menu_admin.setVisible(false);
         }
-        
+
         if (ventana_menu_producto == null) {
             ventana_menu_producto = new VentanaMenuProducto(this);
         }
-        
+
         ventana_menu_producto.setVisible(true);
         ventana_menu_producto.toFront();
     }
@@ -95,7 +96,7 @@ public class Coordinador implements Observador{
     /**
      * Metodo para regresar de la pantalla del menu de clientes para ir a la
      * pantalla de menu administrador
-    *
+     *
      */
     public void regresarMenuMesero() {
         if (ventana_menu_cliente != null) {
@@ -138,6 +139,7 @@ public class Coordinador implements Observador{
     /**
      * Recibe un cliente editado desde la tabla y solicita su actualización al
      * BO.
+     *
      * @param clienteDTO Objeto con los nuevos datos y el ID recuperado de la
      * lista tipo espejo.
      */
@@ -159,6 +161,32 @@ public class Coordinador implements Observador{
             // que el mesero hizo en la celda y que no se guardó.
             this.buscarClientes("");
         }
+    }
+
+    //----------------------------------VENTANAS TIPO DIALOG--------------------
+    /**
+     * Abre el diálogo para agregar ingredientes. Al ser un JDialog, necesita
+     * saber qué JFrame lo está invocando para mantener la jerarquía visual y la
+     * modalidad.
+     *
+     * @param padre La ventana que invoca el diálogo (usualmente
+     * ventana_menu_producto)
+     */
+    public void mostrarDialogoIngredientes(JFrame padre) {
+        // No guardamos el diálogo como atributo de clase porque usualmente
+        // estos diálogos se crean y destruyen (dispose) en cada uso.
+        VentanaDialogAgregarIngrediente dialogo = new VentanaDialogAgregarIngrediente(this, padre);
+
+        // Aqui mismo se debe de agregar lo de los ingredientes, pero eso ya va despues
+        // List<IngredienteDTO> ingredientes = ingredienteBO.obtenerTodos();
+        // dialogo.cargarTabla(ingredientes);
+        dialogo.setVisible(true);
+    }
+    
+    public void mostrarDialogoIngredientesVista(JFrame padre){
+        VentanaDialogVerIngredientes dialogo_vista = new VentanaDialogVerIngredientes(this,padre);
+        
+        dialogo_vista.setVisible(true);
     }
 
     @Override
