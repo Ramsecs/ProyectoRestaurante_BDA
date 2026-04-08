@@ -4,6 +4,7 @@
  */
 package entidadesRestaurante;
 
+import ConevrtidorEncriptado.EncriptadorTelefonoConverter;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,7 +37,7 @@ public class Cliente implements Serializable{
     @Column(name = "correo", length = 100, nullable = true)
     protected String correo;
     
-    @Column(name = "telefono", length = 10, nullable = true)
+    @Convert(converter = EncriptadorTelefonoConverter.class)
     protected String telefono;
     
     @Column(name = "fecha_registro", nullable = false, updatable = false)

@@ -7,6 +7,10 @@
     <class>entidadesRestaurante.ClienteFrecuente</class>
     <class>entidadesRestaurante.Comanda</class>
     <class>entidadesRestaurante.Ingrediente</class>
+    <class>entidadesRestaurante.ComandaProducto</class>
+    <class>entidadesRestaurante.Producto</class>
+    <class>entidadesRestaurante.ProductoIngrediente</class>
+    <class>entidadesRestaurante.Mesa</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/ventaRestaurante?zeroDateTimeBehavior=CONVERT_TO_NULL"/>
       <property name="javax.persistence.jdbc.user" value="root"/>

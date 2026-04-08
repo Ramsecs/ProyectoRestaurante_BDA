@@ -5,6 +5,9 @@
 package entidadesRestaurante;
 
 import enumEntidades.UnidadMedida;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Objects;
 import javax.persistence.*;
 
 /**
@@ -13,7 +16,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "ingredientes")
-public class Ingrediente {
+public class Ingrediente  implements Serializable{
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +31,9 @@ public class Ingrediente {
     @Enumerated(EnumType.STRING)
     @Column(name = "unidad_medida", nullable = false)
     private UnidadMedida unidad_medida;
+    
+    @OneToMany(mappedBy = "productos", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
+    private List<ProductoIngrediente> lista_productos;
 
     public Ingrediente() {
     }
@@ -75,6 +81,28 @@ public class Ingrediente {
 
     public void setUnidad_medida(UnidadMedida unidad_medida) {
         this.unidad_medida = unidad_medida;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 71 * hash + Objects.hashCode(this.id);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Ingrediente other = (Ingrediente) obj;
+        return Objects.equals(this.id, other.id);
     }
 
     @Override
