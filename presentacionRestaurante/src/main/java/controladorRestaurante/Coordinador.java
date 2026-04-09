@@ -29,6 +29,7 @@ public class Coordinador implements Observador {
     private VentanaMenuMesero ventana_menu_mesero;
     private VentanaMenuCliente ventana_menu_cliente;
     private VentanaMenuProducto ventana_menu_producto;
+    private VentanaMenuIngrediente ventana_menu_ingrediente;
 
     public Coordinador() {
         this.clienteBO = ClienteBO.getInstanceClienteBO();
@@ -58,7 +59,7 @@ public class Coordinador implements Observador {
 
     /**
      * Hacer visible la ventana de menu cliente donde es la edicion, registro,
-     * busqueda de clientes
+     * busqueda de clientes.
      */
     public void mostrarMenuCliente() {
         if (ventana_menu_mesero != null) {
@@ -74,6 +75,26 @@ public class Coordinador implements Observador {
         ventana_menu_cliente.setVisible(true);
         ventana_menu_cliente.toFront();
 
+    }
+    
+    /**
+     * Hacer visible la ventana de menu de ingredientes, donde se puede editar
+     * agregar y consultar.
+     */
+    
+    public void mostrarMenuIngrediente(){
+        if (ventana_menu_ingrediente != null) {
+            ventana_menu_ingrediente.setVisible(false);
+        }
+        
+        if (ventana_menu_ingrediente == null) {
+            ventana_menu_ingrediente = new VentanaMenuIngrediente(this);
+            ventana_menu_ingrediente.setConexionObservador(this);
+        }
+        ventana_menu_ingrediente.setVisible(true);
+        ventana_menu_ingrediente.toFront();
+        //------> AQUI FALTA LA PROGRAMACIÓN DE LA TABLA PARA QUE SE MUESTREN LOS INGREDIENTES
+        //ES MUY SIMILAR POR NO DECIR QUE IGUAL A LA DE mostrarMenuCliente
     }
 
     /**
@@ -190,7 +211,12 @@ public class Coordinador implements Observador {
     }
 
     @Override
-    public void updated(ClienteBusquedaDTO clienteDTO) {
+    public void actualizar_empleado(ClienteBusquedaDTO clienteDTO) {
         this.actualizarCliente(clienteDTO);
+    }
+
+    @Override
+    public void actualizar_ingrediente() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

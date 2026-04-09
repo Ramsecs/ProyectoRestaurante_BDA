@@ -14,5 +14,8 @@ import dtosDelRestaurante.ClienteBusquedaDTO;
  * @author josma
  */
 public interface Observador {
-    public void updated(ClienteBusquedaDTO clienteDTO);
+    public void actualizar_empleado(ClienteBusquedaDTO clienteDTO);
+    public void actualizar_ingrediente(); //<-- ESTE METODO ES PARA PODER ACTUALIZAR UNICAMENTE
+    //LA CANTIDAD DEL INGREDIENTE CUANDO SE HAGA REESTOCK OCUPA EL DTO, PERO COMO NO ES MI RUBRO
+    //NO LE MUEVO
 }
