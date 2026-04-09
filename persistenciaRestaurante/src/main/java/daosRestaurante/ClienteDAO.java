@@ -125,7 +125,13 @@ public class ClienteDAO implements IClienteDAO {
             em.close();
         }
     }
-
+/**
+ * Permite hacer la busqueda de clientes que coincida su id
+ * 
+ * @param id
+ * @return Cliente
+ * @throws PersistenciaException 
+ */
     @Override
     public Cliente buscarPorId(Long id) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
