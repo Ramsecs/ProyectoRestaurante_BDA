@@ -363,7 +363,7 @@ public class VentanaMenuCliente extends JFrame {
         //Aqui entra en accion el observador (metiche) 
         
         if (this.metiche != null) {
-            this.metiche.updated(cliente_editado);
+            this.metiche.actualizar_empleado(cliente_editado);
         }
     }
     

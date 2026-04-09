@@ -8,6 +8,7 @@ import dtosDelRestaurante.ClienteBusquedaDTO;
 import dtosDelRestaurante.ClienteDTO;
 import excepcionesRestaurante.NegocioException;
 import java.util.List;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import objetosNegocioRestaurante.ClienteBO;
 import objetosNegocioRestaurante.IClienteBO;
@@ -18,7 +19,7 @@ import pantallas.*;
  *
  * @author RAMSES
  */
-public class Coordinador implements Observador{
+public class Coordinador implements Observador {
 
 //Capas de negocio (BOs)
     private final IClienteBO clienteBO;
@@ -27,7 +28,9 @@ public class Coordinador implements Observador{
     private VentanaMenuAdmin ventana_menu_admin;
     private VentanaMenuMesero ventana_menu_mesero;
     private VentanaMenuCliente ventana_menu_cliente;
-    private VentanaMenuProducto ventana_menu_producto; 
+    private VentanaMenuProducto ventana_menu_producto;
+    private VentanaMenuIngrediente ventana_menu_ingrediente;
+    private VentanaMenuComanda ventana_menu_comanda;
 
     public Coordinador() {
         this.clienteBO = ClienteBO.getInstanceClienteBO();
@@ -37,14 +40,15 @@ public class Coordinador implements Observador{
      * Hacer visible la pantalla de menu admin, si esta no ha sido abierta
      * entonces creamos una nueva
      */
-    public void iniciarMenuAdmin(){
+    public void iniciarMenuAdmin() {
         if (ventana_menu_admin == null) {
             ventana_menu_admin = new VentanaMenuAdmin(this);
         }
-        
+
         ventana_menu_admin.setVisible(true);
-        
+
     }
+
     public void iniciarMenuMesero() {
         if (ventana_menu_mesero == null) {
             ventana_menu_mesero = new VentanaMenuMesero(this);
@@ -56,7 +60,7 @@ public class Coordinador implements Observador{
 
     /**
      * Hacer visible la ventana de menu cliente donde es la edicion, registro,
-     * busqueda de clientes
+     * busqueda de clientes.
      */
     public void mostrarMenuCliente() {
         if (ventana_menu_mesero != null) {
@@ -73,21 +77,55 @@ public class Coordinador implements Observador{
         ventana_menu_cliente.toFront();
 
     }
-    
+
     /**
-     * Hacer visible la ventana del menu de Producto donde es la edicion, registro
-     * y busqueda de productos.
+     * Hacer visible la ventana de menu de ingredientes, donde se puede editar
+     * agregar y consultar.
      */
-    
-    public void mostrarMenuProducto(){
+    public void mostrarMenuIngrediente() {
+        if (ventana_menu_ingrediente != null) {
+            ventana_menu_ingrediente.setVisible(false);
+        }
+
+        if (ventana_menu_ingrediente == null) {
+            ventana_menu_ingrediente = new VentanaMenuIngrediente(this);
+            ventana_menu_ingrediente.setConexionObservador(this);
+        }
+        ventana_menu_ingrediente.setVisible(true);
+        ventana_menu_ingrediente.toFront();
+        //------> AQUI FALTA LA PROGRAMACIÓN DE LA TABLA PARA QUE SE MUESTREN LOS INGREDIENTES
+        //ES MUY SIMILAR POR NO DECIR QUE IGUAL A LA DE mostrarMenuCliente
+    }
+    /**
+     * Hacer visible la ventana de menu comandas, donde se puede
+     * agregar, editar y consultar.
+     */
+    public void mostrarMenuComanda() {
+        if (ventana_menu_comanda != null) {
+            ventana_menu_comanda.setVisible(false);
+        }
+
+        if (ventana_menu_comanda == null) {
+            ventana_menu_comanda = new VentanaMenuComanda(this);
+            ventana_menu_comanda.setConexionObservador(this);
+        }
+        ventana_menu_comanda.setVisible(true);
+        ventana_menu_comanda.toFront();
+    }
+
+    /**
+     * Hacer visible la ventana del menu de Producto donde es la edicion,
+     * registro y busqueda de productos.
+     */
+    public void mostrarMenuProducto() {
         if (ventana_menu_admin != null) {
             ventana_menu_admin.setVisible(false);
         }
-        
+
         if (ventana_menu_producto == null) {
             ventana_menu_producto = new VentanaMenuProducto(this);
         }
-        
+
         ventana_menu_producto.setVisible(true);
         ventana_menu_producto.toFront();
     }
@@ -95,7 +133,7 @@ public class Coordinador implements Observador{
     /**
      * Metodo para regresar de la pantalla del menu de clientes para ir a la
      * pantalla de menu administrador
-    *
+     *
      */
     public void regresarMenuMesero() {
         if (ventana_menu_cliente != null) {
@@ -138,6 +176,7 @@ public class Coordinador implements Observador{
     /**
      * Recibe un cliente editado desde la tabla y solicita su actualización al
      * BO.
+     *
      * @param clienteDTO Objeto con los nuevos datos y el ID recuperado de la
      * lista tipo espejo.
      */
@@ -161,8 +200,39 @@ public class Coordinador implements Observador{
         }
     }
 
+    //----------------------------------VENTANAS TIPO DIALOG--------------------
+    /**
+     * Abre el diálogo para agregar ingredientes. Al ser un JDialog, necesita
+     * saber qué JFrame lo está invocando para mantener la jerarquía visual y la
+     * modalidad.
+     *
+     * @param padre La ventana que invoca el diálogo (usualmente
+     * ventana_menu_producto)
+     */
+    public void mostrarDialogoIngredientes(JFrame padre) {
+        // No guardamos el diálogo como atributo de clase porque usualmente
+        // estos diálogos se crean y destruyen (dispose) en cada uso.
+        VentanaDialogAgregarIngrediente dialogo = new VentanaDialogAgregarIngrediente(this, padre);
+
+        // Aqui mismo se debe de agregar lo de los ingredientes, pero eso ya va despues
+        // List<IngredienteDTO> ingredientes = ingredienteBO.obtenerTodos();
+        // dialogo.cargarTabla(ingredientes);
+        dialogo.setVisible(true);
+    }
+
+    public void mostrarDialogoIngredientesVista(JFrame padre) {
+        VentanaDialogVerIngredientes dialogo_vista = new VentanaDialogVerIngredientes(this, padre);
+
+        dialogo_vista.setVisible(true);
+    }
+
     @Override
-    public void updated(ClienteBusquedaDTO clienteDTO) {
+    public void actualizar_empleado(ClienteBusquedaDTO clienteDTO) {
         this.actualizarCliente(clienteDTO);
+    }
+
+    @Override
+    public void actualizar_ingrediente() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
