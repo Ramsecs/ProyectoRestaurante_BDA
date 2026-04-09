@@ -51,7 +51,7 @@ public class Ingrediente implements Serializable {
      * Lista de relaciones entre este ingrediente y los productos que lo utilizan.
      * Incluye persistencia en cascada y eliminacion de huerfanos para mantener la integridad.
      */
-    @OneToMany(mappedBy = "productos", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "ingredientes", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
     private List<ProductoIngrediente> lista_productos;
 
     /**

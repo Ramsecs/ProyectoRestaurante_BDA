@@ -4,7 +4,7 @@
  */
 package entidadesRestaurante;
 
-import ConevrtidorEncriptado.EncriptadorTelefonoConverter;
+import ConvertidorEncriptado.EncriptadorTelefonoConverter;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -129,72 +129,100 @@ public class Cliente implements Serializable {
     /** 
     * @return El ID del cliente. 
     */
-    public Long getId() { return id; }
+    public Long getId() { 
+        return id; 
+    }
 
     /**
     * @param id El nuevo ID del cliente. 
     */
-    public void setId(Long id) { this.id = id; }
+    public void setId(Long id) { 
+        this.id = id; 
+    }
 
     /**
     * @return El nombre o nombres del cliente. 
     */
-    public String getNombre() { return nombre; }
+    public String getNombre() { 
+        return nombre; 
+    }
 
     /**
     * @param nombre El nombre a asignar. 
     */
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setNombre(String nombre) { 
+        this.nombre = nombre; 
+    }
 
     /** 
     * @return El apellido paterno. 
     */
-    public String getApellido_paterno() { return apellido_paterno; }
+    public String getApellido_paterno() { 
+        return apellido_paterno; 
+    }
 
     /** 
     * @param apellido_paterno El apellido paterno a asignar. 
     */
-    public void setApellido_paterno(String apellido_paterno) { this.apellido_paterno = apellido_paterno; }
+    public void setApellido_paterno(String apellido_paterno) { 
+        this.apellido_paterno = apellido_paterno; 
+    }
 
     /** 
     * @return El apellido materno. 
     */
-    public String getApellido_materno() { return apellido_materno; }
+    public String getApellido_materno() { 
+        return apellido_materno; 
+    }
 
     /** 
     * @param apellido_materno El apellido materno a asignar. 
     */
-    public void setApellido_materno(String apellido_materno) { this.apellido_materno = apellido_materno; }
+    public void setApellido_materno(String apellido_materno) { 
+        this.apellido_materno = apellido_materno; 
+    }
 
     /** 
     * @return El correo electronico. 
     */
-    public String getCorreo() { return correo; }
+    public String getCorreo() { 
+        return correo; 
+    }
 
     /** 
     * @param correo El correo a asignar. 
     */
-    public void setCorreo(String correo) { this.correo = correo; }
+    public void setCorreo(String correo) { 
+        this.correo = correo; 
+    }
 
     /**
     * @return El telefono (desencriptado por el convertidor). 
     */
-    public String getTelefono() { return telefono; }
+    public String getTelefono() { 
+        return telefono; 
+    }
 
     /**
     * @param telefono El telefono a asignar.
     */
-    public void setTelefono(String telefono) { this.telefono = telefono; }
+    public void setTelefono(String telefono) { 
+        this.telefono = telefono; 
+    }
 
     /**
     * @return La fecha de registro. 
     */
-    public LocalDate getFecha_registro() { return fecha_registro; }
+    public LocalDate getFecha_registro() { 
+        return fecha_registro; 
+    }
 
     /** 
     * @param fecha_registro La fecha de registro a asignar.
     */
-    public void setFecha_registro(LocalDate fecha_registro) { this.fecha_registro = fecha_registro; }
+    public void setFecha_registro(LocalDate fecha_registro) { 
+        this.fecha_registro = fecha_registro; 
+    }
 
     /**
      * Devuelve una representacion en cadena de texto del objeto Cliente.

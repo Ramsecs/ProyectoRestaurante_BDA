@@ -31,7 +31,7 @@ public class Mesa implements Serializable {
      * desvincula una comanda, esta sea gestionada correctamente por el proveedor de persistencia.
      */
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, orphanRemoval = true)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "id_mesa")
     private Comanda comanda;
 
     /**

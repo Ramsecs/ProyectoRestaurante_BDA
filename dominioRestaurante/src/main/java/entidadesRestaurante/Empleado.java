@@ -4,7 +4,7 @@
  */
 package entidadesRestaurante;
 
-import ConevrtidorEncriptado.EncriptadorTelefonoConverter;
+import ConvertidorEncriptado.EncriptadorTelefonoConverter;
 import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.*;
