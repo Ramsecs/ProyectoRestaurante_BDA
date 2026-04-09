@@ -30,6 +30,7 @@ public class Coordinador implements Observador {
     private VentanaMenuCliente ventana_menu_cliente;
     private VentanaMenuProducto ventana_menu_producto;
     private VentanaMenuIngrediente ventana_menu_ingrediente;
+    private VentanaMenuComanda ventana_menu_comanda;
 
     public Coordinador() {
         this.clienteBO = ClienteBO.getInstanceClienteBO();
@@ -76,17 +77,16 @@ public class Coordinador implements Observador {
         ventana_menu_cliente.toFront();
 
     }
-    
+
     /**
      * Hacer visible la ventana de menu de ingredientes, donde se puede editar
      * agregar y consultar.
      */
-    
-    public void mostrarMenuIngrediente(){
+    public void mostrarMenuIngrediente() {
         if (ventana_menu_ingrediente != null) {
             ventana_menu_ingrediente.setVisible(false);
         }
-        
+
         if (ventana_menu_ingrediente == null) {
             ventana_menu_ingrediente = new VentanaMenuIngrediente(this);
             ventana_menu_ingrediente.setConexionObservador(this);
@@ -95,6 +95,22 @@ public class Coordinador implements Observador {
         ventana_menu_ingrediente.toFront();
         //------> AQUI FALTA LA PROGRAMACIÓN DE LA TABLA PARA QUE SE MUESTREN LOS INGREDIENTES
         //ES MUY SIMILAR POR NO DECIR QUE IGUAL A LA DE mostrarMenuCliente
+    }
+    /**
+     * Hacer visible la ventana de menu comandas, donde se puede
+     * agregar, editar y consultar.
+     */
+    public void mostrarMenuComanda() {
+        if (ventana_menu_comanda != null) {
+            ventana_menu_comanda.setVisible(false);
+        }
+
+        if (ventana_menu_comanda == null) {
+            ventana_menu_comanda = new VentanaMenuComanda(this);
+            ventana_menu_comanda.setConexionObservador(this);
+        }
+        ventana_menu_comanda.setVisible(true);
+        ventana_menu_comanda.toFront();
     }
 
     /**
@@ -203,10 +219,10 @@ public class Coordinador implements Observador {
         // dialogo.cargarTabla(ingredientes);
         dialogo.setVisible(true);
     }
-    
-    public void mostrarDialogoIngredientesVista(JFrame padre){
-        VentanaDialogVerIngredientes dialogo_vista = new VentanaDialogVerIngredientes(this,padre);
-        
+
+    public void mostrarDialogoIngredientesVista(JFrame padre) {
+        VentanaDialogVerIngredientes dialogo_vista = new VentanaDialogVerIngredientes(this, padre);
+
         dialogo_vista.setVisible(true);
     }
 

@@ -94,6 +94,10 @@ public class VentanaMenuMesero extends JFrame {
         btn_cliente.addActionListener(e -> {
             coordinador.mostrarMenuCliente();
         });
+        
+        btn_comanda.addActionListener(e ->{
+            coordinador.mostrarMenuComanda();
+        });
     }
 
     //METODO PARA LA FUENTE BONITA------------------------------------------
