@@ -7,6 +7,7 @@ package observadorRestaurante;
 import dtosDelRestaurante.ClienteBusquedaDTO;
 import dtosDelRestaurante.ProductoIngredienteDTO;
 import java.util.List;
+import dtosDelRestaurante.IngredienteBusquedaDTO;
 
 /**
  *Se supone que con esta interface vamos a conseguir un descoplamiento con el coodinador y la
@@ -16,7 +17,10 @@ import java.util.List;
  * @author josma
  */
 public interface Observador {
-    public void updated(ClienteBusquedaDTO clienteDTO);
     
+    public void updated(ClienteBusquedaDTO clienteDTO);
     public void enviarProductoConListaARegistro(List<ProductoIngredienteDTO> datos);
+    public void actualizar_empleado(ClienteBusquedaDTO clienteDTO);
+    public void actualizarStockIngrediente(IngredienteBusquedaDTO ingredienteDTO); 
+    
 }

@@ -11,6 +11,8 @@ import dtosDelRestaurante.ProductoDTO;
 import dtosDelRestaurante.ProductoIngredienteDTO;
 import entidadesRestaurante.Ingrediente;
 import entidadesRestaurante.ProductoIngrediente;
+import dtosDelRestaurante.IngredienteBusquedaDTO;
+import dtosDelRestaurante.IngredientesDTO;
 import excepcionesRestaurante.NegocioException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +25,8 @@ import objetosNegocioRestaurante.IIngredienteProductoBO;
 import objetosNegocioRestaurante.IProductoBO;
 import objetosNegocioRestaurante.IngredienteProductoBO;
 import objetosNegocioRestaurante.ProductoBO;
+import objetosNegocioRestaurante.IIngredienteBO;
+import objetosNegocioRestaurante.IngredienteBO;
 import observadorRestaurante.Observador;
 import pantallas.*;
 import validadores.Validaciones;
@@ -48,17 +52,23 @@ public class Coordinador implements Observador {
     
     private Validaciones validar;
 
+    private final IIngredienteBO ingredienteBO;
+
     //Ventanas que se usaran para la navegacion
     private VentanaMenuAdmin ventana_menu_admin;
     private VentanaMenuMesero ventana_menu_mesero;
     private VentanaMenuCliente ventana_menu_cliente;
     private VentanaMenuProducto ventana_menu_producto;
-    private VentanaDialogAgregarIngrediente ventana_agregar_ingredientes;
+    private VentanaMenuIngrediente ventana_menu_ingrediente;
+    private VentanaMenuComanda ventana_menu_comanda;
+    private VentanaCrearComanda ventana_crear_comanda;
+    private VentanaDialogAgregarIngrediente ventana_agregar_ingredientes; 
 
     public Coordinador() {
         this.clienteBO = ClienteBO.getInstanceClienteBO();
         this.productoBO = ProductoBO.getInstanceProductoBO();
         this.ingredienteProductoBO = IngredienteProductoBO.getInstanceIngredienteBO();
+        this.ingredienteBO = IngredienteBO.getInstanceIngredienteBO();
         validar = new Validaciones();
     }
 
@@ -86,7 +96,7 @@ public class Coordinador implements Observador {
 
     /**
      * Hacer visible la ventana de menu cliente donde es la edicion, registro,
-     * busqueda de clientes
+     * busqueda de clientes.
      */
     public void mostrarMenuCliente() {
         if (ventana_menu_mesero != null) {
@@ -103,6 +113,26 @@ public class Coordinador implements Observador {
         ventana_menu_cliente.toFront();
 
     }
+
+    /**
+     * Hacer visible la ventana de menu de ingredientes, donde se puede editar
+     * agregar y consultar.
+     */
+    public void mostrarMenuIngrediente() {
+        if (ventana_menu_ingrediente != null) {
+            ventana_menu_ingrediente.setVisible(false);
+        }
+
+        if (ventana_menu_ingrediente == null) {
+            ventana_menu_ingrediente = new VentanaMenuIngrediente(this);
+            ventana_menu_ingrediente.setConexionObservador(this);
+        }
+        ventana_menu_ingrediente.setVisible(true);
+        ventana_menu_ingrediente.toFront();
+        //------> AQUI FALTA LA PROGRAMACIÓN DE LA TABLA PARA QUE SE MUESTREN LOS INGREDIENTES
+        //ES MUY SIMILAR POR NO DECIR QUE IGUAL A LA DE mostrarMenuCliente
+    }
+
 
     /**
      * Hacer visible la ventana del menu de Producto donde es la edicion,
@@ -123,7 +153,7 @@ public class Coordinador implements Observador {
 
     /**
      * Metodo para regresar de la pantalla del menu de clientes para ir a la
-     * pantalla de menu administrador
+     * pantalla de menu administrador.
      *
      */
     public void regresarMenuMesero() {
@@ -134,6 +164,17 @@ public class Coordinador implements Observador {
         if (ventana_menu_mesero != null) {
             ventana_menu_mesero.setVisible(true);
             ventana_menu_mesero.toFront();
+        }
+    }
+    
+    public void regresarMenuAdmin() {
+        if (ventana_menu_ingrediente != null) {
+            ventana_menu_ingrediente.dispose();
+        }
+
+        if (ventana_menu_admin != null) {
+            ventana_menu_admin.setVisible(true);
+            ventana_menu_admin.toFront();
         }
     }
 
@@ -210,10 +251,67 @@ public class Coordinador implements Observador {
         // dialogo.cargarTabla(ingredientes);
         dialogo.setVisible(true);
     }
-   
+    
+    //-------------------------METODOS JOS JOS----------------------------------
+    /**
+     * Este metodo abre la ventana para agregar una comanda nueva.
+     */
+    public void mostrarCrearComanda(){
+        if (ventana_menu_mesero != null) {
+            ventana_menu_mesero.setVisible(false);
+        }
+
+        if (ventana_crear_comanda == null) {
+            ventana_crear_comanda = new VentanaCrearComanda(this);
+        }
+
+        ventana_crear_comanda.setVisible(true);
+        ventana_crear_comanda.toFront();
+    }
+    
+        /**
+     * Hacer visible la ventana de menu comandas, donde se puede
+     * agregar, editar y consultar.
+     */
+    public void mostrarMenuComanda() {
+        if (ventana_menu_mesero != null) {
+            ventana_menu_mesero.dispose();
+        }
+
+        if (ventana_menu_comanda == null) {
+            ventana_menu_comanda = new VentanaMenuComanda(this);
+            ventana_menu_comanda.setConexionObservador(this);
+        }
+        ventana_menu_comanda.setVisible(true);
+        ventana_menu_comanda.toFront();
+    }
+    
+    /**
+     * Metodo para volver del MENU DE COMANDAS al MENU DE MESERO
+     *
+     */  
+    public void volverComandaMesero(){
+        if (ventana_menu_comanda != null) {
+            ventana_menu_comanda.dispose();
+        }
+        
+        if (ventana_menu_mesero == null) {
+            ventana_menu_mesero = new VentanaMenuMesero(this);
+        }
+        ventana_menu_mesero.setVisible(true);
+        ventana_menu_mesero.toFront();
+    }
+
+    /*
+    public void mostrarDialogoIngredientesVista(JFrame padre) {
+        VentanaDialogVerIngredientes dialogo_vista = new VentanaDialogVerIngredientes(this, padre);
+
+        dialogo_vista.setVisible(true);
+    }
+    */
 
     @Override
-    public void updated(ClienteBusquedaDTO clienteDTO) {
+    public void actualizar_empleado(ClienteBusquedaDTO clienteDTO) {
         this.actualizarCliente(clienteDTO);
     }
     /**
@@ -370,7 +468,7 @@ public class Coordinador implements Observador {
     }
     
     /**
-     * 
+     * Mediante este metodo se muestra la ventana de los ingredientes de un producto.
      * @param padre
      * @param id_producto
      * @param nombre_producto 
@@ -421,4 +519,55 @@ public class Coordinador implements Observador {
     }
     
     
+
+    public void registrarIngrediente(IngredientesDTO ingredienteDTO) {
+        try {
+            ingredienteBO.registrarIngredientes(ingredienteDTO);
+            JOptionPane.showMessageDialog(null, "Ingrediente registrado correctamente.");
+            this.buscarIngredientes(""); // Refrescar tabla
+        } catch (NegocioException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+    }
+
+    /**
+     * Busca ingredientes en la base de datos y le pide a la ventana que
+     * refresque la tabla.
+     *
+     * @param filtro Texto para filtrar por nombre o unidad.
+     */
+    public void buscarIngredientes(String filtro) {
+        try {
+            List<IngredienteBusquedaDTO> lista = ingredienteBO.buscarIngredientes(filtro);
+            if (ventana_menu_ingrediente != null) {
+                // Este método debe existir en tu VentanaMenuIngrediente
+                ventana_menu_ingrediente.cargarTablaDesdeCoordinador(lista);
+            }
+        } catch (NegocioException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+    }
+
+    /**
+     * Actualiza el stock de un ingrediente y refresca la vista.
+     *
+     * @param ingredienteDTO DTO con el ID y el nuevo stock.
+     */
+    @Override
+    public void actualizarStockIngrediente(IngredienteBusquedaDTO ingredienteDTO) {
+        try {
+            ingredienteBO.actualizarStock(ingredienteDTO);
+            System.out.println("Stock actualizado para: " + ingredienteDTO.getNombre());
+            // No refrescamos toda la tabla aquí para no perder el foco del usuario, 
+            // a menos que sea necesario.
+        } catch (NegocioException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error de Actualización", JOptionPane.ERROR_MESSAGE);
+            this.buscarIngredientes(""); // Revertir cambios visuales si falló
+        }
+    }
+    
+    @Override
+    public void updated(ClienteBusquedaDTO clienteDTO) {
+        this.actualizarCliente(clienteDTO);
+    }
 }

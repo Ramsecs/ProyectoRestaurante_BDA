@@ -17,6 +17,12 @@ import javax.persistence.*;
 @PrimaryKeyJoinColumn(name = "id_admin")
 public class Administrador extends Empleado implements Serializable{
     
-    
+    /**
+     * Constructor por defecto requerido por JPA para la instanciación 
+     * mediante reflexión.
+     */
+    public Administrador() {
+        super();
+    }
     
 }

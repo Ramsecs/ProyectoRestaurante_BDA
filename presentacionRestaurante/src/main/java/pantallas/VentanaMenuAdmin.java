@@ -82,13 +82,14 @@ public class VentanaMenuAdmin extends JFrame {
         Font fuente_botones = cargarFuenteAgbalumo(20f);
         BotonMenuAdministrador btn_reporte = new BotonMenuAdministrador("Reportes", "/imagenes/reportePNG.png", verde, 80, 80, fuente_botones);
         BotonMenuAdministrador btn_producto = new BotonMenuAdministrador("Productos", "/imagenes/productoPNG.png", verde, 80, 80, fuente_botones);
-        BotonMenuAdministrador btn_ingrediente = new BotonMenuAdministrador("Ingredientes", "/imagenes/ingredientePNG.png", rojo, 80, 80, fuente_botones);
+        BotonMenuAdministrador btn_ingrediente = new BotonMenuAdministrador("Ingredientes", "/imagenes/ingredientePNG.png", verde, 80, 80, fuente_botones);
         BotonMenuAdministrador btn_volver = new BotonMenuAdministrador("Volver", "/imagenes/volverPNG.png", rojo, 80, 80, fuente_botones);
 
         //Agregar botones al panel 
         panel_botones.add(btn_reporte);
         panel_botones.add(btn_producto);
         panel_botones.add(btn_ingrediente);
+        panel_botones.add(btn_volver);
 
         cuadro_blanco.add(panel_botones, BorderLayout.CENTER);
 
@@ -110,6 +111,9 @@ public class VentanaMenuAdmin extends JFrame {
 
         btn_producto.addActionListener(e -> {
             coordinador.mostrarMenuProducto();// ---> MODIFICAR
+        });
+        btn_ingrediente.addActionListener(e -> {
+            coordinador.mostrarMenuIngrediente();
         });
     }
 

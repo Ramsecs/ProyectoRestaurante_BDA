@@ -5,10 +5,10 @@
 package enumEntidades;
 
 /**
- * 
- * @author RAMSES
+ *
+ * @author josma
  */
-public enum UnidadMedida {
-
-    MILILITROS, GRAMOS, PIEZA, GALONES, KILOS, LITROS
+public enum EstadoMesa {
+    DISPONIBLE,
+    OCUPADA
 }

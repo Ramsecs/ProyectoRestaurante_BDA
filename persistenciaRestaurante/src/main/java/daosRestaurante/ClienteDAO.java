@@ -52,7 +52,9 @@ public class ClienteDAO implements IClienteDAO {
             return cliente;
 
         } catch (Exception ex) {
+            if (em.getTransaction().isActive()) {
             em.getTransaction().rollback();
+        }
             throw new PersistenciaException("Ocurrio un error al querer registrar el cliente.");
         } finally {
             em.close();
@@ -92,7 +94,6 @@ public class ClienteDAO implements IClienteDAO {
             return query.getResultList();
 
         } catch (Exception ex) {
-            em.getTransaction().rollback();
             throw new PersistenciaException("Ocurrio un error al querer aplicar los filtros de busqueda");
         } finally {
             em.close();
@@ -125,7 +126,13 @@ public class ClienteDAO implements IClienteDAO {
             em.close();
         }
     }
-
+/**
+ * Permite hacer la busqueda de clientes que coincida su id
+ * 
+ * @param id
+ * @return Cliente
+ * @throws PersistenciaException 
+ */
     @Override
     public Cliente buscarPorId(Long id) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();

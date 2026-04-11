@@ -20,31 +20,51 @@ import java.util.logging.Logger;
 import validadores.Validaciones;
 
 /**
- *
+ * 
  * @author RAMSES
  */
 public class ClienteBO implements IClienteBO {
 
-    //Singleton
+    /**
+     * Instancia unica de la clase para el patron Singleton.
+     */
     private static ClienteBO clienteBO;
 
+    /**
+     * Referencia al DAO de clientes para operaciones de persistencia.
+     */
     private IClienteDAO clienteDAO = ClienteDAO.getInstanceClienteDAO();
+
+    /**
+     * Utilidad de validaciones para verificar el formato de los datos de entrada.
+     */
     private Validaciones validar = new Validaciones();
 
-    //Constructor privado
+    /**
+     * Constructor privado para evitar la instanciacion externa y mantener el patron Singleton.
+     */
     private ClienteBO() {
-
     }
 
-    //Metodo para el singleton
+    /**
+     * Obtiene la instancia unica de ClienteBO. Si no existe, la crea.
+     * @return La instancia unica de ClienteBO.
+     */
     public static ClienteBO getInstanceClienteBO() {
         if (clienteBO == null) {
             clienteBO = new ClienteBO();
         }
-
         return clienteBO;
     }
 
+    /**
+     * Registra un nuevo cliente en el sistema después de validar sus datos personales.
+     * Se encarga de convertir el DTO recibido en una entidad de persistencia.
+     * @param cliente Objeto DTO que contiene la informacion del cliente a registrar.
+     * @return true si el registro fue exitoso, false en caso contrario.
+     * @throws NegocioException Si los datos del cliente no pasan las validaciones de formato
+     * o si ocurre un error en la capa de persistencia.
+     */
     @Override
     public boolean registrarCliente(ClienteDTO cliente) throws NegocioException {
         ClienteAdapter clienteAdapter = new ClienteAdapter();
@@ -53,10 +73,10 @@ public class ClienteBO implements IClienteBO {
             throw new NegocioException("El nombre del cliente esta mal escrito.");
         }
         if (!validar.validarApellidos(cliente.getApellido_paterno())) {
-            throw new NegocioException("El apellido materno del usuario esta mal escrito.");
+            throw new NegocioException("El apellido paterno del usuario esta mal escrito.");
         }
         if (!validar.validarApellidos(cliente.getApellido_materno())) {
-            throw new NegocioException("El apellido paterno del usuario esta mal escrito.");
+            throw new NegocioException("El apellido materno del usuario esta mal escrito.");
         }
         if (cliente.getCorreo() != null) {
             if (!validar.validarCorreo(cliente.getCorreo())) {
@@ -81,9 +101,15 @@ public class ClienteBO implements IClienteBO {
         } catch (PersistenciaException ex) {
             throw new NegocioException("Ocurrio un error en negocio al intentar registrar el cliente.");
         }
-
     }
 
+    /**
+     * Busca clientes basados en un filtro de texto y calcula estadísticas adicionales 
+     * como total de visitas, suma de ventas y puntos acumulados.
+     * @param filtro Cadena de texto para filtrar la busqueda (nombre, telefono, etc.).
+     * @return ClienteBusquedaDTO.
+     * @throws NegocioException Si ocurre un error al consultar los datos en la base de datos.
+     */
     @Override
     public List<ClienteBusquedaDTO> buscarClientes(String filtro) throws NegocioException {
 
@@ -121,9 +147,13 @@ public class ClienteBO implements IClienteBO {
         } catch (PersistenciaException ex) {
             throw new NegocioException("Ocurrio un error en negocio al intentar devolver la lista de clientes" + ex.getMessage());
         }
-
     }
 
+    /**
+     * Actualiza la información personal de un cliente existente en la base de datos.
+     * @param clienteDTO Objeto que contiene los datos actualizados del cliente y su ID identificador.
+     * @throws NegocioException Si el cliente no existe o si ocurre un error durante la actualización.
+     */
     @Override
     public void actualizarDatosCliente(ClienteBusquedaDTO clienteDTO) throws NegocioException {
         try {
@@ -141,5 +171,4 @@ public class ClienteBO implements IClienteBO {
             throw new NegocioException("No se pudo actualizar el cliente: " + ex.getMessage());
         }
     }
-
 }
