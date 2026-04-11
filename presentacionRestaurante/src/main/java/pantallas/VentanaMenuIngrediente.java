@@ -5,6 +5,8 @@
 package pantallas;
 
 import controladorRestaurante.Coordinador;
+import dtosDelRestaurante.IngredienteBusquedaDTO;
+import enumEntidades.UnidadMedida;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -13,6 +15,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -120,25 +123,15 @@ public class VentanaMenuIngrediente extends JFrame {
         gbc.fill = GridBagConstraints.BOTH;
         //1. Definimos las columnas que va a contener la tabla
         String[] columnas = {
-            "Nombre", "Cantidad", "Unidad de Medida"
+            "ID", "Nombre", "Cantidad", "Unidad de Medida"
         };
-        //----> OJO AQUI TIENES QUE CHECAR QUE SOLO SEA EDITABLE LA CANTIDAD PARA EL REESTOCK
-        //EL EL CODIGO TIENE ALGUNAS COSITAS QUE YA NO ESTAS A TIEMPO DE CORREGIR JOS
-        //TRABAJA CON LO QUE TIENES Y BUSCA LA MANERA DE RESOLVERLO
+
         //2. Ahora implementamos ModeloTablaEditable, para permitir que datos se van a editar
         modelo_tabla = new ModeloTablaEditable(columnas, 0, 1) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 // Bloqueamos la columna 0 (Nombre) 
-                if (column == 0) {
-                    return false;
-                }
-                // Bloqueamos la columna 2 (Unidad de Medida) 
-                if (column == 2) {
-                    return false;
-                }
-                // Solo permitimos la columna 1 (Cantidad)
-                return column == 1;
+                return (column == 2);
             }
         };
 
@@ -150,20 +143,10 @@ public class VentanaMenuIngrediente extends JFrame {
 
         cuadro_blanco.add(scroll, gbc);
 
-        //======================================================================
-        //DATOS FAKE
-        modelo_tabla.addRow(new Object[]{"Harina de Trigo", "25.5", "Kilogramos"});
-        modelo_tabla.addRow(new Object[]{"Tomate Saladette", "12.0", "Kilogramos"});
-        modelo_tabla.addRow(new Object[]{"Aceite de Oliva", "5.0", "Litros"});
-        modelo_tabla.addRow(new Object[]{"Sal de Mar", "2.0", "Kilogramos"});
-        modelo_tabla.addRow(new Object[]{"Levadura Seca", "500", "Gramos"});
-        modelo_tabla.addRow(new Object[]{"Pechuga de Pollo", "15.0", "Kilogramos"});
-        modelo_tabla.addRow(new Object[]{"Leche Entera", "10.0", "Litros"});
-        modelo_tabla.addRow(new Object[]{"Huevo Blanco", "180", "Piezas"});
-        modelo_tabla.addRow(new Object[]{"Azúcar Estándar", "8.0", "Kilogramos"});
-        modelo_tabla.addRow(new Object[]{"Pimiento Morrón", "4.5", "Kilogramos"});
+        tabla.getColumnModel().getColumn(0).setMinWidth(0);
+        tabla.getColumnModel().getColumn(0).setMaxWidth(0);
+        tabla.getColumnModel().getColumn(0).setPreferredWidth(0);
 
-        //======================================================================
         //----------------SECCIÓN PARA AGREGAR EL INGREDIENTE (panel)---------------
         PanelBordePunteado panel_agregar = new PanelBordePunteado();
         panel_agregar.setLayout(new GridLayout(0, 2, 10, 2));
@@ -189,8 +172,7 @@ public class VentanaMenuIngrediente extends JFrame {
         JLabel lbl_unidad = new JLabel("Unidad de Medida");
         lbl_unidad.setFont(fuente_rabbits_pequena);
         panel_agregar.add(lbl_unidad);
-        String[] opcionesTipo = {"Seleccionar", "Galones", "Litros", "Gramos", "Kilogramos", "Mililitros"};
-        ComboBoxPersonalizado<String> combo_tipo = new ComboBoxPersonalizado<>(opcionesTipo);
+        ComboBoxPersonalizado<UnidadMedida> combo_tipo = new ComboBoxPersonalizado<>(UnidadMedida.values());
         combo_tipo.setPreferredSize(new Dimension(0, 35)); // Misma altura que tus textfields
         panel_agregar.add(combo_tipo);
 
@@ -226,5 +208,97 @@ public class VentanaMenuIngrediente extends JFrame {
         gbc_fondo.insets = new Insets(40, 60, 40, 60);
 
         panel_fondo.add(cuadro_blanco, gbc_fondo);
+
+// --- 1. BUSCADOR: Filtrado dinámico mientras el usuario escribe ---
+        txt_buscador.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                // Llama al coordinador para refrescar la lista con el texto actual
+                coordinador.buscarIngredientes(txt_buscador.getText().trim());
+            }
+        });
+
+// --- 2. BOTÓN AGREGAR: Registro de nuevo ingrediente ---
+        btn_agregar.addActionListener(e -> {
+            try {
+                // Creamos el DTO de registro
+                dtosDelRestaurante.IngredientesDTO nuevo = new dtosDelRestaurante.IngredientesDTO();
+
+                nuevo.setNombre(txt_nombre.getText().trim());
+                nuevo.setStock(Integer.parseInt(txt_cantidad.getText().trim()));
+
+                // Obtenemos la unidad del ComboBox y la convertimos al Enum
+                UnidadMedida unidadSeleccionada = (UnidadMedida) combo_tipo.getSelectedItem();
+                if (unidadSeleccionada != null) {
+                    nuevo.setUnidad_Medida(unidadSeleccionada);
+                }
+
+                // Enviamos al coordinador (quien llama al BO para validar nombre y stock)
+                coordinador.registrarIngrediente(nuevo);
+
+                // Si tuvo éxito, limpiamos los campos
+                txt_nombre.setText("");
+                txt_cantidad.setText("");
+                combo_tipo.setSelectedIndex(0);
+
+                // Refrescamos la tabla para ver el nuevo ingreso
+                coordinador.buscarIngredientes("");
+
+            } catch (NumberFormatException ex) {
+                javax.swing.JOptionPane.showMessageDialog(this, "La cantidad debe ser un número entero válido.");
+            } catch (Exception ex) {
+                // Atrapa NegocioException (como nombre repetido o mal escrito)
+                javax.swing.JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            }
+        });
+
+// --- 3. TABLA: Actualización automática de Stock al editar la celda ---
+        modelo_tabla.addTableModelListener(e -> {
+            // Verificamos que sea la columna 2 (Stock)
+            if (e.getType() == javax.swing.event.TableModelEvent.UPDATE && e.getColumn() == 2) {
+                int fila = e.getFirstRow();
+                try {
+                    // Uso de .toString() para evitar el ClassCastException
+                    Long id = Long.parseLong(modelo_tabla.getValueAt(fila, 0).toString());
+                    String nombre = modelo_tabla.getValueAt(fila, 1).toString();
+                    Integer stockNuevo = Integer.parseInt(modelo_tabla.getValueAt(fila, 2).toString());
+                    String unidadStr = modelo_tabla.getValueAt(fila, 3).toString();
+
+                    dtosDelRestaurante.IngredienteBusquedaDTO dtoEditado = new dtosDelRestaurante.IngredienteBusquedaDTO();
+                    dtoEditado.setId(id);
+                    dtoEditado.setNombre(nombre);
+                    dtoEditado.setStock(stockNuevo);
+                    dtoEditado.setUnidad_medida(enumEntidades.UnidadMedida.valueOf(unidadStr));
+
+                    coordinador.actualizarStockIngrediente(dtoEditado);
+                } catch (Exception ex) {
+                    javax.swing.JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+                    coordinador.buscarIngredientes("");
+                }
+            }
+        });
+
+// --- 4. BOTÓN VOLVER ---
+        btn_volver.addActionListener(e -> {
+            coordinador.regresarMenuAdmin();
+        });
+    }
+
+    public void cargarTablaDesdeCoordinador(List<IngredienteBusquedaDTO> listaIngredientes) {
+        for (IngredienteBusquedaDTO dto : listaIngredientes) {
+        System.out.println("Ingrediente: " + dto.getNombre() + " | Stock: " + dto.getStock());
+        }
+        
+        modelo_tabla.setRowCount(0);
+
+        for (IngredienteBusquedaDTO dto : listaIngredientes) {
+            Object[] fila = {
+                dto.getId(), // Columna 0 (ID)
+                dto.getNombre(), // Columna 1 (Nombre)
+                dto.getStock(), // Columna 2 (Cantidad)
+                dto.getUnidad_medida().name() // Columna 3 (Texto del Enum)
+            };
+            modelo_tabla.addRow(fila);
+        }
     }
 }

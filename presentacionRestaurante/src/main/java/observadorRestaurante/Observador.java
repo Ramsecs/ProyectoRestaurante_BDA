@@ -5,6 +5,7 @@
 package observadorRestaurante;
 
 import dtosDelRestaurante.ClienteBusquedaDTO;
+import dtosDelRestaurante.IngredienteBusquedaDTO;
 
 /**
  *Se supone que con esta interface vamos a conseguir un descoplamiento con el coodinador y la
@@ -15,7 +16,6 @@ import dtosDelRestaurante.ClienteBusquedaDTO;
  */
 public interface Observador {
     public void actualizar_empleado(ClienteBusquedaDTO clienteDTO);
-    public void actualizar_ingrediente(); //<-- ESTE METODO ES PARA PODER ACTUALIZAR UNICAMENTE
-    //LA CANTIDAD DEL INGREDIENTE CUANDO SE HAGA REESTOCK OCUPA EL DTO, PERO COMO NO ES MI RUBRO
-    //NO LE MUEVO
+    public void actualizarStockIngrediente(IngredienteBusquedaDTO ingredienteDTO); 
+    
 }

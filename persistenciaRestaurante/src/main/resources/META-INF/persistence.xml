@@ -3,6 +3,7 @@
   <persistence-unit name="ConexionPU" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>paqueteEntidadPrueba.Prueba</class>
+    <class>ConvertidorEncriptado.EncriptadorTelefonoConverter</class>
     <class>entidadesRestaurante.Cliente</class>
     <class>entidadesRestaurante.ClienteFrecuente</class>
     <class>entidadesRestaurante.Comanda</class>

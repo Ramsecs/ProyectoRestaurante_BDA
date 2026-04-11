@@ -10,21 +10,5 @@ package enumEntidades;
  */
 public enum UnidadMedida {
 
-    /**
-     * Representa medidas de volumen en mililitros (ml).
-     * Ideal para líquidos como bebidas, aceites o salsas.
-     */
-    MILILITROS,
-
-    /**
-     * Representa medidas de peso en gramos (g).
-     * Utilizado habitualmente para solidos, carnes o especias.
-     */
-    GRAMOS,
-
-    /**
-     * Representa unidades enteras o individuales.
-     * Se usa para productos que se contabilizan por unidad (ej. panes, huevos, envases).
-     */
-    PIEZA
+    MILILITROS, GRAMOS, PIEZA, GALONES, KILOS, LITROS
 }

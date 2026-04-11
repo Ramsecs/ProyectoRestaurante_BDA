@@ -32,7 +32,7 @@ public class ProductoIngrediente implements Serializable {
 
     /**
      * El producto al que pertenece esta parte de la receta.
-     * Relación de muchos a uno con la entidad {@link Producto}.
+     * Relación de muchos a uno con la entidad Producto.
      */
     @ManyToOne
     @JoinColumn(name = "id_producto", nullable = false)
@@ -40,7 +40,7 @@ public class ProductoIngrediente implements Serializable {
 
     /**
      * El ingrediente requerido para el producto.
-     * Relación de muchos a uno con la entidad {@link Ingrediente}.
+     * Relación de muchos a uno con la entidad Ingrediente.
      */
     @ManyToOne
     @JoinColumn(name = "id_ingrediente", nullable = false)

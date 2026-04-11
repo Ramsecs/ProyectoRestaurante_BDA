@@ -37,6 +37,7 @@ public class Mesa implements Serializable {
     @OneToMany(mappedBy = "mesa", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comanda> comandas;
 
+
     /**
      * Constructor por defecto requerido por JPA.
      */  

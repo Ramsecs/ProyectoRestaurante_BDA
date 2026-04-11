@@ -21,7 +21,7 @@ public class PruebasPantallas {
         
         Coordinador coordinador = new Coordinador();
         // TODO code application logic here
-        coordinador.iniciarMenuMesero();
+        coordinador.mostrarMenuIngrediente();
         
     }
     
