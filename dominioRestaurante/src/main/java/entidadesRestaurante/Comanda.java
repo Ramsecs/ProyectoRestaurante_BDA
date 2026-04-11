@@ -19,16 +19,16 @@ import javax.persistence.*;
 public class Comanda implements Serializable {
 
     /**
-     * Identificador único de la comanda.
-     * Generado automáticamente por la base de datos.
+     * Identificador único de la comanda. Generado automáticamente por la base
+     * de datos.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Estado actual del pedido (ABIERTA, CANCELADA, ENTREGADA).
-     * Se almacena en la base de datos como una cadena de texto.
+     * Estado actual del pedido (ABIERTA, CANCELADA, ENTREGADA). Se almacena en
+     * la base de datos como una cadena de texto.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_comanda", nullable = false)
@@ -47,23 +47,24 @@ public class Comanda implements Serializable {
     private Double total_venta;
 
     /**
-     * Cliente que realizó el pedido.
-     * Relación de muchos a uno: Varias comandas pueden pertenecer a un mismo cliente.
+     * Cliente que realizó el pedido. Relación de muchos a uno: Varias comandas
+     * pueden pertenecer a un mismo cliente.
      */
     @ManyToOne
     @JoinColumn(name = "fk_cliente")
     private Cliente cliente;
 
     /**
-     * Mesa asignada a la comanda.
-     * Relación uno a uno mapeada bidireccionalmente.
+     * Documentar de nuevo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      */
-    @OneToOne(mappedBy = "comanda")
+    @ManyToOne
+    @JoinColumn(name = "fk_mesa", nullable = false) // Esta será la columna en la tabla comanda
     private Mesa mesa;
 
     /**
-     * Lista de productos incluidos en la comanda a través de la entidad intermedia.
-     * Incluye persistencia y eliminación en cascada para mantener la integridad del pedido.
+     * Lista de productos incluidos en la comanda a través de la entidad
+     * intermedia. Incluye persistencia y eliminación en cascada para mantener
+     * la integridad del pedido.
      */
     @OneToMany(mappedBy = "comandas", cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE})
     private List<ComandaProducto> lista_productos;
@@ -75,7 +76,8 @@ public class Comanda implements Serializable {
     }
 
     /**
-     * Constructor para inicializar una comanda nueva con sus datos operativos básicos.
+     * Constructor para inicializar una comanda nueva con sus datos operativos
+     * básicos.
      *
      * @param estado_comanda Estado inicial de la orden.
      * @param fecha_hora_creacion Momento de apertura del pedido.
@@ -103,64 +105,85 @@ public class Comanda implements Serializable {
     }
 
     // --- Métodos de Acceso (Getters y Setters) ---
-
-    /** 
-     * @return El ID de la comanda. 
+    /**
+     * @return El ID de la comanda.
      */
-    public Long getId() { return id; }
-
-    /** 
-     * @param id El nuevo ID de la comanda. 
-     */
-    public void setId(Long id) { this.id = id; }
-
-    /** 
-     * @return El estado actual de la comanda. 
-     */
-    public EstadoComanda getEstado_comanda() { return estado_comanda; }
-
-    /** 
-     * @param estado_comanda El nuevo estado a asignar. 
-     */
-    public void setEstado_comanda(EstadoComanda estado_comanda) { this.estado_comanda = estado_comanda; }
-
-    /** 
-     * @return La fecha y hora de creación. 
-     */
-    public LocalDateTime getFecha_hora_creacion() { return fecha_hora_creacion; }
+    public Long getId() {
+        return id;
+    }
 
     /**
-     * @param fecha_hora_creacion La nueva fecha y hora a asignar. 
+     * @param id El nuevo ID de la comanda.
      */
-    public void setFecha_hora_creacion(LocalDateTime fecha_hora_creacion) { this.fecha_hora_creacion = fecha_hora_creacion; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     /**
-     * @return El total de la venta. 
+     * @return El estado actual de la comanda.
      */
-    public Double getTotal_venta() { return total_venta; }
+    public EstadoComanda getEstado_comanda() {
+        return estado_comanda;
+    }
 
     /**
-     * @param total_venta El nuevo total a asignar. 
+     * @param estado_comanda El nuevo estado a asignar.
      */
-    public void setTotal_venta(Double total_venta) { this.total_venta = total_venta; }
+    public void setEstado_comanda(EstadoComanda estado_comanda) {
+        this.estado_comanda = estado_comanda;
+    }
 
-    /** 
+    /**
+     * @return La fecha y hora de creación.
+     */
+    public LocalDateTime getFecha_hora_creacion() {
+        return fecha_hora_creacion;
+    }
+
+    /**
+     * @param fecha_hora_creacion La nueva fecha y hora a asignar.
+     */
+    public void setFecha_hora_creacion(LocalDateTime fecha_hora_creacion) {
+        this.fecha_hora_creacion = fecha_hora_creacion;
+    }
+
+    /**
+     * @return El total de la venta.
+     */
+    public Double getTotal_venta() {
+        return total_venta;
+    }
+
+    /**
+     * @param total_venta El nuevo total a asignar.
+     */
+    public void setTotal_venta(Double total_venta) {
+        this.total_venta = total_venta;
+    }
+
+    /**
      * @return La lista de productos asociados a esta comanda.
      */
-    public List<ComandaProducto> getLista_productos() { return lista_productos; }
-
-    /** 
-     * @param lista_productos La lista de productos a asociar.
-     */
-    public void setLista_productos(List<ComandaProducto> lista_productos) { this.lista_productos = lista_productos; }
+    public List<ComandaProducto> getLista_productos() {
+        return lista_productos;
+    }
 
     /**
-     * Devuelve una representación en texto de la comanda con sus atributos principales.
+     * @param lista_productos La lista de productos a asociar.
+     */
+    public void setLista_productos(List<ComandaProducto> lista_productos) {
+        this.lista_productos = lista_productos;
+    }
+
+    /**
+     * Devuelve una representación en texto de la comanda con sus atributos
+     * principales.
+     *
      * @return Cadena con el estado de la entidad.
      */
     @Override
     public String toString() {
-        return "Comanda{" + "id=" + id + ", estado_comanda=" + estado_comanda + 
-               ", fecha_hora_creacion=" + fecha_hora_creacion + ", total_venta=" + total_venta + '}';
+        return "Comanda{" + "id=" + id + ", estado_comanda=" + estado_comanda
+                + ", fecha_hora_creacion=" + fecha_hora_creacion + ", total_venta=" + total_venta + '}';
     }
 }

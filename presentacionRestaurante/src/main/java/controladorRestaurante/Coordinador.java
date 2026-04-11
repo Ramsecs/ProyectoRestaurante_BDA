@@ -31,6 +31,7 @@ public class Coordinador implements Observador {
     private VentanaMenuProducto ventana_menu_producto;
     private VentanaMenuIngrediente ventana_menu_ingrediente;
     private VentanaMenuComanda ventana_menu_comanda;
+    private VentanaCrearComanda ventana_crear_comanda; 
 
     public Coordinador() {
         this.clienteBO = ClienteBO.getInstanceClienteBO();
@@ -96,22 +97,7 @@ public class Coordinador implements Observador {
         //------> AQUI FALTA LA PROGRAMACIÓN DE LA TABLA PARA QUE SE MUESTREN LOS INGREDIENTES
         //ES MUY SIMILAR POR NO DECIR QUE IGUAL A LA DE mostrarMenuCliente
     }
-    /**
-     * Hacer visible la ventana de menu comandas, donde se puede
-     * agregar, editar y consultar.
-     */
-    public void mostrarMenuComanda() {
-        if (ventana_menu_comanda != null) {
-            ventana_menu_comanda.setVisible(false);
-        }
 
-        if (ventana_menu_comanda == null) {
-            ventana_menu_comanda = new VentanaMenuComanda(this);
-            ventana_menu_comanda.setConexionObservador(this);
-        }
-        ventana_menu_comanda.setVisible(true);
-        ventana_menu_comanda.toFront();
-    }
 
     /**
      * Hacer visible la ventana del menu de Producto donde es la edicion,
@@ -132,7 +118,7 @@ public class Coordinador implements Observador {
 
     /**
      * Metodo para regresar de la pantalla del menu de clientes para ir a la
-     * pantalla de menu administrador
+     * pantalla de menu administrador.
      *
      */
     public void regresarMenuMesero() {
@@ -218,6 +204,56 @@ public class Coordinador implements Observador {
         // List<IngredienteDTO> ingredientes = ingredienteBO.obtenerTodos();
         // dialogo.cargarTabla(ingredientes);
         dialogo.setVisible(true);
+    }
+    
+    //-------------------------METODOS JOS JOS----------------------------------
+    /**
+     * Este metodo abre la ventana para agregar una comanda nueva.
+     */
+    public void mostrarCrearComanda(){
+        if (ventana_menu_mesero != null) {
+            ventana_menu_mesero.setVisible(false);
+        }
+
+        if (ventana_crear_comanda == null) {
+            ventana_crear_comanda = new VentanaCrearComanda(this);
+        }
+
+        ventana_crear_comanda.setVisible(true);
+        ventana_crear_comanda.toFront();
+    }
+    
+        /**
+     * Hacer visible la ventana de menu comandas, donde se puede
+     * agregar, editar y consultar.
+     */
+    public void mostrarMenuComanda() {
+        if (ventana_menu_mesero != null) {
+            ventana_menu_mesero.dispose();
+        }
+
+        if (ventana_menu_comanda == null) {
+            ventana_menu_comanda = new VentanaMenuComanda(this);
+            ventana_menu_comanda.setConexionObservador(this);
+        }
+        ventana_menu_comanda.setVisible(true);
+        ventana_menu_comanda.toFront();
+    }
+    
+    /**
+     * Metodo para volver del MENU DE COMANDAS al MENU DE MESERO
+     *
+     */  
+    public void volverComandaMesero(){
+        if (ventana_menu_comanda != null) {
+            ventana_menu_comanda.dispose();
+        }
+        
+        if (ventana_menu_mesero == null) {
+            ventana_menu_mesero = new VentanaMenuMesero(this);
+        }
+        ventana_menu_mesero.setVisible(true);
+        ventana_menu_mesero.toFront();
     }
 
     public void mostrarDialogoIngredientesVista(JFrame padre) {

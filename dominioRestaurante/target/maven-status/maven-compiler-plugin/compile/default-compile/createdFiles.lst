@@ -8,6 +8,7 @@ enumEntidades\UnidadMedida.class
 entidadesRestaurante\ProductoIngrediente.class
 ConevrtidorEncriptado\EncriptadorTelefonoConverter.class
 entidadesRestaurante\Ingrediente.class
+enumEntidades\EstadoMesa.class
 entidadesRestaurante\Producto.class
 entidadesRestaurante\Mesa.class
 entidadesRestaurante\Empleado.class
