@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
 import objetosNegocioRestaurante.ClienteBO;
 import objetosNegocioRestaurante.IClienteBO;
 import objetosNegocioRestaurante.IIngredienteProductoBO;
