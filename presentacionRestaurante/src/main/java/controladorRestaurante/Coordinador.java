@@ -6,12 +6,16 @@ package controladorRestaurante;
 
 import dtosDelRestaurante.ClienteBusquedaDTO;
 import dtosDelRestaurante.ClienteDTO;
+import dtosDelRestaurante.IngredienteBusquedaDTO;
+import dtosDelRestaurante.IngredientesDTO;
 import excepcionesRestaurante.NegocioException;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import objetosNegocioRestaurante.ClienteBO;
 import objetosNegocioRestaurante.IClienteBO;
+import objetosNegocioRestaurante.IIngredienteBO;
+import objetosNegocioRestaurante.IngredienteBO;
 import observadorRestaurante.Observador;
 import pantallas.*;
 
@@ -24,6 +28,8 @@ public class Coordinador implements Observador {
 //Capas de negocio (BOs)
     private final IClienteBO clienteBO;
 
+    private final IIngredienteBO ingredienteBO;
+
     //Ventanas que se usaran para la navegacion
     private VentanaMenuAdmin ventana_menu_admin;
     private VentanaMenuMesero ventana_menu_mesero;
@@ -34,6 +40,8 @@ public class Coordinador implements Observador {
 
     public Coordinador() {
         this.clienteBO = ClienteBO.getInstanceClienteBO();
+
+        this.ingredienteBO = IngredienteBO.getInstanceIngredienteBO();
     }
 
     /**
@@ -96,9 +104,10 @@ public class Coordinador implements Observador {
         //------> AQUI FALTA LA PROGRAMACIÓN DE LA TABLA PARA QUE SE MUESTREN LOS INGREDIENTES
         //ES MUY SIMILAR POR NO DECIR QUE IGUAL A LA DE mostrarMenuCliente
     }
+
     /**
-     * Hacer visible la ventana de menu comandas, donde se puede
-     * agregar, editar y consultar.
+     * Hacer visible la ventana de menu comandas, donde se puede agregar, editar
+     * y consultar.
      */
     public void mostrarMenuComanda() {
         if (ventana_menu_comanda != null) {
@@ -143,6 +152,17 @@ public class Coordinador implements Observador {
         if (ventana_menu_mesero != null) {
             ventana_menu_mesero.setVisible(true);
             ventana_menu_mesero.toFront();
+        }
+    }
+    
+    public void regresarMenuAdmin() {
+        if (ventana_menu_ingrediente != null) {
+            ventana_menu_ingrediente.dispose();
+        }
+
+        if (ventana_menu_admin != null) {
+            ventana_menu_admin.setVisible(true);
+            ventana_menu_admin.toFront();
         }
     }
 
@@ -231,8 +251,50 @@ public class Coordinador implements Observador {
         this.actualizarCliente(clienteDTO);
     }
 
-    @Override
-    public void actualizar_ingrediente() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void registrarIngrediente(IngredientesDTO ingredienteDTO) {
+        try {
+            ingredienteBO.registrarIngredientes(ingredienteDTO);
+            JOptionPane.showMessageDialog(null, "Ingrediente registrado correctamente.");
+            this.buscarIngredientes(""); // Refrescar tabla
+        } catch (NegocioException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
     }
+
+    /**
+     * Busca ingredientes en la base de datos y le pide a la ventana que
+     * refresque la tabla.
+     *
+     * @param filtro Texto para filtrar por nombre o unidad.
+     */
+    public void buscarIngredientes(String filtro) {
+        try {
+            List<IngredienteBusquedaDTO> lista = ingredienteBO.buscarIngredientes(filtro);
+            if (ventana_menu_ingrediente != null) {
+                // Este método debe existir en tu VentanaMenuIngrediente
+                ventana_menu_ingrediente.cargarTablaDesdeCoordinador(lista);
+            }
+        } catch (NegocioException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+    }
+
+    /**
+     * Actualiza el stock de un ingrediente y refresca la vista.
+     *
+     * @param ingredienteDTO DTO con el ID y el nuevo stock.
+     */
+    @Override
+    public void actualizarStockIngrediente(IngredienteBusquedaDTO ingredienteDTO) {
+        try {
+            ingredienteBO.actualizarStock(ingredienteDTO);
+            System.out.println("Stock actualizado para: " + ingredienteDTO.getNombre());
+            // No refrescamos toda la tabla aquí para no perder el foco del usuario, 
+            // a menos que sea necesario.
+        } catch (NegocioException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error de Actualización", JOptionPane.ERROR_MESSAGE);
+            this.buscarIngredientes(""); // Revertir cambios visuales si falló
+        }
+    }
+    
 }
