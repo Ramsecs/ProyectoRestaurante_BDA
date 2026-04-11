@@ -94,4 +94,25 @@ public class Validaciones {
     return true; // Es válido, no está repetido
 }
     
+    public boolean validarPrecio(String precio){
+        
+        Pattern patt = Pattern.compile("^\\d+(\\.\\d{1,2})?$");
+        Matcher match = patt.matcher(precio);
+        
+        if (match.find()) {
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean validarCant(String cant){
+        Pattern patt = Pattern.compile("^\\d+$");
+        Matcher match = patt.matcher(cant);
+        
+        if (match.find()) {
+            return true;
+        }
+        return false;
+    }
+    
 }
