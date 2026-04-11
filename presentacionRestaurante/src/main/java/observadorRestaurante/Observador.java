@@ -6,6 +6,7 @@ package observadorRestaurante;
 
 import dtosDelRestaurante.ClienteBusquedaDTO;
 import dtosDelRestaurante.IngredienteBusquedaDTO;
+import dtosDelRestaurante.IngredientesDTO;
 
 /**
  *Se supone que con esta interface vamos a conseguir un descoplamiento con el coodinador y la
@@ -17,5 +18,6 @@ import dtosDelRestaurante.IngredienteBusquedaDTO;
 public interface Observador {
     public void actualizar_empleado(ClienteBusquedaDTO clienteDTO);
     public void actualizarStockIngrediente(IngredienteBusquedaDTO ingredienteDTO); 
-    
+    public void buscarIngredientes(String filtro);
+    public void registrarIngrediente(IngredientesDTO ingredienteDTO);
 }

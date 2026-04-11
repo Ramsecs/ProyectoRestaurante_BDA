@@ -285,9 +285,6 @@ public class VentanaMenuIngrediente extends JFrame {
     }
 
     public void cargarTablaDesdeCoordinador(List<IngredienteBusquedaDTO> listaIngredientes) {
-        for (IngredienteBusquedaDTO dto : listaIngredientes) {
-        System.out.println("Ingrediente: " + dto.getNombre() + " | Stock: " + dto.getStock());
-        }
         
         modelo_tabla.setRowCount(0);
 
