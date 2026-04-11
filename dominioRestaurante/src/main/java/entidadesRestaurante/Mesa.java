@@ -21,7 +21,7 @@ public class Mesa implements Serializable{
     private Long id;
     
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, orphanRemoval = true)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "id_comanda")
     private Comanda comanda;
 
     public Mesa() {

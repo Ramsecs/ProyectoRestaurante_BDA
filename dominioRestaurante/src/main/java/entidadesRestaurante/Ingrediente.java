@@ -32,7 +32,7 @@ public class Ingrediente  implements Serializable{
     @Column(name = "unidad_medida", nullable = false)
     private UnidadMedida unidad_medida;
     
-    @OneToMany(mappedBy = "productos", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "ingredientes", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
     private List<ProductoIngrediente> lista_productos;
 
     public Ingrediente() {

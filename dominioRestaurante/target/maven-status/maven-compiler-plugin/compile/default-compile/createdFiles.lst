@@ -6,7 +6,7 @@ entidadesRestaurante\ComandaProducto.class
 enumEntidades\EstadoComanda.class
 enumEntidades\UnidadMedida.class
 entidadesRestaurante\ProductoIngrediente.class
-ConevrtidorEncriptado\EncriptadorTelefonoConverter.class
+ConvertidorEncriptado\EncriptadorTelefonoConverter.class
 entidadesRestaurante\Ingrediente.class
 entidadesRestaurante\Producto.class
 entidadesRestaurante\Mesa.class
