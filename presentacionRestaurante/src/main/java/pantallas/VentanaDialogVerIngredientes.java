@@ -5,10 +5,14 @@
 package pantallas;
 
 import controladorRestaurante.Coordinador;
+import dtosDelRestaurante.IngredienteDTOLista;
+import dtosDelRestaurante.ProductoIngredienteDTO;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import recursos.*;
+import java.util.List;
+import javax.swing.table.TableRowSorter;
 /**
  *
  * @author josma
@@ -20,9 +24,12 @@ public class VentanaDialogVerIngredientes extends JDialog {
     private final Color naranja = new Color(255, 184, 77);
     private final Color rojo = new Color(188, 55, 30);
     
-    public VentanaDialogVerIngredientes(Coordinador coordinador, Frame padre) {
-        super(padre, true);
+    private List<IngredienteDTOLista> lista_ingredientes;
+        
+    public VentanaDialogVerIngredientes(Coordinador coordinador, JFrame padre, boolean valor, List<IngredienteDTOLista> detalles) {
+        super(padre, valor);
         this.coordinador = coordinador;
+        this.lista_ingredientes = detalles;
         setSize(900, 700);
         setLocationRelativeTo(padre);
         initComponents();
@@ -109,11 +116,46 @@ public class VentanaDialogVerIngredientes extends JDialog {
         panel_fondo.add(cuadro_blanco, gbc);
 
         //---------------------------EVENTOS----------------------------------
-        btn_volver.addActionListener(e -> dispose());
+        btn_volver.addActionListener(e -> this.dispose());
+        
+        // 1. Cargar los datos en la tabla
+        llenarTabla();
 
-        // Datos de prueba
-        modelo_tabla.addRow(new Object[]{"Pan Artesanal", "1", "Pieza"});
-        modelo_tabla.addRow(new Object[]{"Carne de Res", "200", "Gramos"});
-        modelo_tabla.addRow(new Object[]{"Queso Cheddar", "2", "Rebanadas"});
+        // 2. Configurar el Filtro de búsqueda
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(modelo_tabla);
+        tabla.setRowSorter(sorter);
+
+        txt_buscador.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent e) {
+                String texto = txt_buscador.getText().trim();
+                if (texto.isEmpty()) {
+                    sorter.setRowFilter(null);
+                } else {
+                    // (?i) hace que ignore mayúsculas y minúsculas
+                    // El 0 es la columna "Nombre" y el 2 es la columna "Medida"
+                    sorter.setRowFilter(RowFilter.regexFilter("(?i)" + texto, 0, 2));
+                }
+            }
+        });
+        
     }
+    
+    public void llenarTabla() {
+        // 1. Limpiamos por seguridad
+        modelo_tabla.setRowCount(0);
+
+        // 2. Validamos que la lista no sea nula
+        if (lista_ingredientes != null) {
+            for (IngredienteDTOLista ing : lista_ingredientes) {
+                Object[] fila = {
+                    ing.getNombre(), // Columna 0: Nombre
+                    ing.getStock(),// Columna 1: Cantidad
+                    ing.getUnidad_medida()// Columna 2: Medida (puedes traerlo del DTO si lo tienes)
+                };
+                modelo_tabla.addRow(fila);
+            }
+        }
+    }
+    
 }

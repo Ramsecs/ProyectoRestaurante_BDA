@@ -5,16 +5,21 @@
 package observadorRestaurante;
 
 import dtosDelRestaurante.ClienteBusquedaDTO;
+import dtosDelRestaurante.ProductoIngredienteDTO;
+import java.util.List;
 import dtosDelRestaurante.IngredienteBusquedaDTO;
 
 /**
  *Se supone que con esta interface vamos a conseguir un descoplamiento con el coodinador y la
- * función de actualizar dentro de la ventana de clientes, practicamente este anda de metiche en la ventana
- * ve un cambio y grita que alguien se actualizo, se podria decir que es Observador = Contrato,
- * Ventana = Emisor y Coordinador = Receptor. 
+ función de enviarProductoConListaARegistro dentro de la ventana de clientes, practicamente este anda de metiche en la ventana
+ ve un cambio y grita que alguien se actualizo, se podria decir que es Observador = Contrato,
+ Ventana = Emisor y Coordinador = Receptor. 
  * @author josma
  */
 public interface Observador {
+    
+    public void updated(ClienteBusquedaDTO clienteDTO);
+    public void enviarProductoConListaARegistro(List<ProductoIngredienteDTO> datos);
     public void actualizar_empleado(ClienteBusquedaDTO clienteDTO);
     public void actualizarStockIngrediente(IngredienteBusquedaDTO ingredienteDTO); 
     

@@ -5,14 +5,20 @@
 package pantallas;
 
 import controladorRestaurante.Coordinador;
+import dtosDelRestaurante.ProductoDTO;
+import entidadesEnumeradorDTO.TipoPlatilloDTO;
+import entidadesRestaurante.Producto;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import observadorRestaurante.Observador;
 import recursos.*;
+import java.util.List;
+import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -21,7 +27,8 @@ import recursos.*;
 public class VentanaMenuProducto extends JFrame {
 
     private final Coordinador coordinador;
-
+    
+    private File archivo_imagen = null;
     private TextFieldPersonalizado txt_nombre;
     private TextFieldPersonalizado txt_precio;
     private TextFieldPersonalizado txt_buscador;
@@ -42,6 +49,8 @@ public class VentanaMenuProducto extends JFrame {
     private final Color rojo = new Color(188, 55, 30);
     private DefaultTableModel modelo_tabla;
     private TablaEstilizada tabla;
+    private ComboBoxPersonalizado<String> combo_tipo;
+    private JLabel lbl_foto;
 
     public VentanaMenuProducto(Coordinador coordinador) {
         this.coordinador = coordinador;
@@ -88,7 +97,7 @@ public class VentanaMenuProducto extends JFrame {
         //-------------------------BUSCADOR LABEL y TXTFIELD (FILA 1 Y 2)-------
         gbc.gridy = 1;
         gbc.weighty = 0;
-        JLabel lbl_buscar = new JLabel("Buscar cliente");
+        JLabel lbl_buscar = new JLabel("Buscar producto");
         lbl_buscar.setFont(fuente_rabbits_mediana);
         cuadro_blanco.add(lbl_buscar, gbc);
 
@@ -102,7 +111,7 @@ public class VentanaMenuProducto extends JFrame {
         gbc.weighty = 0.4;
         gbc.fill = GridBagConstraints.BOTH;
 
-        String[] columnas = {"Ingredientes", "Nombre", "Precio", "Tipo", "Imagen"};
+        String[] columnas = {"Ingredientes", "Nombre", "Precio", "Tipo", "Imagen", "ID"};
         modelo_tabla = new ModeloTablaEditable(columnas, 0, 2);
 
         tabla = new TablaEstilizada(modelo_tabla, fuente_rabbits_pequena);
@@ -114,6 +123,26 @@ public class VentanaMenuProducto extends JFrame {
         tabla.setCellSelectionEnabled(false); // Evita que la selección interfiera con el clic del botón
 
         cuadro_blanco.add(scroll, gbc);
+        
+        // Creamos el sorter vinculado al modelo de la tabla
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(modelo_tabla);
+        tabla.setRowSorter(sorter);
+
+        // Agregamos el evento de escucha al campo de texto buscador
+        txt_buscador.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent e) {
+                String texto = txt_buscador.getText().trim();
+
+                if (texto.isEmpty()) {
+                    sorter.setRowFilter(null);
+                } else {
+                    // (?i) hace que ignore mayúsculas y minúsculas
+                    // Buscamos en la columna 1 (Nombre) y columna 3 (Tipo)
+                    sorter.setRowFilter(RowFilter.regexFilter("(?i)" + texto, 1, 3));
+                }
+            }
+        });
 
         //APARTADO PARA EL COMPORTAMIENTO DE LA COLUMNA DE INGREDIENTES 
         BotonMenuAdministrador btn_detalles = new BotonMenuAdministrador("Ver detalles",
@@ -134,34 +163,23 @@ public class VentanaMenuProducto extends JFrame {
         tabla.getColumnModel().getColumn(0).setCellRenderer(new BotonTablaRender(btn_detalles));
         TableColumn columna_ingredientes = tabla.getColumnModel().getColumn(0);
         columna_ingredientes.setCellEditor(new BotonTablaEditor(btn_detalles, e -> {
-            
-            coordinador.mostrarDialogoIngredientesVista(this);
-            //AQUI TIENE QUE IR LA LOGICA PARA QUE SE ABRA LA VENTANA DE
-            //INGREDIENTES PARA PODER VISUALIZARLOS 
-            //DE MOMENTO SOLO CORROBORAMOS QUE FUNCIONE
-            int fila = tabla.getSelectedRow();
-            if (fila != -1) {
-                String nombre = tabla.getValueAt(fila, 1).toString();
-                System.out.println("Clic en ingredientes de la fila: " + fila);
+            int filaVista = tabla.getSelectedRow();
+
+            if (filaVista != -1) {
+                // 1. Convertimos el índice por si hay filtros activos
+                int filaModelo = tabla.convertRowIndexToModel(filaVista);
+
+                // 2. Obtenemos el ID del producto (suponiendo que está en la columna 5)
+                Long idProducto = (Long) modelo_tabla.getValueAt(filaModelo, 5);
+
+                // 3. Obtenemos el nombre para el título del diálogo (opcional)
+                String nombreProducto = modelo_tabla.getValueAt(filaModelo, 1).toString();
+
+                // 4. Llamamos al coordinador pasando el ID del producto clickeado
+                // Este método en el coordinador debe abrir el JDialog que muestra ingredientes
+                coordinador.mostrarDialogoIngredientesVista(this, idProducto, nombreProducto);
             }
-
         }));
-
-        //DATOS FAKE SOLO DE PRUEBA BORRAR DESPUES 
-        // 1. Obtenemos el modelo de tu tabla
-        DefaultTableModel modelo = (DefaultTableModel) tabla.getModel();
-
-        // 2. Limpiamos por si acaso
-        modelo.setRowCount(0);
-
-        // 3. Agregamos filas de prueba
-        // Formato: {Nombre, Precio, Tipo, Imagen (ID o Ruta), Botón}
-        modelo.addRow(new Object[]{"Ver detalles", "Enchiladas Suizas", "150.00", "Platillo", "/imagenes/fondo.jpg"});
-        modelo.addRow(new Object[]{"Ver detalles", "Tacos al Pastor", "120.00", "Platillo", "/imagenes/hola.jpg",});
-        modelo.addRow(new Object[]{"Ver detalles", "Limonada Natural", "45.00", "Bebida", "/imagenes/fondo.jpg",});
-        modelo.addRow(new Object[]{"Ver detalles", "Pastel de Chocolate", "85.00", "Postre", "/imagenes/hola.jpg",});
-        modelo.addRow(new Object[]{"Ver detalles", "Hamburguesa Doble", "180.00", "Platillo", "/imagenes/fondo.jpg",});
-        
 
         //----------------SECCION PARA REGISTRAR PRODUCTO (FILA 4)--------------
 
@@ -192,8 +210,9 @@ public class VentanaMenuProducto extends JFrame {
         JLabel lbl_tipo = new JLabel("Tipo:");
         lbl_tipo.setFont(fuente_rabbits_pequena);
 
-        String[] opcionesTipo = {"Seleccionar", "Platillo", "Bebida", "Postre"};
-        ComboBoxPersonalizado<String> combo_tipo = new ComboBoxPersonalizado<>(opcionesTipo);
+
+        String[] opcionesTipo = {"Seleccionar...", "Platillo", "Bebida", "Postre"};
+        combo_tipo = new ComboBoxPersonalizado<>(opcionesTipo);
         combo_tipo.setPreferredSize(new Dimension(0, 35)); // Misma altura que tus textfields
 
         panel_campos.add(lbl_nombre);
@@ -215,7 +234,7 @@ public class VentanaMenuProducto extends JFrame {
         GridBagConstraints gbcMedia = new GridBagConstraints();
 
         //Recuadro para la imagen 
-        JLabel lbl_foto = new JLabel();
+        lbl_foto = new JLabel();
 
         lbl_foto.setPreferredSize(new Dimension(120, 120));
         lbl_foto.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
@@ -273,14 +292,141 @@ public class VentanaMenuProducto extends JFrame {
                 int estado = selector.showOpenDialog(null);
                 //APPROVE_OPTION es para saber si el usuario selecciono un archivo
                 if (estado == JFileChooser.APPROVE_OPTION) {
-                    lbl_foto.setIcon(ClaseImagen.escalarImagenDesdeFile(selector.getSelectedFile(), 120, 120));
-                    lbl_foto.setText("");
+                    archivo_imagen = selector.getSelectedFile();
+                    lbl_foto.setIcon(ClaseImagen.escalarImagenDesdeFile(archivo_imagen, 120, 120));
                 }
+                
 
             }
         });
+        
+        //En esta parte usamos el action listener en el boton de agregar ingredientes para agregar 
+        //los ingredientes que perteneceran a producto de esta manera podemos hacer que valide 
+        //todos los demas campos que hay en la ventana
+        btn_ingredientes.addActionListener(e -> {
+            // 1. Validaciones
+            if (txt_nombre.getText().trim().isEmpty() || txt_precio.getText().trim().isEmpty() || 
+                combo_tipo.getSelectedIndex() <= 0 || archivo_imagen == null) {
+                JOptionPane.showMessageDialog(null, "Complete todos los campos y la imagen.");
+                return;
+            }
+            
+            if (!coordinador.validarPrecio(txt_precio.getText())) {
+                JOptionPane.showMessageDialog(null, "La cantidad del precio es invalida.");
+                return;
+            }
 
-        btn_volver.addActionListener(e -> coordinador.regresarMenuMesero());
-        btn_ingredientes.addActionListener(e -> coordinador.mostrarDialogoIngredientes(this));
+            // 2. Creamos el DTO con los datos actuales de la ventana
+            ProductoDTO dto_para_registrar = new ProductoDTO();
+            dto_para_registrar.setNombre(txt_nombre.getText().trim());
+            dto_para_registrar.setPrecio(Double.parseDouble(txt_precio.getText().trim()));
+
+            // Convertir String de combo a TipoPlatilloDTO
+            String seleccion = combo_tipo.getSelectedItem().toString().toUpperCase();
+            dto_para_registrar.setTipo_platilo(TipoPlatilloDTO.valueOf(seleccion));
+
+            dto_para_registrar.setRuta_imagen(archivo_imagen.getAbsolutePath());
+
+            // 3. Le decimos al coordinador que queremos agregar ingredientes a este producto
+            coordinador.mostrarDialogoIngredientes(this, dto_para_registrar);
+        });
+        
+        btn_volver.addActionListener(e -> coordinador.ventanaMenuProductosAMenuAdmin());
+        
+        // --- EVENTO DE EDICIÓN EN TIEMPO REAL EN TABLA ---
+            modelo_tabla.addTableModelListener(e -> {
+                // Solo actuamos si el cambio fue una actualización de celda
+                if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
+                    int filaModelo = e.getFirstRow();
+                    int columna = e.getColumn();
+
+                    // Evitamos procesar columnas que no sean Nombre (1) o Precio (2)
+                    if (columna == 1 || columna == 2) {
+
+                        // 1. Obtenemos el ID del producto (Columna 5)
+                        Long idProducto = (Long) modelo_tabla.getValueAt(filaModelo, 5);
+
+                        // 2. Obtenemos el nuevo valor ingresado
+                        Object nuevoValor = modelo_tabla.getValueAt(filaModelo, columna);
+
+                        if (nuevoValor == null || nuevoValor.toString().trim().isEmpty()) {
+                            JOptionPane.showMessageDialog(this, "El campo no puede estar vacío.");
+                            llenarTabla(); // Reventamos la tabla para recuperar el valor anterior
+                            return;
+                        }
+
+                        String valorString = nuevoValor.toString().trim();
+
+                        // 3. Validaciones según la columna
+                        if (columna == 1) { // Cuando se hace edicion de NOMBRE
+                            if (!coordinador.validarNombre(valorString)) {
+                                JOptionPane.showMessageDialog(this, "Nombre inválido.");
+                                llenarTabla(); 
+                                return;
+                            }
+                            // Llamamos al coordinador para actualizar solo el nombre
+                            coordinador.actualizarNombreProducto(idProducto, valorString);
+                        } 
+                        else if (columna == 2) { // Cuando se hace edicion de PRECIO
+                            if (!coordinador.validarPrecio(valorString)) {
+                                JOptionPane.showMessageDialog(this, "Precio inválido (Debe ser numérico).");
+                                llenarTabla();
+                                return;
+                            }
+                            // Llamamos al coordinador para actualizar el precio
+                            Double precioNuevo = Double.parseDouble(valorString);
+                            coordinador.actualizarPrecioProducto(idProducto, precioNuevo);
+                        }
+                    }
+                }
+            });
+
+        //Este metodo actualiza la tabla con los registros que hay
+        llenarTabla();
+    }
+    
+    public void llenarTabla() {
+        List<ProductoDTO> lista = coordinador.obtenerListaProductos();
+        modelo_tabla.setRowCount(0);
+
+        if (lista == null || lista.isEmpty()) return;
+
+        for (ProductoDTO p : lista) {
+            Object[] fila = new Object[]{
+                "Ver detalles",     // Columna 0
+                p.getNombre(),      // Columna 1
+                p.getPrecio(),      // Columna 2
+                p.getTipo_platilo(),// Columna 3
+                p.getRuta_imagen(), // Columna 4
+                p.getId()           // Columna 5 (Oculta)
+            };
+            modelo_tabla.addRow(fila);
+        }
+        tabla.getColumnModel().getColumn(5).setMinWidth(0);
+        tabla.getColumnModel().getColumn(5).setMaxWidth(0);
+        tabla.getColumnModel().getColumn(5).setPreferredWidth(0);
+        tabla.getColumnModel().getColumn(5).setResizable(false);
+    }
+    
+    public void limpiarCampos() {
+        // 1. Limpiar campos de texto
+        txt_nombre.setText("");
+        txt_precio.setText("");
+        if (txt_buscador != null) {
+            txt_buscador.setText("");
+        }
+
+        // 2. Restablecer el ComboBox a la opción "Seleccionar..." (índice 0)
+        // Asumiendo que tu variable se llama combo_tipo
+        combo_tipo.setSelectedIndex(0);
+
+        // 3. Restablecer la imagen por defecto
+        lbl_foto.setIcon(new ImageIcon(getClass().getResource("/imagenes/imagenPNG.png")));
+
+        // 4. Limpiar la variable que guarda el archivo seleccionado
+        archivo_imagen = null;
+
+        // 5. Opcional: Devolver el foco al primer campo para agilidad
+        txt_nombre.requestFocus();
     }
 }
