@@ -285,10 +285,6 @@ public class VentanaMenuIngrediente extends JFrame {
     }
 
     public void cargarTablaDesdeCoordinador(List<IngredienteBusquedaDTO> listaIngredientes) {
-        for (IngredienteBusquedaDTO dto : listaIngredientes) {
-        System.out.println("Ingrediente: " + dto.getNombre() + " | Stock: " + dto.getStock());
-        }
-        
         modelo_tabla.setRowCount(0);
 
         for (IngredienteBusquedaDTO dto : listaIngredientes) {
@@ -296,7 +292,7 @@ public class VentanaMenuIngrediente extends JFrame {
                 dto.getId(), // Columna 0 (ID)
                 dto.getNombre(), // Columna 1 (Nombre)
                 dto.getStock(), // Columna 2 (Cantidad)
-                dto.getUnidad_medida().name() // Columna 3 (Texto del Enum)
+                dto.getUnidad_medida().name()// Columna 3 (Texto del Enum)
             };
             modelo_tabla.addRow(fila);
         }

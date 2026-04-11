@@ -66,6 +66,11 @@ public class Coordinador implements Observador {
         ventana_menu_mesero.setVisible(true);
 
     }
+    
+    @Override
+    public void actualizar_empleado(ClienteBusquedaDTO clienteDTO) {
+        this.actualizarCliente(clienteDTO);
+    }
 
     /**
      * Hacer visible la ventana de menu cliente donde es la edicion, registro,
@@ -87,52 +92,7 @@ public class Coordinador implements Observador {
 
     }
 
-    /**
-     * Hacer visible la ventana de menu de ingredientes, donde se puede editar
-     * agregar y consultar.
-     */
-    public void mostrarMenuIngrediente() {
-        if (ventana_menu_ingrediente != null) {
-            ventana_menu_ingrediente.setVisible(false);
-        }
-
-        if (ventana_menu_ingrediente == null) {
-            ventana_menu_ingrediente = new VentanaMenuIngrediente(this);
-            ventana_menu_ingrediente.setConexionObservador(this);
-        }
-        ventana_menu_ingrediente.setVisible(true);
-        ventana_menu_ingrediente.toFront();
-        //------> AQUI FALTA LA PROGRAMACIÓN DE LA TABLA PARA QUE SE MUESTREN LOS INGREDIENTES
-        //ES MUY SIMILAR POR NO DECIR QUE IGUAL A LA DE mostrarMenuCliente
-    }
-
-
-    /**
-     * Hacer visible la ventana de menu comandas, donde se puede agregar, editar
-     * y consultar.
-     */
-    public void mostrarMenuComanda() {
-        if (ventana_menu_comanda != null) {
-            ventana_menu_comanda.setVisible(false);
-        }
-
-
-    /**
-     * Hacer visible la ventana del menu de Producto donde es la edicion,
-     * registro y busqueda de productos.
-     */
-    public void mostrarMenuProducto() {
-        if (ventana_menu_admin != null) {
-            ventana_menu_admin.setVisible(false);
-        }
-
-        if (ventana_menu_producto == null) {
-            ventana_menu_producto = new VentanaMenuProducto(this);
-        }
-
-        ventana_menu_producto.setVisible(true);
-        ventana_menu_producto.toFront();
-    }
+    
 
     /**
      * Metodo para regresar de la pantalla del menu de clientes para ir a la
@@ -155,10 +115,12 @@ public class Coordinador implements Observador {
             ventana_menu_ingrediente.dispose();
         }
 
-        if (ventana_menu_admin != null) {
-            ventana_menu_admin.setVisible(true);
-            ventana_menu_admin.toFront();
+        if (ventana_menu_admin == null) {
+            ventana_menu_admin = new VentanaMenuAdmin(this);
         }
+        ventana_menu_admin.setVisible(true);
+        ventana_menu_admin.toFront();
+        
     }
 
     /**
@@ -270,7 +232,7 @@ public class Coordinador implements Observador {
     }
     
     /**
-     * Metodo para volver del MENU DE COMANDAS al MENU DE MESERO
+     * Metodo para volver del MENU DE COMANDAS al MENU DE MESERO.
      *
      */  
     public void volverComandaMesero(){
@@ -284,17 +246,56 @@ public class Coordinador implements Observador {
         ventana_menu_mesero.setVisible(true);
         ventana_menu_mesero.toFront();
     }
+    
+    //==========================================================================
+    
+    //---------------------------------METODOS DANIEL---------------------------
+    
+    
+    /**
+     * Hacer visible la ventana de menu de ingredientes, donde se puede editar
+     * agregar y consultar.
+     */
+    public void mostrarMenuIngrediente() {
+        if (ventana_menu_admin != null) {
+            ventana_menu_admin.dispose();
+        }
 
+        if (ventana_menu_ingrediente == null) {
+            ventana_menu_ingrediente = new VentanaMenuIngrediente(this);
+            ventana_menu_ingrediente.setConexionObservador(this);
+        }
+        this.buscarIngredientes("");
+        ventana_menu_ingrediente.setVisible(true);
+        ventana_menu_ingrediente.toFront();
+        //------> AQUI FALTA LA PROGRAMACIÓN DE LA TABLA PARA QUE SE MUESTREN LOS INGREDIENTES
+        //ES MUY SIMILAR POR NO DECIR QUE IGUAL A LA DE mostrarMenuCliente
+    }
+
+    /**
+     * Hacer visible la ventana del menu de Producto donde es la edicion,
+     * registro y busqueda de productos.
+     */
+    public void mostrarMenuProducto() {
+        if (ventana_menu_admin != null) {
+            ventana_menu_admin.setVisible(false);
+        }
+
+        if (ventana_menu_producto == null) {
+            ventana_menu_producto = new VentanaMenuProducto(this);
+        }
+
+        ventana_menu_producto.setVisible(true);
+        ventana_menu_producto.toFront();
+    }
+    
+    
     public void mostrarDialogoIngredientesVista(JFrame padre) {
         VentanaDialogVerIngredientes dialogo_vista = new VentanaDialogVerIngredientes(this, padre);
 
         dialogo_vista.setVisible(true);
     }
 
-    @Override
-    public void actualizar_empleado(ClienteBusquedaDTO clienteDTO) {
-        this.actualizarCliente(clienteDTO);
-    }
 
     public void registrarIngrediente(IngredientesDTO ingredienteDTO) {
         try {
