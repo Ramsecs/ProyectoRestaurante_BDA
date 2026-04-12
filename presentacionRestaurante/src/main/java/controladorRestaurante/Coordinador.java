@@ -63,6 +63,12 @@ public class Coordinador implements Observador {
     private VentanaCrearComanda ventana_crear_comanda;
     private VentanaDialogAgregarIngrediente ventana_agregar_ingredientes;
     private VentanaInicioSesion ventana_inicio_sesion;
+    //No mover es mio (Jos)
+    private long idMeseroSesion = 1; // Un ID quemado para pruebas hasta que llegue el commit
+
+    public long getIdMeseroSesion() {
+        return idMeseroSesion; //mockito para poder avanzar en la logica
+    }
 
     public Coordinador() {
         this.clienteBO = ClienteBO.getInstanceClienteBO();
@@ -300,38 +306,25 @@ public class Coordinador implements Observador {
         ventana_menu_mesero.setVisible(true);
         ventana_menu_mesero.toFront();
     }
+
     /**
-     * Con este metodo vamos a poder mostrar el JDialog de la tabla 
-     * de clientes para poder adjudicar la comanda al cliente 
+     * Con este metodo vamos a poder mostrar el JDialog de la tabla de clientes
+     * para poder adjudicar la comanda al cliente
+     *
      * @param padre que es el frame del que viene el JDialog
      */
-    
-    public void mostrarDialogClienteComanda(JFrame padre){
+
+    public void mostrarDialogClienteComanda(JFrame padre) {
         VentanaDialogComandaCliente dialogo = new VentanaDialogComandaCliente(this, padre);
         dialogo.setVisible(true);
     }
-    
-    public void mostrarDialogModificarComanda(JFrame padre){
+
+    public void mostrarDialogModificarComanda(JFrame padre) {
         VentanaDialogModificar dialogo = new VentanaDialogModificar(this, padre);
         dialogo.setVisible(true);
     }
-    
+
     //===================FIN METODOS JOS JOS====================================
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     /*
     public void mostrarDialogoIngredientesVista(JFrame padre) {
         VentanaDialogVerIngredientes dialogo_vista = new VentanaDialogVerIngredientes(this, padre);
@@ -349,7 +342,6 @@ public class Coordinador implements Observador {
      * METODOS QUE SON USADOS PARA LAS VENTANAS DE PRODUCTO CON INGREDIENTES
      * =======================================================================
      */
-
     /**
      * Este metodo nos da la lista completa de los productos que hay en el
      * registro.
