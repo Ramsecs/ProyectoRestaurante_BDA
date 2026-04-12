@@ -47,14 +47,6 @@ public class Coordinador implements Observador {
     private ProductoDTO productoTemporal;
     //Ventana para mostrar detalles
     private VentanaDialogVerIngredientes ventana_ver_detalles;
-    
-
-    //Lista temporal para los ingredientes que el usuario seleccione para cuando agrega el producto
-    private List<ProductoIngredienteDTO> ingredientesTemporales;
-    // Guardamos temporalmente los datos del producto que estan en la ventana
-    private ProductoDTO productoTemporal;
-    //Ventana para mostrar detalles
-    private VentanaDialogVerIngredientes ventana_ver_detalles;
 
 //Capas de negocio (BOs)
     private final IClienteBO clienteBO;
@@ -359,56 +351,6 @@ public class Coordinador implements Observador {
     public void actualizar_empleado(ClienteBusquedaDTO clienteDTO) {
         this.actualizarCliente(clienteDTO);
     }
-    /**
-     * =======================================================================
-     * METODOS QUE SON USADOS PARA LAS VENTANAS DE PRODUCTO CON INGREDIENTES
-     * =======================================================================
-     */
-    
-    /**
-     * Este metodo nos da la lista completa de los productos que hay en el registro.
-     * @return 
-     */
-    public List<ProductoDTO> obtenerListaProductos(){
-        List<ProductoDTO> lista_productos = new ArrayList<>();
-        try{
-            
-            lista_productos = productoBO.listarProductos();
-            
-        }catch(NegocioException ex){
-            System.out.println("No se consiguio de manera correcta la lista de productos de negocio.");
-        }
-        
-        return lista_productos;
-        
-    }
-    
-    /**
-     * Mediante este metodo obtenemos la lista de ingredientes que hay en la base de datos.
-     * @return 
-     */
-    public List<IngredienteDTOLista> obtenerListaIngredientes() {
-        // Inicializa con una lista vacia, no con null
-        List<IngredienteDTOLista> lista = new ArrayList<>(); 
-        try {
-            lista = ingredienteProductoBO.recuperarListaIngredientes();
-        } catch (NegocioException ex) {
-            System.out.println("Error en Coordinador: " + ex.getMessage());
-            // Aqui podrias mostrar un JOptionPane para avisar al usuario
-        }
-        return lista; // Si falla, devuelve la lista vacia creada arriba
-    }
-    
-    
-    /**
-     * Este metodo muestra la ventana de agregar ingredientes a el producto que estamos agregando.
-     * @param frame 
-     */
-    public void ventanaProductosAAgregarIngredientes(JFrame frame){
-        
-        if (ventana_menu_producto != null) {
-            ventana_menu_producto.setVisible(false);
-        }
 
     /**
      * =======================================================================
