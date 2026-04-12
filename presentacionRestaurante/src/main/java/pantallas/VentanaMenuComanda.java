@@ -203,9 +203,7 @@ public class VentanaMenuComanda extends JFrame {
                 Object estado = tabla.getValueAt(fila, 2);
                 if (estado != null && estado.toString().equalsIgnoreCase("ABIERTA")) {
 
-                    String folio = tabla.getValueAt(fila, 4).toString();
-                    System.out.println("Ejecutando modificación para: " + folio);
-                    JOptionPane.showMessageDialog(null, "Modificando comanda: " + folio);
+                    coordinador.mostrarDialogModificarComanda(this);
 
                 } else {
                     // Si no es abierta, detenemos la edición y no hacemos nada
