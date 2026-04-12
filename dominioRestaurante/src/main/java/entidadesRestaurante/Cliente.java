@@ -19,7 +19,7 @@ import javax.persistence.*;
 @Table(name = "clientes")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "tipo_cliente")
-public class Cliente implements Serializable {
+public class Cliente implements Serializable { 
 
     /**
      * Identificador unico del cliente. Se autogenera mediante una estrategia de identidad.
@@ -57,6 +57,7 @@ public class Cliente implements Serializable {
      * Se aplica el conversor EncriptadorTelefonoConverter para cifrar el dato antes de persistirlo.
      */
     @Convert(converter = EncriptadorTelefonoConverter.class)
+    @Column(name = "telefono", length = 255)
     protected String telefono;
 
     /**

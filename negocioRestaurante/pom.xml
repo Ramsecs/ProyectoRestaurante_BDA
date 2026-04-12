@@ -13,12 +13,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>dominioRestaurante</artifactId>
+            <artifactId>persistenciaRestaurante</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>persistenciaRestaurante</artifactId>
+            <artifactId>dominioRestaurante</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

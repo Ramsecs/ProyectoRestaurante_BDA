@@ -6,6 +6,7 @@ package controladorRestaurante;
 
 import dtosDelRestaurante.ClienteBusquedaDTO;
 import dtosDelRestaurante.ClienteDTO;
+import dtosDelRestaurante.EmpleadoRegistroDTO;
 import dtosDelRestaurante.IngredienteDTOLista;
 import dtosDelRestaurante.ProductoDTO;
 import dtosDelRestaurante.ProductoIngredienteDTO;
@@ -13,6 +14,7 @@ import entidadesRestaurante.Ingrediente;
 import entidadesRestaurante.ProductoIngrediente;
 import dtosDelRestaurante.IngredienteBusquedaDTO;
 import dtosDelRestaurante.IngredientesDTO;
+import entidadesRestaurante.Empleado;
 import excepcionesRestaurante.NegocioException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,9 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import objetosNegocioRestaurante.ClienteBO;
+import objetosNegocioRestaurante.EmpleadoBO;
 import objetosNegocioRestaurante.IClienteBO;
+import objetosNegocioRestaurante.IEmpleadoBO;
 import objetosNegocioRestaurante.IIngredienteProductoBO;
 import objetosNegocioRestaurante.IProductoBO;
 import objetosNegocioRestaurante.IngredienteProductoBO;
@@ -36,6 +40,14 @@ import validadores.Validaciones;
  * @author RAMSES
  */
 public class Coordinador implements Observador {
+    
+    //Lista temporal para los ingredientes que el usuario seleccione para cuando agrega el producto
+    private List<ProductoIngredienteDTO> ingredientesTemporales;
+    // Guardamos temporalmente los datos del producto que estan en la ventana
+    private ProductoDTO productoTemporal;
+    //Ventana para mostrar detalles
+    private VentanaDialogVerIngredientes ventana_ver_detalles;
+    
 
     //Lista temporal para los ingredientes que el usuario seleccione para cuando agrega el producto
     private List<ProductoIngredienteDTO> ingredientesTemporales;
@@ -48,7 +60,8 @@ public class Coordinador implements Observador {
     private final IClienteBO clienteBO;
     private final IProductoBO productoBO;
     private final IIngredienteProductoBO ingredienteProductoBO;
-
+    private final IEmpleadoBO empleadoBO;
+    
     private Validaciones validar;
 
     private final IIngredienteBO ingredienteBO;
@@ -61,7 +74,7 @@ public class Coordinador implements Observador {
     private VentanaMenuIngrediente ventana_menu_ingrediente;
     private VentanaMenuComanda ventana_menu_comanda;
     private VentanaCrearComanda ventana_crear_comanda;
-    private VentanaDialogAgregarIngrediente ventana_agregar_ingredientes;
+    private VentanaDialogAgregarIngrediente ventana_agregar_ingredientes; 
     private VentanaInicioSesion ventana_inicio_sesion;
 
     public Coordinador() {
@@ -69,6 +82,7 @@ public class Coordinador implements Observador {
         this.productoBO = ProductoBO.getInstanceProductoBO();
         this.ingredienteProductoBO = IngredienteProductoBO.getInstanceIngredienteBO();
         this.ingredienteBO = IngredienteBO.getInstanceIngredienteBO();
+        this.empleadoBO = EmpleadoBO.getInstanceEmpleadoBO();
         validar = new Validaciones();
     }
 
@@ -132,6 +146,7 @@ public class Coordinador implements Observador {
         //------> AQUI FALTA LA PROGRAMACIÓN DE LA TABLA PARA QUE SE MUESTREN LOS INGREDIENTES
         //ES MUY SIMILAR POR NO DECIR QUE IGUAL A LA DE mostrarMenuCliente
     }
+
 
     /**
      * Hacer visible la ventana del menu de Producto donde es la edicion,
@@ -338,11 +353,62 @@ public class Coordinador implements Observador {
 
         dialogo_vista.setVisible(true);
     }
-     */
+    */
+
     @Override
     public void actualizar_empleado(ClienteBusquedaDTO clienteDTO) {
         this.actualizarCliente(clienteDTO);
     }
+    /**
+     * =======================================================================
+     * METODOS QUE SON USADOS PARA LAS VENTANAS DE PRODUCTO CON INGREDIENTES
+     * =======================================================================
+     */
+    
+    /**
+     * Este metodo nos da la lista completa de los productos que hay en el registro.
+     * @return 
+     */
+    public List<ProductoDTO> obtenerListaProductos(){
+        List<ProductoDTO> lista_productos = new ArrayList<>();
+        try{
+            
+            lista_productos = productoBO.listarProductos();
+            
+        }catch(NegocioException ex){
+            System.out.println("No se consiguio de manera correcta la lista de productos de negocio.");
+        }
+        
+        return lista_productos;
+        
+    }
+    
+    /**
+     * Mediante este metodo obtenemos la lista de ingredientes que hay en la base de datos.
+     * @return 
+     */
+    public List<IngredienteDTOLista> obtenerListaIngredientes() {
+        // Inicializa con una lista vacia, no con null
+        List<IngredienteDTOLista> lista = new ArrayList<>(); 
+        try {
+            lista = ingredienteProductoBO.recuperarListaIngredientes();
+        } catch (NegocioException ex) {
+            System.out.println("Error en Coordinador: " + ex.getMessage());
+            // Aqui podrias mostrar un JOptionPane para avisar al usuario
+        }
+        return lista; // Si falla, devuelve la lista vacia creada arriba
+    }
+    
+    
+    /**
+     * Este metodo muestra la ventana de agregar ingredientes a el producto que estamos agregando.
+     * @param frame 
+     */
+    public void ventanaProductosAAgregarIngredientes(JFrame frame){
+        
+        if (ventana_menu_producto != null) {
+            ventana_menu_producto.setVisible(false);
+        }
 
     /**
      * =======================================================================
@@ -632,5 +698,75 @@ public class Coordinador implements Observador {
 
         ventana_inicio_sesion.setVisible(true);
 
+    
     }
+    
+    /**
+     * Llama al BO para realizar un registro masivo de empleados (Admin o Meseros).
+     * @param empleados Lista de entidades a registrar.
+     * @throws Exception Si ocurre un error en la persistencia o encriptación.
+     */
+    public void registrarEmpleadosMasivo(List<Empleado> empleados) throws Exception {
+        this.empleadoBO.registrarEmpleados(empleados);
+    }
+
+    /**
+     * Llama al BO para validar el acceso mediante el código.
+     * @param codigo El código ingresado en el campo amarillo de la ventana.
+     * @return Un objeto DTO con la información del empleado y su Rol.
+     * @throws Exception Si el código es incorrecto o el usuario no existe.
+     */
+    public EmpleadoRegistroDTO validarIngresoPorCodigo(String codigo) throws Exception {
+        return this.empleadoBO.loginPorCodigo(codigo);
+    }
+    
+    
+    /**
+     * Mostrar las ventana de menu admin.
+     */
+    public void abrirVentanaMenuAdmin(){
+        if (ventana_inicio_sesion != null) {
+            ventana_inicio_sesion.dispose();
+        }
+        if (ventana_menu_admin == null) {
+            ventana_menu_admin = new VentanaMenuAdmin(this);
+        }
+        
+        ventana_menu_admin.setVisible(true);
+        ventana_menu_admin.toFront();
+        
+    }
+    
+    
+    /**
+     * Mostrar las ventana de menu mesero.
+     */
+    public void abrirVentanaMenuMesero(){
+        if (ventana_inicio_sesion != null) {
+            ventana_inicio_sesion.dispose();
+        }
+        if (ventana_menu_mesero == null) {
+            ventana_menu_mesero = new VentanaMenuMesero(this);
+        }
+        
+        ventana_menu_mesero.setVisible(true);
+        ventana_menu_mesero.toFront();
+        
+    }
+    
+    /**
+     * Este metodo oculta la pantalla con la que estamos trabajando, para despues regresarnos a la ventana 
+     * de incio de sesion.
+     * @param frame 
+     */
+    public void regresarInicioSesion(JFrame frame){
+        frame.setVisible(false);
+        
+        if (ventana_inicio_sesion == null) {
+            ventana_inicio_sesion = new VentanaInicioSesion(this);
+        }
+        ventana_inicio_sesion.setVisible(true);
+        ventana_inicio_sesion.toFront();
+    }
+    
 }
