@@ -7,7 +7,7 @@ package pantallas;
 import controladorRestaurante.Coordinador;
 import dtosDelRestaurante.ProductoDTO;
 import entidadesEnumeradorDTO.TipoPlatilloDTO;
-import entidadesRestaurante.Producto;
+import enumEntidades.TipoPlatillo;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -21,8 +21,8 @@ import java.util.List;
 import javax.swing.table.TableRowSorter;
 
 /**
- *
- * @author josma
+ * Ventana de gestión de productos corregida con soporte de Enums en ComboBox.
+ * @author josma / Adaptación Gemini
  */
 public class VentanaMenuProducto extends JFrame {
 
@@ -49,7 +49,8 @@ public class VentanaMenuProducto extends JFrame {
     private final Color rojo = new Color(188, 55, 30);
     private DefaultTableModel modelo_tabla;
     private TablaEstilizada tabla;
-    private ComboBoxPersonalizado<String> combo_tipo;
+    // Cambio: El ComboBox ahora maneja TipoPlatillo directamente
+    private ComboBoxPersonalizado<Object> combo_tipo; 
     private JLabel lbl_foto;
 
     public VentanaMenuProducto(Coordinador coordinador) {
@@ -77,9 +78,9 @@ public class VentanaMenuProducto extends JFrame {
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL; // Que ocupen todo el ancho
-        gbc.weightx = 1.0; // Factor de expansión horizontal
-        gbc.insets = new Insets(2, 0, 2, 0); // Espaciado vertical entre filas
+        gbc.fill = GridBagConstraints.HORIZONTAL; 
+        gbc.weightx = 1.0; 
+        gbc.insets = new Insets(2, 0, 2, 0); 
 
         //----------------------------FUENTES-----------------------------------
         Font fuente_titulo = GestorFuentes.obtenerFuente("Agbalumo-Regular.ttf", 32f);
@@ -103,7 +104,7 @@ public class VentanaMenuProducto extends JFrame {
 
         gbc.gridy = 2;
         txt_buscador = new TextFieldPersonalizado(20);
-        txt_buscador.setPreferredSize(new Dimension(0, 35)); // Altura fija
+        txt_buscador.setPreferredSize(new Dimension(0, 35)); 
         cuadro_blanco.add(txt_buscador, gbc);
 
         //------------------------TABLA (FILA 3)--------------------------------
@@ -119,8 +120,8 @@ public class VentanaMenuProducto extends JFrame {
         scroll.setPreferredSize(new Dimension(0, 150));
         scroll.setBorder(BorderFactory.createEmptyBorder());
         scroll.getViewport().setBackground(Color.WHITE);
-        tabla.setRowHeight(45); // Esto da espacio para que el botón se dibuje bien
-        tabla.setCellSelectionEnabled(false); // Evita que la selección interfiera con el clic del botón
+        tabla.setRowHeight(45); 
+        tabla.setCellSelectionEnabled(false); 
 
         cuadro_blanco.add(scroll, gbc);
         
@@ -133,7 +134,6 @@ public class VentanaMenuProducto extends JFrame {
             @Override
             public void keyReleased(java.awt.event.KeyEvent e) {
                 String texto = txt_buscador.getText().trim();
-
                 if (texto.isEmpty()) {
                     sorter.setRowFilter(null);
                 } else {
@@ -146,10 +146,7 @@ public class VentanaMenuProducto extends JFrame {
 
         //APARTADO PARA EL COMPORTAMIENTO DE LA COLUMNA DE INGREDIENTES 
         BotonMenuAdministrador btn_detalles = new BotonMenuAdministrador("Ver detalles",
-                null, //Sin icono
-                new Color(255, 184, 77),
-                0, 0,
-                fuente_rabbits_pequena
+                null, naranja, 0, 0, fuente_rabbits_pequena
         );
 
         //------------------------APARTADO PARA QUE SE MUESTRE LA IMAGEN--------
@@ -164,25 +161,23 @@ public class VentanaMenuProducto extends JFrame {
         TableColumn columna_ingredientes = tabla.getColumnModel().getColumn(0);
         columna_ingredientes.setCellEditor(new BotonTablaEditor(btn_detalles, e -> {
             int filaVista = tabla.getSelectedRow();
-
             if (filaVista != -1) {
-                // 1. Convertimos el índice por si hay filtros activos
+                // Convertimos el índice por si hay filtros activos
                 int filaModelo = tabla.convertRowIndexToModel(filaVista);
 
-                // 2. Obtenemos el ID del producto (suponiendo que está en la columna 5)
+                // Obtenemos el ID del producto
                 Long idProducto = (Long) modelo_tabla.getValueAt(filaModelo, 5);
 
-                // 3. Obtenemos el nombre para el título del diálogo (opcional)
+                // Obtenemos el nombre para el título del diálogo
                 String nombreProducto = modelo_tabla.getValueAt(filaModelo, 1).toString();
 
-                // 4. Llamamos al coordinador pasando el ID del producto clickeado
+                // Llamamos al coordinador pasando el ID del producto clickeado
                 // Este método en el coordinador debe abrir el JDialog que muestra ingredientes
                 coordinador.mostrarDialogoIngredientesVista(this, idProducto, nombreProducto);
             }
         }));
 
         //----------------SECCION PARA REGISTRAR PRODUCTO (FILA 4)--------------
-
         gbc.gridy = 4;
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -210,10 +205,14 @@ public class VentanaMenuProducto extends JFrame {
         JLabel lbl_tipo = new JLabel("Tipo:");
         lbl_tipo.setFont(fuente_rabbits_pequena);
 
+        // CORRECCIÓN: Preparar opciones con "Seleccionar..." + los valores del Enum
+        TipoPlatillo[] enums = TipoPlatillo.values();
+        Object[] itemsCombo = new Object[enums.length + 1];
+        itemsCombo[0] = "Seleccionar...";
+        System.arraycopy(enums, 0, itemsCombo, 1, enums.length);
 
-        String[] opcionesTipo = {"Seleccionar...", "Platillo", "Bebida", "Postre"};
-        combo_tipo = new ComboBoxPersonalizado<>(opcionesTipo);
-        combo_tipo.setPreferredSize(new Dimension(0, 35)); // Misma altura que tus textfields
+        combo_tipo = new ComboBoxPersonalizado<>(itemsCombo);
+        combo_tipo.setPreferredSize(new Dimension(0, 35)); 
 
         panel_campos.add(lbl_nombre);
         panel_campos.add(txt_nombre);
@@ -228,14 +227,11 @@ public class VentanaMenuProducto extends JFrame {
 
         //----------SUBPANEL DERECHO (apartado de imagen y boton ingredinetes)--
         JPanel panel_medio = new JPanel(new GridBagLayout());
-
         panel_medio.setOpaque(false);
-
         GridBagConstraints gbcMedia = new GridBagConstraints();
 
         //Recuadro para la imagen 
         lbl_foto = new JLabel();
-
         lbl_foto.setPreferredSize(new Dimension(120, 120));
         lbl_foto.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
         lbl_foto.setHorizontalAlignment(JLabel.CENTER);
@@ -295,8 +291,6 @@ public class VentanaMenuProducto extends JFrame {
                     archivo_imagen = selector.getSelectedFile();
                     lbl_foto.setIcon(ClaseImagen.escalarImagenDesdeFile(archivo_imagen, 120, 120));
                 }
-                
-
             }
         });
         
@@ -316,70 +310,70 @@ public class VentanaMenuProducto extends JFrame {
                 return;
             }
 
-            // 2. Creamos el DTO con los datos actuales de la ventana
+            // 2. Creamos el DTO
             ProductoDTO dto_para_registrar = new ProductoDTO();
             dto_para_registrar.setNombre(txt_nombre.getText().trim());
             dto_para_registrar.setPrecio(Double.parseDouble(txt_precio.getText().trim()));
 
-            // Convertir String de combo a TipoPlatilloDTO
-            String seleccion = combo_tipo.getSelectedItem().toString().toUpperCase();
-            dto_para_registrar.setTipo_platilo(TipoPlatilloDTO.valueOf(seleccion));
+            // CORRECCIÓN: Obtener el Enum seleccionado de forma segura
+            TipoPlatillo seleccion = (TipoPlatillo) combo_tipo.getSelectedItem();
+            // Mapeamos el nombre del Enum original al del DTO
+            dto_para_registrar.setTipo_platilo(TipoPlatilloDTO.valueOf(seleccion.name()));
 
             dto_para_registrar.setRuta_imagen(archivo_imagen.getAbsolutePath());
 
-            // 3. Le decimos al coordinador que queremos agregar ingredientes a este producto
+            // 3. Abrir diálogo
             coordinador.mostrarDialogoIngredientes(this, dto_para_registrar);
         });
         
         btn_volver.addActionListener(e -> coordinador.ventanaMenuProductosAMenuAdmin());
         
         // --- EVENTO DE EDICIÓN EN TIEMPO REAL EN TABLA ---
-            modelo_tabla.addTableModelListener(e -> {
-                // Solo actuamos si el cambio fue una actualización de celda
-                if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
-                    int filaModelo = e.getFirstRow();
-                    int columna = e.getColumn();
+        modelo_tabla.addTableModelListener(e -> {
+                // Solo actua si el cambio fue una actualización de celda
+            if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
+                int filaModelo = e.getFirstRow();
+                int columna = e.getColumn();
 
                     // Evitamos procesar columnas que no sean Nombre (1) o Precio (2)
-                    if (columna == 1 || columna == 2) {
+                if (columna == 1 || columna == 2) {
 
-                        // 1. Obtenemos el ID del producto (Columna 5)
-                        Long idProducto = (Long) modelo_tabla.getValueAt(filaModelo, 5);
+                        // Obtenemos el ID del producto (Columna 5)
+                    Long idProducto = (Long) modelo_tabla.getValueAt(filaModelo, 5);
 
-                        // 2. Obtenemos el nuevo valor ingresado
-                        Object nuevoValor = modelo_tabla.getValueAt(filaModelo, columna);
+                        // Obtenemos el nuevo valor ingresado
+                    Object nuevoValor = modelo_tabla.getValueAt(filaModelo, columna);
 
-                        if (nuevoValor == null || nuevoValor.toString().trim().isEmpty()) {
-                            JOptionPane.showMessageDialog(this, "El campo no puede estar vacío.");
-                            llenarTabla(); // Reventamos la tabla para recuperar el valor anterior
+                    if (nuevoValor == null || nuevoValor.toString().trim().isEmpty()) {
+                        JOptionPane.showMessageDialog(this, "El campo no puede estar vacío.");
+                        llenarTabla(); 
+                        return;
+                    }
+
+                    String valorString = nuevoValor.toString().trim();
+
+                    if (columna == 1) { 
+                        if (!coordinador.validarNombre(valorString)) {
+                            JOptionPane.showMessageDialog(this, "Nombre inválido.");
+                            llenarTabla(); 
                             return;
                         }
-
-                        String valorString = nuevoValor.toString().trim();
-
-                        // 3. Validaciones según la columna
-                        if (columna == 1) { // Cuando se hace edicion de NOMBRE
-                            if (!coordinador.validarNombre(valorString)) {
-                                JOptionPane.showMessageDialog(this, "Nombre inválido.");
-                                llenarTabla(); 
-                                return;
-                            }
                             // Llamamos al coordinador para actualizar solo el nombre
-                            coordinador.actualizarNombreProducto(idProducto, valorString);
-                        } 
-                        else if (columna == 2) { // Cuando se hace edicion de PRECIO
-                            if (!coordinador.validarPrecio(valorString)) {
-                                JOptionPane.showMessageDialog(this, "Precio inválido (Debe ser numérico).");
-                                llenarTabla();
-                                return;
-                            }
-                            // Llamamos al coordinador para actualizar el precio
-                            Double precioNuevo = Double.parseDouble(valorString);
-                            coordinador.actualizarPrecioProducto(idProducto, precioNuevo);
+                        coordinador.actualizarNombreProducto(idProducto, valorString);
+                    } 
+                    else if (columna == 2) { 
+                        if (!coordinador.validarPrecio(valorString)) {
+                            JOptionPane.showMessageDialog(this, "Precio inválido.");
+                            llenarTabla();
+                            return;
                         }
+                            // Llamamos al coordinador para actualizar el precio
+                        Double precioNuevo = Double.parseDouble(valorString);
+                        coordinador.actualizarPrecioProducto(idProducto, precioNuevo);
                     }
                 }
-            });
+            }
+        });
 
         //Este metodo actualiza la tabla con los registros que hay
         llenarTabla();
@@ -388,45 +382,38 @@ public class VentanaMenuProducto extends JFrame {
     public void llenarTabla() {
         List<ProductoDTO> lista = coordinador.obtenerListaProductos();
         modelo_tabla.setRowCount(0);
-
         if (lista == null || lista.isEmpty()) return;
 
         for (ProductoDTO p : lista) {
             Object[] fila = new Object[]{
-                "Ver detalles",     // Columna 0
-                p.getNombre(),      // Columna 1
-                p.getPrecio(),      // Columna 2
-                p.getTipo_platilo(),// Columna 3
-                p.getRuta_imagen(), // Columna 4
-                p.getId()           // Columna 5 (Oculta)
+                "Ver detalles", p.getNombre(), p.getPrecio(), 
+                p.getTipo_platilo(), p.getRuta_imagen(), p.getId()
             };
             modelo_tabla.addRow(fila);
         }
+        ocultarColumnaID();
+    }
+
+    private void ocultarColumnaID() {
         tabla.getColumnModel().getColumn(5).setMinWidth(0);
         tabla.getColumnModel().getColumn(5).setMaxWidth(0);
         tabla.getColumnModel().getColumn(5).setPreferredWidth(0);
-        tabla.getColumnModel().getColumn(5).setResizable(false);
     }
     
     public void limpiarCampos() {
-        // 1. Limpiar campos de texto
+        // Limpiar campos de texto
         txt_nombre.setText("");
         txt_precio.setText("");
-        if (txt_buscador != null) {
-            txt_buscador.setText("");
-        }
-
-        // 2. Restablecer el ComboBox a la opción "Seleccionar..." (índice 0)
-        // Asumiendo que tu variable se llama combo_tipo
+        if (txt_buscador != null) txt_buscador.setText("");
         combo_tipo.setSelectedIndex(0);
 
-        // 3. Restablecer la imagen por defecto
+        // Restablecer la imagen por defecto
         lbl_foto.setIcon(new ImageIcon(getClass().getResource("/imagenes/imagenPNG.png")));
 
-        // 4. Limpiar la variable que guarda el archivo seleccionado
+        // Limpiar la variable que guarda el archivo seleccionado
         archivo_imagen = null;
 
-        // 5. Opcional: Devolver el foco al primer campo para agilidad
+        // Opcional: Devolver el foco al primer campo para agilidad
         txt_nombre.requestFocus();
     }
 }

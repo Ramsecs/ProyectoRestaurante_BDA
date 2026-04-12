@@ -40,10 +40,7 @@ public class PruebasPantallas {
             System.out.println("Error: " + e.getMessage());
         }
         */
-
-
-        // TODO code application logic here
-        coordinador.iniciarMenuAdmin();
+        coordinador.iniciarInicioSesion();
         
         
         
