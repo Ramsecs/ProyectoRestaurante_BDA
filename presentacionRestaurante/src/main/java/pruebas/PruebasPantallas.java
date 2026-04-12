@@ -43,7 +43,7 @@ public class PruebasPantallas {
 
 
         // TODO code application logic here
-        coordinador.iniciarMenuMesero();
+        coordinador.iniciarMenuAdmin();
         
         
         
