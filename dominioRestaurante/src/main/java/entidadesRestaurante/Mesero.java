@@ -16,5 +16,18 @@ import javax.persistence.*;
 @DiscriminatorValue("MESERO")
 @PrimaryKeyJoinColumn(name = "id_empleado")
 public class Mesero extends Empleado implements Serializable{
+
+    public Mesero() {
+    }
+
+    public Mesero(String nombre_usuario, String contrasena, String nombres, String apellido_paterno, String apellido_materno, String telefono) {
+        super(nombre_usuario, contrasena, nombres, apellido_paterno, apellido_materno, telefono);
+    }
+
+    public Mesero(Long id, String nombre_usuario, String contrasena, String nombres, String apellido_paterno, String apellido_materno, String telefono) {
+        super(id, nombre_usuario, contrasena, nombres, apellido_paterno, apellido_materno, telefono);
+    }
+    
+    
     
 }

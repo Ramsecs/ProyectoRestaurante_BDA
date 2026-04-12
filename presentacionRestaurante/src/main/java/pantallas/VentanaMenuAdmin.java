@@ -102,7 +102,7 @@ public class VentanaMenuAdmin extends JFrame {
 
         // --- ACCIONES DE LOS BOTONES ---
         btn_volver.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Regresando al inicio...");
+            coordinador.regresarInicioSesion(this);
         });
 
         btn_reporte.addActionListener(e -> {

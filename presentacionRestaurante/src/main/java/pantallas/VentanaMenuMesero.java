@@ -87,7 +87,7 @@ public class VentanaMenuMesero extends JFrame {
 
         // --- ACCIONES DE LOS BOTONES ---
         btn_volver.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Regresando al inicio...");
+            coordinador.regresarInicioSesion(this);
         });
         
         
