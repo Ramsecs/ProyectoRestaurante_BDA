@@ -5,6 +5,7 @@
 package entidadesRestaurante;
 
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.*;
 
 /**
@@ -28,6 +29,12 @@ public class Mesero extends Empleado implements Serializable{
         super(id, nombre_usuario, contrasena, nombres, apellido_paterno, apellido_materno, telefono);
     }
     
-    
+    /**
+     * Relacion de uno a muchos con la entidad Comanda.
+     * Gestiona el ciclo de vida de las comandas asociadas mediante operaciones en cascada.
+     */
+    @OneToMany(mappedBy = "mesero", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    private List<Comanda> comandas;
+
     
 }

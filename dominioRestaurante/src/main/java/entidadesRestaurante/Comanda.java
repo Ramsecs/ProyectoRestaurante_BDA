@@ -47,6 +47,14 @@ public class Comanda implements Serializable {
     private Double total_venta;
 
     /**
+     * Mesero al que se le asigno la comanda. Relación de muchos a uno: Varias comandas
+     * pueden pertenecer a un mismo mesero.
+     */
+    @ManyToOne
+    @JoinColumn(name = "fk_mesero")
+    private Mesero mesero;
+    
+    /**
      * Cliente que realizó el pedido. Relación de muchos a uno: Varias comandas
      * pueden pertenecer a un mismo cliente.
      */
