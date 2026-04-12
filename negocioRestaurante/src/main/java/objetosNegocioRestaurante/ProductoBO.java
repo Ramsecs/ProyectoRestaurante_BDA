@@ -7,23 +7,27 @@ package objetosNegocioRestaurante;
 import adaptadores.ProductoAdapter;
 import daosRestaurante.IProductoDAO;
 import daosRestaurante.ProductoDAO;
+import dtosDelRestaurante.ProductoComandaDTO;
 import dtosDelRestaurante.ProductoDTO;
 import entidadesEnumeradorDTO.TipoPlatilloDTO;
 import entidadesRestaurante.Producto;
 import entidadesRestaurante.ProductoIngrediente;
+import enumEntidades.TipoPlatillo;
 import excepcionesRestaurante.NegocioException;
 import excepcionesRestaurante.PersistenciaException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import validadores.Validaciones;
 
 /**
  *
  * @author RAMSES
  */
-public class ProductoBO implements IProductoBO{
-    
-        //Singleton
+public class ProductoBO implements IProductoBO {
+
+    //Singleton
     private static ProductoBO productoBO;
 
     private IProductoDAO productoDAO = ProductoDAO.getInstanceProductoDAO();
@@ -42,15 +46,16 @@ public class ProductoBO implements IProductoBO{
 
         return productoBO;
     }
-    
+
     /**
      * Lista la lista de productos que hay en la base de datos.
+     *
      * @return
-     * @throws NegocioException 
+     * @throws NegocioException
      */
     @Override
-    public List<ProductoDTO> listarProductos() throws NegocioException{
-        
+    public List<ProductoDTO> listarProductos() throws NegocioException {
+
         try {
             List<Producto> productosEntidad = productoDAO.listarTodo();
             List<ProductoDTO> productosDTO = new ArrayList<>();
@@ -78,45 +83,45 @@ public class ProductoBO implements IProductoBO{
         } catch (PersistenciaException ex) {
             throw new NegocioException("Error al mapear productos: " + ex.getMessage());
         }
-        
+
     }
-    
+
     /**
-     * Mediante este metodo se registra el producto con la lista de detalles que son los ingredientes que tiene
-     * el producto 
+     * Mediante este metodo se registra el producto con la lista de detalles que
+     * son los ingredientes que tiene el producto
+     *
      * @param productoDTO
      * @param detalles
      * @return
-     * @throws NegocioException 
+     * @throws NegocioException
      */
     @Override
-    public boolean registrarProducto(ProductoDTO productoDTO, List<ProductoIngrediente> detalles) throws NegocioException{
+    public boolean registrarProducto(ProductoDTO productoDTO, List<ProductoIngrediente> detalles) throws NegocioException {
         ProductoAdapter adapter_producto = new ProductoAdapter();
-        
+
         if (detalles.isEmpty() || detalles == null) {
             throw new NegocioException("La lista de ingredientes esta vacia.");
         }
         if (!validar.validarNombres(productoDTO.getNombre())) {
             throw new NegocioException("El nombre del producto no es valido.");
         }
-        if (!validar.validarPrecio(productoDTO.getPrecio()+"")) {
+        if (!validar.validarPrecio(productoDTO.getPrecio() + "")) {
             throw new NegocioException("El precio que el usuario ingreso no es valido");
         }
-        
+
         Producto producto = adapter_producto.DTOAEntidadProducto(productoDTO);
-        
+
         try {
-            
+
             return productoDAO.registrarProductoConIngredientes(producto, detalles);
-            
+
         } catch (PersistenciaException ex) {
-            
-            throw new NegocioException("Hubo un error al querer hacer el registro en producto DAO: "+ex.getMessage());
+
+            throw new NegocioException("Hubo un error al querer hacer el registro en producto DAO: " + ex.getMessage());
         }
-        
-        
+
     }
-    
+
     @Override
     public void actualizarNombre(Long id, String nuevoNombre) throws NegocioException {
         // 1. Validaciones de Negocio
@@ -155,7 +160,50 @@ public class ProductoBO implements IProductoBO{
             throw new NegocioException("No se pudo actualizar el precio: " + e.getMessage());
         }
     }
-    
-    
-    
+
+    /**
+     * Metodo en BO para hacer validación y asi poder llamar al metodo de la DAO
+     * para mostrar en el apartado de comandas los productos por categoria
+     *
+     * @param tipoDTO
+     * @return
+     * @throws NegocioException
+     */
+    @Override
+    public List<ProductoComandaDTO> listarProductosPorCategoria(TipoPlatilloDTO tipoDTO) throws NegocioException {
+        if (tipoDTO == null) {
+            throw new NegocioException("La categoría de busqueda no puede ser nula");
+        }
+
+        try {
+            // 2. Convertir a DTO a Entidad (esto puede marcar error por un error de dedo en producto
+            //pero no es mi modulo asi que no le muevo)
+            TipoPlatillo tipo_entidad = TipoPlatillo.valueOf(tipoDTO.name());
+
+            // 3. Llamada al DAO
+            List<Producto> productos_dominio = productoDAO.consultarPorCategoria(tipo_entidad);
+
+            // 4. Transformación a DTOs
+            List<ProductoComandaDTO> listaDTO = new ArrayList<>();
+
+            if (productos_dominio != null && !productos_dominio.isEmpty()) {
+                for (Producto producto : productos_dominio) {
+                    // Usamos el constructor vacio
+                    ProductoComandaDTO productoDTO = new ProductoComandaDTO();
+                    productoDTO.setId(producto.getId());
+                    productoDTO.setNombre(producto.getNombre());
+                    productoDTO.setPrecio(producto.getPrecio());
+
+                    listaDTO.add(productoDTO);
+                }
+            }
+
+            return listaDTO;
+
+        } catch (PersistenciaException e) {
+            // Si el DAO falló, lo envolvemos en una excepción de Negocio para el Coordinador
+            throw new NegocioException("Error al obtener productos desde la base de datos: " + e.getMessage());
+        }
+
+    }
 }

@@ -5,7 +5,9 @@
 package objetosNegocioRestaurante;
 
 
+import dtosDelRestaurante.ProductoComandaDTO;
 import dtosDelRestaurante.ProductoDTO;
+import entidadesEnumeradorDTO.TipoPlatilloDTO;
 import entidadesRestaurante.ProductoIngrediente;
 import excepcionesRestaurante.NegocioException;
 import java.util.List;
@@ -24,4 +26,5 @@ public interface IProductoBO {
     
     public void actualizarPrecio(Long id, Double nuevoPrecio) throws NegocioException;
     
+    public List<ProductoComandaDTO> listarProductosPorCategoria(TipoPlatilloDTO tipoDTO) throws NegocioException;    
 }

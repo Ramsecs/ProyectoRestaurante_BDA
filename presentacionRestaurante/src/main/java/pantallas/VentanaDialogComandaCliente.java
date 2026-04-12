@@ -13,8 +13,14 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.*;
+import static javax.swing.SwingUtilities.invokeLater;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import recursos.GestorFuentes;
 import recursos.ModeloTablaEditable;
@@ -32,8 +38,7 @@ public class VentanaDialogComandaCliente extends JDialog {
 
     private final Coordinador coordinador;
 
-    private List<ClienteBusquedaDTO> listaClientesActual;
-    private ClienteDTO clienteDTO;
+    private List<ClienteBusquedaDTO> lista_clientes_actual;
     private final Color naranja = new Color(255, 184, 77);
     private final Color verde = new Color(116, 155, 87);
     private final Color rojo = new Color(188, 55, 30);
@@ -45,7 +50,6 @@ public class VentanaDialogComandaCliente extends JDialog {
     public VentanaDialogComandaCliente(Coordinador coordinador, JFrame padre) {
         super(padre, true);
         this.coordinador = coordinador;
-        this.clienteDTO = new ClienteDTO();
         //CONFIGURACION BASE----------------------------------------------------
         setSize(900, 700);
         setLocationRelativeTo(padre);
@@ -142,30 +146,125 @@ public class VentanaDialogComandaCliente extends JDialog {
 
         //Parte logica para que solo sea uno a la vez
         modelo_tabla.addTableModelListener(e -> {
-            if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
+            if (e.getType() == TableModelEvent.UPDATE) {
                 int row = e.getFirstRow();
                 int col = e.getColumn();
 
-                // Si el usuario marcó un radio button como true
+                // Si el mesero marcó un radio button como true
                 if (col == 5 && (Boolean) modelo_tabla.getValueAt(row, col)) {
-                    for (int i = 0; i < modelo_tabla.getRowCount(); i++) {
-                        if (i != row) {
-                            modelo_tabla.setValueAt(false, i, 5); // Desmarca los demás
+                    //Esto nos ahorrara conflictos al momento de dibujar la tabla
+                    //como puede ser la omisión de eventos que es con lo principal que se tiene
+                    //problema
+                    invokeLater(()->{
+                        for (int i = 0; i < modelo_tabla.getRowCount(); i++) {
+                            /**
+                             * Al usar boolean le estamos diciendo a Java el 
+                             * tipo de objeto que se encuentra en esa columna
+                             * */
+                            if (i != row && (Boolean) modelo_tabla.getValueAt(i, 5)) {
+                                modelo_tabla.setValueAt(false, i, 5);
+                                
+                            }
                         }
-                    }
+                    });
+                }
+            }
+        });
+
+        tabla.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) { // Cambiado a mousePressed
+                int fila = tabla.rowAtPoint(e.getPoint());
+                int columna = tabla.columnAtPoint(e.getPoint());
+
+                if (fila != -1 && lista_clientes_actual != null) {
+                    // BANDERA 1
+                    System.out.println("--- FLAG DIALOG ---");
+                    ClienteBusquedaDTO seleccionado = lista_clientes_actual.get(fila);
+                    System.out.println("Click en fila: " + fila + " - Cliente: " + seleccionado.getNombre());
+
+                   //Hacemos que la atención se centre en la fila seleccionada
+                    modelo_tabla.setValueAt(true, fila, 5);
+
+                    //Avisamos al coordinador
+                    coordinador.setClienteEnComanda(seleccionado);
                 }
             }
         });
 //==============================================================================
 
-        // Agregamos un par de filas fake para probar visualmente
-        modelo_tabla.addRow(new Object[]{"Juan", "Perez", "García", "juan@mail.com", "123456", true});
-        modelo_tabla.addRow(new Object[]{"Juan", "Perez", "García", "juan@mail.com", "123456", false});
-        modelo_tabla.addRow(new Object[]{"Juan", "Perez", "García", "juan@mail.com", "123456", false});
         JScrollPane scroll = new JScrollPane(tabla);
         scroll.getViewport().setBackground(Color.WHITE);
         scroll.setBorder(BorderFactory.createLineBorder(naranja, 2));
 
         cuadro_blanco.add(scroll, gbc);
+
+        txt_buscador.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filtrar();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filtrar();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                filtrar();
+            }
+
+            private void filtrar() {
+                String texto = txt_buscador.getText().trim();
+                // Llamamos al coordinador para que refresque la tabla
+                coordinador.buscarClientesParaComanda(texto);
+            }
+
+        });
+
+    }
+
+    /**
+     * Este metodo nos es de ayuda para poder cargar los clientes en al tabla y
+     * asi seleccionar solo uno
+     *
+     * @param lista de los clientes
+     */
+    public void cargarTabla(List<ClienteBusquedaDTO> lista) {
+        this.lista_clientes_actual = lista; // Guardamos la lista para saber qué ID corresponde a qué fila
+        modelo_tabla.setRowCount(0); // Limpiamos la tabla
+
+        for (ClienteBusquedaDTO cliente : lista) {
+            Object[] fila = {
+                cliente.getNombre(),
+                cliente.getApellido_paterno(),
+                cliente.getApellido_materno(),
+                cliente.getCorreo(),
+                cliente.getTelefono(),
+                false // El RadioButton inicia desmarcado
+            };
+            modelo_tabla.addRow(fila);
+        }
+    }
+
+    /**
+     * Este metodo es para obtener el cliente que queremos para la comanda
+     *
+     * @return
+     */
+    public ClienteBusquedaDTO getClienteSeleccionado() {
+        // 1. Buscamos en la tabla que fila está seleccionada (columna 5 corresponde al radio)
+        for (int i = 0; i < modelo_tabla.getRowCount(); i++) {
+            Boolean seleccionado = (Boolean) modelo_tabla.getValueAt(i, 5);
+
+            if (seleccionado != null && seleccionado) {
+                // 2. Devolvemos el DTO de la lista interna usando el mismo indice
+                if (lista_clientes_actual != null && i < lista_clientes_actual.size()) {
+                    return lista_clientes_actual.get(i);
+                }
+            }
+        }
+        return null; // Si no hay nada seleccionado
     }
 }

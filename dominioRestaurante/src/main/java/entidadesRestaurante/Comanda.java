@@ -51,11 +51,11 @@ public class Comanda implements Serializable {
      * pueden pertenecer a un mismo mesero.
      */
     @ManyToOne
-    @JoinColumn(name = "fk_mesero")
+    @JoinColumn(name = "fk_mesero", nullable = false)
     private Mesero mesero;
     
     /**
-     * Cliente que realizó el pedido. Relación de muchos a uno: Varias comandas
+     * Cliente que realizó el pedido Relación de muchos a uno: Varias comandas
      * pueden pertenecer a un mismo cliente.
      */
     @ManyToOne
@@ -63,7 +63,7 @@ public class Comanda implements Serializable {
     private Cliente cliente;
 
     /**
-     * Documentar de nuevo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * Mesa  a la que esta asociada la comanda.
      */
     @ManyToOne
     @JoinColumn(name = "fk_mesa", nullable = false) // Esta será la columna en la tabla comanda
@@ -114,13 +114,15 @@ public class Comanda implements Serializable {
 
     // --- Métodos de Acceso (Getters y Setters) ---
     /**
-     * @return El ID de la comanda.
+     * Obtener el id de la comanda
+     * @return 
      */
     public Long getId() {
         return id;
     }
 
     /**
+     * Setea el id de la comanda
      * @param id El nuevo ID de la comanda.
      */
     public void setId(Long id) {
@@ -128,6 +130,7 @@ public class Comanda implements Serializable {
     }
 
     /**
+     * Obtiene el estado de la comanda
      * @return El estado actual de la comanda.
      */
     public EstadoComanda getEstado_comanda() {
@@ -135,20 +138,23 @@ public class Comanda implements Serializable {
     }
 
     /**
-     * @param estado_comanda El nuevo estado a asignar.
+     * Setea el estado de la comanda
+     * @param estado_comanda 
      */
     public void setEstado_comanda(EstadoComanda estado_comanda) {
         this.estado_comanda = estado_comanda;
     }
 
     /**
-     * @return La fecha y hora de creación.
+     * Obtener la fecha y hora en que se creo la comanda
+     * @return 
      */
     public LocalDateTime getFecha_hora_creacion() {
         return fecha_hora_creacion;
     }
 
     /**
+     * Cambia la fecha y hora
      * @param fecha_hora_creacion La nueva fecha y hora a asignar.
      */
     public void setFecha_hora_creacion(LocalDateTime fecha_hora_creacion) {
@@ -156,7 +162,8 @@ public class Comanda implements Serializable {
     }
 
     /**
-     * @return El total de la venta.
+     * Obtener el total de la venta
+     * @return 
      */
     public Double getTotal_venta() {
         return total_venta;
@@ -170,13 +177,15 @@ public class Comanda implements Serializable {
     }
 
     /**
-     * @return La lista de productos asociados a esta comanda.
+     * Regresa la lista de productos de la comanda
+     * @return 
      */
     public List<ComandaProducto> getLista_productos() {
         return lista_productos;
     }
 
     /**
+     * Permite modificar  o setear por asi decirlo la lista de productos
      * @param lista_productos La lista de productos a asociar.
      */
     public void setLista_productos(List<ComandaProducto> lista_productos) {
@@ -187,7 +196,7 @@ public class Comanda implements Serializable {
      * Devuelve una representación en texto de la comanda con sus atributos
      * principales.
      *
-     * @return Cadena con el estado de la entidad.
+     * @return 
      */
     @Override
     public String toString() {

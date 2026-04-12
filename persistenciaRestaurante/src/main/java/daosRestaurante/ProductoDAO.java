@@ -9,9 +9,11 @@ import dtosDelRestaurante.ProductoDTO;
 import entidadesRestaurante.Ingrediente;
 import entidadesRestaurante.Producto;
 import entidadesRestaurante.ProductoIngrediente;
+import enumEntidades.TipoPlatillo;
 import excepcionesRestaurante.PersistenciaException;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 
 /**
  *
@@ -147,6 +149,27 @@ public class ProductoDAO implements IProductoDAO{
             }
             throw new PersistenciaException("Error al actualizar el nombre del producto: " + e.getMessage());
         } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Producto> consultarPorCategoria(TipoPlatillo tipo) throws PersistenciaException {
+        EntityManager em = ConexionBD.crearConexion();
+        try{
+            //1.Creamos la consulta con la entidad Producto, usaremos TypedQuery
+            String comandoJPQL = "SELECT p FROM Producto p WHERE p.tipo_platilo = :platillo_tipo";
+            
+            TypedQuery<Producto> query = em.createQuery(comandoJPQL, Producto.class);
+            query.setParameter("platillo_tipo", tipo);
+            
+            return query.getResultList();
+        }catch(Exception e){
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new PersistenciaException("Error en ProductoDAO.consultarPorCategotia" + e.getMessage());
+        }finally{
             em.close();
         }
     }

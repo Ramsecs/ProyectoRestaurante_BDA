@@ -5,11 +5,17 @@
 package pantallas;
 
 import controladorRestaurante.Coordinador;
+import dtosDelRestaurante.ComandaDTO;
+import dtosDelRestaurante.ComandaProductoDTO;
+import dtosDelRestaurante.ProductoComandaDTO;
+import entidadesEnumeradorDTO.TipoPlatilloDTO;
+import enumEntidades.EstadoComanda;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import recursos.*;
+import java.util.List;
 
 /**
  *
@@ -18,9 +24,21 @@ import recursos.*;
 public class VentanaCrearComanda extends JFrame {
 
     private final Coordinador coordinador;
+
+    private Long id_cliente_seleccionado;
+    private Long id_mesa_seleccionada;
+    private DefaultTableModel modelo;
+    private TablaEstilizada tabla;
+    private JTextArea txt_notas; // Para recolectar las notas generales
+    private BotonMenuAdministrador btn_buscar_cliente;
+    private ComboBoxPersonalizado<String> cmb_tipo_cliente;
+    private ComboBoxPersonalizado<TipoPlatilloDTO> cb_tipo_producto;
+
     private JPanel panel_cartas;
     private CardLayout navegador;
     private final int TOTAL_MESAS = 20;
+    
+    private List<ProductoComandaDTO> productos_tabla; //Esto nos servira para poder traer el id de los productos
 
     // Colores corporativos
     private final Color verde = new Color(116, 155, 87);
@@ -50,6 +68,10 @@ public class VentanaCrearComanda extends JFrame {
         //CREAR LAS DOS VISTAS--------------------------------------------------
         panel_cartas.add(crearVistaSeleccionMesa(), "SELECCION");
         panel_cartas.add(crearVistaFormularioComanda(), "FORMULARIO");
+
+        //EL BOTON INICIA DESEACTIVADO------------------------------------------
+        btn_buscar_cliente.setEnabled(false);
+        //----------------------------------------------------------------------
 
         GridBagConstraints gbc_fondo = new GridBagConstraints();
         gbc_fondo.fill = GridBagConstraints.BOTH;
@@ -95,7 +117,7 @@ public class VentanaCrearComanda extends JFrame {
         panel.add(grilla, gbc);
 
         return panel;
-        
+
     }
 //==============================COMANDAS========================================
 
@@ -130,9 +152,9 @@ public class VentanaCrearComanda extends JFrame {
 
         gbc.gridy = 2;
         String[] tipos = {"Seleccionar...", "Frecuente", "Sin cliente"};
-        ComboBoxPersonalizado<String> cb_tipo_cliente = new ComboBoxPersonalizado<>(tipos);
-        cb_tipo_cliente.setPreferredSize(new Dimension(0, 35));
-        panel.add(cb_tipo_cliente, gbc);
+        cmb_tipo_cliente = new ComboBoxPersonalizado<>(tipos);
+        cmb_tipo_cliente.setPreferredSize(new Dimension(0, 35));
+        panel.add(cmb_tipo_cliente, gbc);
 
         // Lógica para habilitar/deshabilitar botón de búsqueda según el combo
         gbc.gridy = 3;
@@ -142,12 +164,20 @@ public class VentanaCrearComanda extends JFrame {
 
         gbc.gridy = 4;
         //AQUI ESTA EL BOTON PARA DESPLEGAR EL JDIALOG JOS
-        BotonMenuAdministrador btn_buscar_cliente = new BotonMenuAdministrador("Seleccione un cliente", null, naranja, 0, 0, fuente_rabbits);
+        btn_buscar_cliente = new BotonMenuAdministrador("Seleccione un cliente", null, naranja, 0, 0, fuente_rabbits);
         btn_buscar_cliente.setPreferredSize(new Dimension(0, 35));
-        cb_tipo_cliente.addActionListener(e -> {
-            boolean esFrecuente = cb_tipo_cliente.getSelectedItem().toString().equals("Frecuente");
-            btn_buscar_cliente.setEnabled(esFrecuente);
-            btn_buscar_cliente.setText(esFrecuente ? "Seleccione un cliente" : "No aplica");
+        cmb_tipo_cliente.addActionListener(e -> {
+            boolean frecuente = cmb_tipo_cliente.getSelectedItem().toString().equals("Frecuente");
+            btn_buscar_cliente.setEnabled(frecuente);
+
+            if (frecuente) {
+                btn_buscar_cliente.setText("Seleccione un cliente");
+                btn_buscar_cliente.setBackground(naranja); // Color original
+            } else {
+                btn_buscar_cliente.setText("No aplica");
+                btn_buscar_cliente.setBackground(Color.LIGHT_GRAY); // Visualmente desactivado
+                this.id_cliente_seleccionado = null; // Limpiamos el ID por seguridad
+            }
         });
         panel.add(btn_buscar_cliente, gbc);
 
@@ -158,8 +188,7 @@ public class VentanaCrearComanda extends JFrame {
         panel.add(lbl_prod, gbc);
 
         gbc.gridy = 6;
-        String[] productos = {"Todos", "Bebidas", "Postres", "Platillos", "Entradas"};
-        ComboBoxPersonalizado<String> cb_tipo_producto = new ComboBoxPersonalizado<>(productos);
+        cb_tipo_producto = new ComboBoxPersonalizado<>(TipoPlatilloDTO.values());
         cb_tipo_producto.setPreferredSize(new Dimension(0, 35));
         panel.add(cb_tipo_producto, gbc);
 
@@ -175,21 +204,19 @@ public class VentanaCrearComanda extends JFrame {
 
         // 1. LA TABLA
         // 1. Definir columnas
-        String[] columnas = {"Nombre", "Costo", "Cantidad", "Agregar"};
+        String[] columnas = {"Nombre", "Costo", "Cantidad","Notas", "Agregar"};
 
-// 2. Crear el modelo
-        DefaultTableModel modelo = new DefaultTableModel(columnas, 0) {
+        // 2. Crear el modelo
+        modelo = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 // Permitir editar Cantidad (2) y Agregar (3)
-                return column == 2 || column == 3;
+                return column == 2 || column == 3 || column == 4;
             }
 
             @Override
             public Class<?> getColumnClass(int columnIndex) {
-                // ¡ESTO ES LO MÁS IMPORTANTE! 
-                // Si no regresas Boolean.class, Swing siempre dibujará texto.
-                if (columnIndex == 3) {
+                if (columnIndex == 4) {
                     return Boolean.class;
                 }
                 return super.getColumnClass(columnIndex);
@@ -200,23 +227,17 @@ public class VentanaCrearComanda extends JFrame {
          * modificaciones para que la tabla no lo tome como string y si lo
          * dibuje
          */
-        TablaEstilizada tabla = new TablaEstilizada(modelo, fuente_tabla);
-        
+        tabla = new TablaEstilizada(modelo, fuente_tabla);
+
         TableCellRenderer booleanRenderer = tabla.getDefaultRenderer(Boolean.class);
         DefaultCellEditor booleanEditor = (DefaultCellEditor) tabla.getDefaultEditor(Boolean.class);
-        tabla.getColumnModel().getColumn(3).setCellRenderer(booleanRenderer);
-        tabla.getColumnModel().getColumn(3).setCellEditor(booleanEditor);
+        tabla.getColumnModel().getColumn(4).setCellRenderer(booleanRenderer);
+        tabla.getColumnModel().getColumn(4).setCellEditor(booleanEditor);
         if (booleanRenderer instanceof JComponent) {
             ((JComponent) booleanRenderer).setOpaque(false);
         }
-        
+
         //======================================================================
-        
-        
-        // Datos Fake
-        modelo.addRow(new Object[]{"Pastel de Chocolate", 200.00, 1, false});
-        modelo.addRow(new Object[]{"Refresco 600ml", 35.00, 1, false});
-        modelo.addRow(new Object[]{"Pasta Alfredo", 180.00, 1, false});
 
         JScrollPane scrollTabla = new JScrollPane(tabla);
         scrollTabla.getViewport().setBackground(Color.WHITE);
@@ -227,29 +248,6 @@ public class VentanaCrearComanda extends JFrame {
         gbcMedio.fill = GridBagConstraints.BOTH;
         gbcMedio.weighty = 1.0;
         panelMedio.add(scrollTabla, gbcMedio);
-
-        // 2. EL TEXT AREA DE NOTAS
-        JPanel panelNotas = new JPanel(new BorderLayout());
-        panelNotas.setOpaque(false);
-        panelNotas.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
-
-        JLabel lbl_notas = new JLabel("Notas de la comanda:");
-        lbl_notas.setFont(fuente_rabbits);
-
-        JTextArea txt_notas = new JTextArea();
-        txt_notas.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        txt_notas.setLineWrap(true);
-        txt_notas.setWrapStyleWord(true);
-
-        JScrollPane scrollNotas = new JScrollPane(txt_notas);
-        scrollNotas.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-
-        panelNotas.add(lbl_notas, BorderLayout.NORTH);
-        panelNotas.add(scrollNotas, BorderLayout.CENTER);
-
-        gbcMedio.gridx = 1;
-        gbcMedio.weightx = 0.3; // 30% del ancho para notas
-        panelMedio.add(panelNotas, gbcMedio);
 
         panel.add(panelMedio, gbc);
 
@@ -271,14 +269,95 @@ public class VentanaCrearComanda extends JFrame {
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         panel.add(panelBotones, gbc);
+//===============ACTION LISTENER================================================
+        btn_buscar_cliente.addActionListener(a -> {
+            coordinador.mostrarSelectorCliente(this);
+        });
         
-        btn_buscar_cliente.addActionListener(a -> {coordinador.mostrarDialogClienteComanda(this);});
-        
+        cb_tipo_producto.addActionListener(e ->{
+            TipoPlatilloDTO categoria_seleccionada = (TipoPlatilloDTO) cb_tipo_producto.getSelectedItem();
+            
+            System.out.println("Filtrado por" + categoria_seleccionada);
+            coordinador.cargarProductosPorCategoria(categoria_seleccionada);
+        });
+
         //TODOS LOS ACTIONS LISTENER TIENEN QUE IR ANTES DE ESTE RETURN JOS=====
         return panel;
         
         
-        
+
     }
     
+    public void cargarTablaProductos(List<ProductoComandaDTO> lista){
+        this.productos_tabla = lista; 
+        
+        modelo.setRowCount(0);
+        
+        for(ProductoComandaDTO producto: lista){
+            Object[] fila = {
+                producto.getNombre(),
+                producto.getPrecio(),
+                1, //Cantidad por defecto
+                "", //Vacio aqui van las notas
+                false //checkbox desmarcado
+            };
+            modelo.addRow(fila);
+        }
+    }
+
+    private ComandaDTO recolectarDatosComanda() {
+        ComandaDTO comandaDTO = new ComandaDTO();
+
+        // 1. Seteamos los IDs básicos
+        comandaDTO.setIdCliente(this.id_cliente_seleccionado);
+        comandaDTO.setIdMesa(this.id_mesa_seleccionada);
+        // El coordinador debe tener un método que te de el mesero actual
+        comandaDTO.setIdMesero(coordinador.geMeseroEnSesion().getId());
+        comandaDTO.setEstado(EstadoComanda.ABIERTA);
+        //PENDIENTE POR TERMINAR
+
+        // 2. Recorremos la tabla
+        double total_venta = 0;
+
+        for (int i = 0; i < modelo.getRowCount(); i++) {
+            // La columna del checkbox es la 3 según tu código
+            Boolean seleccionado = (Boolean) modelo.getValueAt(i, 4);
+
+            if (seleccionado != null && seleccionado) {
+                ComandaProductoDTO detalle = new ComandaProductoDTO();
+
+                //Obtenemos el id del prpducto real
+                detalle.setId_producto(productos_tabla.get(i).getId());
+                
+                //Capturamos la nota de los productos 
+                String nota_producto = modelo.getValueAt(i, 3).toString();
+                detalle.setDetalles(nota_producto); //Guardamos la nota
+
+                int cantidad = Integer.parseInt(modelo.getValueAt(i, 2).toString());
+                double precio = Double.parseDouble(modelo.getValueAt(i, 1).toString());
+
+                detalle.setCantidad(cantidad);
+                detalle.setPrecio_unitario(precio);
+
+                total_venta += (precio * cantidad);
+                comandaDTO.agregarProducto(detalle);
+            }
+        }
+
+        comandaDTO.setTotal(total_venta);
+        return comandaDTO;
+    }
+
+    public void setClienteSeleccionado(Long id, String nombre_completo) {
+        // Guardamos el ID para cuando se ejecute el boton
+        this.id_cliente_seleccionado = id;
+
+        // Seteamos el texto del boton para que el mesero peuda ver el nombre seleccionado
+        this.btn_buscar_cliente.setText(nombre_completo);
+        this.btn_buscar_cliente.setBackground(verde);
+
+        //checamos que si se este haciendo el proceso (borrar cuando ya no sea necesario)
+        System.out.println("Cliente recibido en Ventana Comanda: " + id + " - " + nombre_completo);
+    }
+
 }

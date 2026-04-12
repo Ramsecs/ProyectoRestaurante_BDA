@@ -14,6 +14,8 @@ import entidadesRestaurante.Ingrediente;
 import entidadesRestaurante.ProductoIngrediente;
 import dtosDelRestaurante.IngredienteBusquedaDTO;
 import dtosDelRestaurante.IngredientesDTO;
+import dtosDelRestaurante.ProductoComandaDTO;
+import entidadesEnumeradorDTO.TipoPlatilloDTO;
 import entidadesRestaurante.Empleado;
 import excepcionesRestaurante.NegocioException;
 import java.util.ArrayList;
@@ -40,13 +42,18 @@ import validadores.Validaciones;
  * @author RAMSES
  */
 public class Coordinador implements Observador {
-    
+
     //Lista temporal para los ingredientes que el usuario seleccione para cuando agrega el producto
     private List<ProductoIngredienteDTO> ingredientesTemporales;
     // Guardamos temporalmente los datos del producto que estan en la ventana
     private ProductoDTO productoTemporal;
     //Ventana para mostrar detalles
     private VentanaDialogVerIngredientes ventana_ver_detalles;
+    /**
+     * Variable para el empleado que este en sesión, esto sera util para poder
+     * relacionar el mesero y la comanda.
+     */
+    private EmpleadoRegistroDTO empleado_sesion;
 
 //Capas de negocio (BOs)
     private final IClienteBO clienteBO;
@@ -55,8 +62,11 @@ public class Coordinador implements Observador {
     private final IEmpleadoBO empleadoBO;
     
     private Validaciones validar;
-
+    
     private final IIngredienteBO ingredienteBO;
+
+    //Parte del dto para las comandas
+    private ClienteBusquedaDTO cliente_Seleccionado_comanda;
 
     //Ventanas que se usaran para la navegacion
     private VentanaMenuAdmin ventana_menu_admin;
@@ -66,14 +76,10 @@ public class Coordinador implements Observador {
     private VentanaMenuIngrediente ventana_menu_ingrediente;
     private VentanaMenuComanda ventana_menu_comanda;
     private VentanaCrearComanda ventana_crear_comanda;
-    private VentanaDialogAgregarIngrediente ventana_agregar_ingredientes; 
+    private VentanaDialogAgregarIngrediente ventana_agregar_ingredientes;
     private VentanaInicioSesion ventana_inicio_sesion;
+    private VentanaDialogComandaCliente ventana_dialog_cliente;
     //No mover es mio (Jos)
-    private long idMeseroSesion = 1; // Un ID quemado para pruebas hasta que llegue el commit
-
-    public long getIdMeseroSesion() {
-        return idMeseroSesion; //mockito para poder avanzar en la logica
-    }
 
     public Coordinador() {
         this.clienteBO = ClienteBO.getInstanceClienteBO();
@@ -85,6 +91,24 @@ public class Coordinador implements Observador {
     }
 
     /**
+     * Guardamos este inicio de sesión, lo vamos a utilizar más adelante
+     *
+     * @param empleado empleado en sesión
+     */
+    public void setMeseroEnSesion(EmpleadoRegistroDTO empleado) {
+        this.empleado_sesion = empleado;
+    }
+
+    /**
+     * Obtener el empleado de la sesión
+     *
+     * @return
+     */
+    public EmpleadoRegistroDTO geMeseroEnSesion() {
+        return empleado_sesion;
+    }
+
+    /**
      * Hacer visible la pantalla de menu admin, si esta no ha sido abierta
      * entonces creamos una nueva
      */
@@ -92,18 +116,18 @@ public class Coordinador implements Observador {
         if (ventana_menu_admin == null) {
             ventana_menu_admin = new VentanaMenuAdmin(this);
         }
-
+        
         ventana_menu_admin.setVisible(true);
-
+        
     }
-
+    
     public void iniciarMenuMesero() {
         if (ventana_menu_mesero == null) {
             ventana_menu_mesero = new VentanaMenuMesero(this);
         }
-
+        
         ventana_menu_mesero.setVisible(true);
-
+        
     }
 
     /**
@@ -114,7 +138,7 @@ public class Coordinador implements Observador {
         if (ventana_menu_mesero != null) {
             ventana_menu_mesero.setVisible(false);
         }
-
+        
         if (ventana_menu_cliente == null) {
             ventana_menu_cliente = new VentanaMenuCliente(this);
             ventana_menu_cliente.setConexionObservador(this);
@@ -123,7 +147,7 @@ public class Coordinador implements Observador {
         this.buscarClientes("");
         ventana_menu_cliente.setVisible(true);
         ventana_menu_cliente.toFront();
-
+        
     }
 
     /**
@@ -134,7 +158,7 @@ public class Coordinador implements Observador {
         if (ventana_menu_ingrediente != null) {
             ventana_menu_ingrediente.setVisible(false);
         }
-
+        
         if (ventana_menu_ingrediente == null) {
             ventana_menu_ingrediente = new VentanaMenuIngrediente(this);
             ventana_menu_ingrediente.setConexionObservador(this);
@@ -145,7 +169,6 @@ public class Coordinador implements Observador {
         //ES MUY SIMILAR POR NO DECIR QUE IGUAL A LA DE mostrarMenuCliente
     }
 
-
     /**
      * Hacer visible la ventana del menu de Producto donde es la edicion,
      * registro y busqueda de productos.
@@ -154,11 +177,11 @@ public class Coordinador implements Observador {
         if (ventana_menu_admin != null) {
             ventana_menu_admin.setVisible(false);
         }
-
+        
         if (ventana_menu_producto == null) {
             ventana_menu_producto = new VentanaMenuProducto(this);
         }
-
+        
         ventana_menu_producto.setVisible(true);
         ventana_menu_producto.toFront();
     }
@@ -172,18 +195,18 @@ public class Coordinador implements Observador {
         if (ventana_menu_cliente != null) {
             ventana_menu_cliente.dispose();
         }
-
+        
         if (ventana_menu_mesero != null) {
             ventana_menu_mesero.setVisible(true);
             ventana_menu_mesero.toFront();
         }
     }
-
+    
     public void regresarMenuAdmin() {
         if (ventana_menu_ingrediente != null) {
             ventana_menu_ingrediente.dispose();
         }
-
+        
         if (ventana_menu_admin != null) {
             ventana_menu_admin.setVisible(true);
             ventana_menu_admin.toFront();
@@ -196,25 +219,25 @@ public class Coordinador implements Observador {
      *
      */
     public void agregarClienteFrecuente(ClienteDTO clienteDTO) {
-
+        
         try {
             clienteBO.registrarCliente(clienteDTO);
             JOptionPane.showMessageDialog(null, "Se agrego el cliente");
         } catch (NegocioException e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
         }
-
+        
     }
-
+    
     public void buscarClientes(String filtro) {
-
+        
         try {
             List<ClienteBusquedaDTO> lista = clienteBO.buscarClientes(filtro);
             ventana_menu_cliente.actualizarTabla(lista);
         } catch (NegocioException e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
         }
-
+        
     }
 
     /**
@@ -234,7 +257,7 @@ public class Coordinador implements Observador {
 
             // 3. Refrescamos la tabla para que se reflejen los cambios
             this.buscarClientes("");
-
+            
         } catch (NegocioException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error de Actualizacion", JOptionPane.ERROR_MESSAGE);
 
@@ -266,17 +289,42 @@ public class Coordinador implements Observador {
 
     //-------------------------METODOS JOS JOS----------------------------------
     /**
+     * Metodo para mostrar por categoria los productos en el apartado de comanda
+     *
+     * @param tipo
+     */
+    public void cargarProductosPorCategoria(TipoPlatilloDTO tipo) {
+        try {
+            //1.Llamar al BO para que nos despliegue los platillos segun el tipo
+            List<ProductoComandaDTO> productos = productoBO.listarProductosPorCategoria(tipo);
+            
+            if (productos != null) {
+                //2. Pasamos los  DTOs a la ventana para que los muestre en la tabla
+                this.ventana_crear_comanda.cargarTablaProductos(productos);
+            } else {
+                System.out.println("No se encontraron productos para la categoria: " + tipo);
+                //Limpiamos la tabla visualmente 
+                this.ventana_crear_comanda.cargarTablaProductos(new ArrayList<>());
+            }
+        } catch (NegocioException e) {
+            JOptionPane.showMessageDialog(ventana_menu_cliente, e.getMessage(),
+                    "Error de Consulta", JOptionPane.ERROR_MESSAGE);
+            this.ventana_crear_comanda.cargarTablaProductos(new ArrayList<>());
+        }
+    }
+
+    /**
      * Este metodo abre la ventana para agregar una comanda nueva.
      */
     public void mostrarCrearComanda() {
-        if (ventana_menu_mesero != null) {
-            ventana_menu_mesero.setVisible(false);
+        if (ventana_menu_comanda != null) {
+            ventana_menu_comanda.dispose();
         }
-
+        
         if (ventana_crear_comanda == null) {
             ventana_crear_comanda = new VentanaCrearComanda(this);
         }
-
+        
         ventana_crear_comanda.setVisible(true);
         ventana_crear_comanda.toFront();
     }
@@ -289,7 +337,7 @@ public class Coordinador implements Observador {
         if (ventana_menu_mesero != null) {
             ventana_menu_mesero.dispose();
         }
-
+        
         if (ventana_menu_comanda == null) {
             ventana_menu_comanda = new VentanaMenuComanda(this);
             ventana_menu_comanda.setConexionObservador(this);
@@ -306,7 +354,7 @@ public class Coordinador implements Observador {
         if (ventana_menu_comanda != null) {
             ventana_menu_comanda.dispose();
         }
-
+        
         if (ventana_menu_mesero == null) {
             ventana_menu_mesero = new VentanaMenuMesero(this);
         }
@@ -315,20 +363,68 @@ public class Coordinador implements Observador {
     }
 
     /**
-     * Con este metodo vamos a poder mostrar el JDialog de la tabla de clientes
-     * para poder adjudicar la comanda al cliente
+     * Metodo para que se muestre el Dialog de la tabla con clientes que pueden
+     * ser seleccionados para poder adjudicarselo a una comanda
      *
-     * @param padre que es el frame del que viene el JDialog
+     * @param padre que es el frame padre
      */
+    public void mostrarSelectorCliente(VentanaCrearComanda padre) {
+        // 1. Guardamos la instancia en la variable global de la clase
+        this.ventana_dialog_cliente = new VentanaDialogComandaCliente(this, padre);
 
-    public void mostrarDialogClienteComanda(JFrame padre) {
-        VentanaDialogComandaCliente dialogo = new VentanaDialogComandaCliente(this, padre);
-        dialogo.setVisible(true);
+        // 2. Cargamos la lista inicial
+        this.buscarClientesParaComanda("");
+        
+        this.ventana_dialog_cliente.setVisible(true);
     }
 
+    /**
+     * Este metodo ejecuta la busqueda del cliente, reutilizamos el bo y el dao
+     *
+     * @param filtro lo que va a recibir para buscarlo, en este caso el nombre
+     */
+    public void buscarClientesParaComanda(String filtro) {
+        try {
+            // Pedimos la lista al BO
+            List<ClienteBusquedaDTO> lista = clienteBO.buscarClientes(filtro);
+
+            // Si el diálogo está abierto, le refrescamos la tabla
+            if (this.ventana_dialog_cliente != null) {
+                this.ventana_dialog_cliente.cargarTabla(lista);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+    }
+    
     public void mostrarDialogModificarComanda(JFrame padre) {
         VentanaDialogModificar dialogo = new VentanaDialogModificar(this, padre);
         dialogo.setVisible(true);
+    }
+    
+    public void setClienteEnComanda(ClienteBusquedaDTO cliente) {
+        System.out.println("--- FLAG COORDINADOR ---");
+        System.out.println("Recibido en Coordinador: " + (cliente != null ? cliente.getNombre() : "NULL"));
+
+// 1. Guardamos el cliente en una variable del coordinador para la persistencia final
+        if (cliente != null) {
+            this.cliente_Seleccionado_comanda = cliente;
+        }
+
+        // 2. Actualizamos el boton en la ventana de la comanda
+        if (cliente != null) {
+            String nombre = cliente.getNombre() + " " + cliente.getApellido_paterno();
+            // Usamos el método que ya tienes en tu VentanaCrearComanda
+            ventana_crear_comanda.setClienteSeleccionado(cliente.getId(), nombre);
+        }
+        //Cerrar una vez que se selecciona un cliente
+        if (this.ventana_dialog_cliente != null) {
+            this.ventana_dialog_cliente.dispose();
+            this.ventana_dialog_cliente = null; // Limpiamos la referencia
+        } else {
+            System.out.println("El objeto ventana_dialog_cliente es NULL en el Coordinador");
+        }
     }
 
     //===================FIN METODOS JOS JOS====================================
@@ -338,8 +434,7 @@ public class Coordinador implements Observador {
 
         dialogo_vista.setVisible(true);
     }
-    */
-
+     */
     @Override
     public void actualizar_empleado(ClienteBusquedaDTO clienteDTO) {
         this.actualizarCliente(clienteDTO);
@@ -359,15 +454,15 @@ public class Coordinador implements Observador {
     public List<ProductoDTO> obtenerListaProductos() {
         List<ProductoDTO> lista_productos = new ArrayList<>();
         try {
-
+            
             lista_productos = productoBO.listarProductos();
-
+            
         } catch (NegocioException ex) {
             System.out.println("No se consiguio de manera correcta la lista de productos de negocio.");
         }
-
+        
         return lista_productos;
-
+        
     }
 
     /**
@@ -395,18 +490,18 @@ public class Coordinador implements Observador {
      * @param frame
      */
     public void ventanaProductosAAgregarIngredientes(JFrame frame) {
-
+        
         if (ventana_menu_producto != null) {
             ventana_menu_producto.setVisible(false);
         }
-
+        
         if (ventana_agregar_ingredientes == null) {
             ventana_agregar_ingredientes = new VentanaDialogAgregarIngrediente(this, frame);
             ventana_agregar_ingredientes.setConexionObservador(this);
         }
         ventana_agregar_ingredientes.setVisible(true);
         ventana_agregar_ingredientes.toFront();
-
+        
     }
 
     /**
@@ -417,7 +512,7 @@ public class Coordinador implements Observador {
         if (ventana_menu_producto != null) {
             ventana_menu_producto.setVisible(false);
         }
-
+        
         if (ventana_menu_admin != null) {
             ventana_menu_admin.setVisible(true);
             ventana_menu_admin.toFront();
@@ -443,7 +538,7 @@ public class Coordinador implements Observador {
             Ingrediente ing = new Ingrediente();
             ing.setId(dto.getIdIngrediente());
             pi.setIngredientes(ing);
-
+            
             detalles.add(pi);
         }
 
@@ -455,11 +550,11 @@ public class Coordinador implements Observador {
             // Opcional: Refrescar la tabla de la ventana productos
             ventana_menu_producto.llenarTabla();
             ventana_menu_producto.limpiarCampos();
-
+            
         } catch (NegocioException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage());
         }
-
+        
     }
 
     /**
@@ -528,7 +623,7 @@ public class Coordinador implements Observador {
             ventana_ver_detalles = new VentanaDialogVerIngredientes(this, padre, true, detalles);
             ventana_ver_detalles.setTitle("Ingredientes de: " + nombre_producto);
             ventana_ver_detalles.setVisible(true);
-
+            
         } catch (NegocioException e) {
             JOptionPane.showMessageDialog(padre, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -563,7 +658,7 @@ public class Coordinador implements Observador {
             JOptionPane.showMessageDialog(null, e.getMessage());
         }
     }
-
+    
     public void registrarIngrediente(IngredientesDTO ingredienteDTO) {
         try {
             ingredienteBO.registrarIngredientes(ingredienteDTO);
@@ -629,14 +724,15 @@ public class Coordinador implements Observador {
         if (ventana_inicio_sesion == null) {
             ventana_inicio_sesion = new VentanaInicioSesion(this);
         }
-
+        
         ventana_inicio_sesion.setVisible(true);
-
-    
+        
     }
-    
+
     /**
-     * Llama al BO para realizar un registro masivo de empleados (Admin o Meseros).
+     * Llama al BO para realizar un registro masivo de empleados (Admin o
+     * Meseros).
+     *
      * @param empleados Lista de entidades a registrar.
      * @throws Exception Si ocurre un error en la persistencia o encriptación.
      */
@@ -646,6 +742,7 @@ public class Coordinador implements Observador {
 
     /**
      * Llama al BO para validar el acceso mediante el código.
+     *
      * @param codigo El código ingresado en el campo amarillo de la ventana.
      * @return Un objeto DTO con la información del empleado y su Rol.
      * @throws Exception Si el código es incorrecto o el usuario no existe.
@@ -653,12 +750,11 @@ public class Coordinador implements Observador {
     public EmpleadoRegistroDTO validarIngresoPorCodigo(String codigo) throws Exception {
         return this.empleadoBO.loginPorCodigo(codigo);
     }
-    
-    
+
     /**
      * Mostrar las ventana de menu admin.
      */
-    public void abrirVentanaMenuAdmin(){
+    public void abrirVentanaMenuAdmin() {
         if (ventana_inicio_sesion != null) {
             ventana_inicio_sesion.dispose();
         }
@@ -670,12 +766,11 @@ public class Coordinador implements Observador {
         ventana_menu_admin.toFront();
         
     }
-    
-    
+
     /**
      * Mostrar las ventana de menu mesero.
      */
-    public void abrirVentanaMenuMesero(){
+    public void abrirVentanaMenuMesero() {
         if (ventana_inicio_sesion != null) {
             ventana_inicio_sesion.dispose();
         }
@@ -687,13 +782,14 @@ public class Coordinador implements Observador {
         ventana_menu_mesero.toFront();
         
     }
-    
+
     /**
-     * Este metodo oculta la pantalla con la que estamos trabajando, para despues regresarnos a la ventana 
-     * de incio de sesion.
-     * @param frame 
+     * Este metodo oculta la pantalla con la que estamos trabajando, para
+     * despues regresarnos a la ventana de incio de sesion.
+     *
+     * @param frame
      */
-    public void regresarInicioSesion(JFrame frame){
+    public void regresarInicioSesion(JFrame frame) {
         frame.setVisible(false);
         
         if (ventana_inicio_sesion == null) {

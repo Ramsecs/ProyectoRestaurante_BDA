@@ -19,24 +19,20 @@ public class ClienteAdapter {
      * @param cliente
      * @return ClienteFrecuente
      */
-    public ClienteFrecuente DTOAEntidadClienteFrecuente(ClienteDTO cliente){
-        
-        if (cliente == null) {
-            return null;
-        }
-        
-        ClienteFrecuente clienteEntidad = new ClienteFrecuente();
-        clienteEntidad.setNombre(cliente.getNombre());
-        clienteEntidad.setApellido_paterno(cliente.getApellido_paterno());
-        clienteEntidad.setApellido_materno(cliente.getApellido_materno());
-        clienteEntidad.setCorreo(cliente.getCorreo());
-        clienteEntidad.setTelefono(cliente.getTelefono());
-        clienteEntidad.setFecha_registro(LocalDate.now());
-        clienteEntidad.setPuntos(0);
-        
-        return clienteEntidad;
-        
-    }
+    public ClienteFrecuente DTOAEntidadClienteFrecuente(ClienteDTO cliente) {
+    if (cliente == null) return null;
+
+    ClienteFrecuente clienteEntidad = new ClienteFrecuente();
+    clienteEntidad.setNombre(cliente.getNombre());
+    clienteEntidad.setApellido_paterno(cliente.getApellido_paterno());
+    clienteEntidad.setApellido_materno(cliente.getApellido_materno());
+    clienteEntidad.setCorreo(cliente.getCorreo());
+    clienteEntidad.setTelefono(cliente.getTelefono());
+    
+    clienteEntidad.setPuntos(0); 
+
+    return clienteEntidad;
+}
     
     
     public ClienteDTO EntidadADTOCliente(ClienteFrecuente cliente){

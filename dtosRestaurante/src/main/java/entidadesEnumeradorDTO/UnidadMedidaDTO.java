@@ -9,5 +9,5 @@ package entidadesEnumeradorDTO;
  * @author RAMSES
  */
 public enum UnidadMedidaDTO {
-    MILILITROS, GRAMOS, PIEZA
+    MILILITROS, GRAMOS, PIEZA, GALONES, KILOS, LITROS
 }

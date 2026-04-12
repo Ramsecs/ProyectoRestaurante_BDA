@@ -192,6 +192,7 @@ public class VentanaInicioSesion extends JFrame {
                         coordinador.abrirVentanaMenuAdmin();
                     } else {
                         txtCodigo.setText("");
+                        coordinador.setMeseroEnSesion(emp);
                         coordinador.abrirVentanaMenuMesero();
                     }
                     this.dispose();

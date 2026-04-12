@@ -25,21 +25,22 @@ public class PruebasPantallas {
     public static void main(String[] args) {
         Coordinador coordinador = new Coordinador();
         
-        /* INSERTS MASIVOS DE LOS EMPLEADOS
+       
         
         
         List<Empleado> nuevos = new ArrayList<>();
         // Agregamos un Admin y un Mesero a la misma lista
-        nuevos.add(new Administrador("admin_rest", "CODE123", "Ramses", "Admin", "García", "12345678"));
-        nuevos.add(new Mesero("mesero_01", "CODE456", "Daniel", "López", "Méndez", "87654321"));
-
-        try {
-            coordinador.registrarEmpleadosMasivo(nuevos);
-            System.out.println("Cuentas creadas exitosamente.");
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-        */
+        //nuevos.add(new Administrador("admin_rest", "CODE123", "Ramses", "Admin", "García", "12345678"));
+        //nuevos.add(new Mesero("mesero_01", "CODE456", "Daniel", "López", "Méndez", "87654321"));
+//        nuevos.add(new Administrador ("admin_rest", "CODE098", "Alexa", "Quintana", "Benitez", "6441025765"));
+//        nuevos.add(new Mesero ("admin_02", "CODE321", "Daniel", "Ruiz", "Jocobi", "6441234567"));
+//        try {
+//            coordinador.registrarEmpleadosMasivo(nuevos);
+//            System.out.println("Cuentas creadas exitosamente.");
+//        } catch (Exception e) {
+//            System.out.println("Error: " + e.getMessage());
+//        }
+        
         coordinador.iniciarInicioSesion();
         
         

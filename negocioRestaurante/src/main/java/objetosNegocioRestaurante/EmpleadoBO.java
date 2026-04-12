@@ -82,9 +82,9 @@ public class EmpleadoBO implements IEmpleadoBO{
                 String rol = "DESCONOCIDO";
                 
                 if (e instanceof Mesero){
-                    rol = "ADMINISTRADOR";
-                }else{
                     rol = "MESERO";
+                }else{
+                    rol = "ADMINISTRADOR";
                 }
 
                 // Retornamos el DTO solicitado

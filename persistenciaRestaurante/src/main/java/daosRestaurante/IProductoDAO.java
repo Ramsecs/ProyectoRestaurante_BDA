@@ -7,6 +7,7 @@ package daosRestaurante;
 import dtosDelRestaurante.ProductoDTO;
 import entidadesRestaurante.Producto;
 import entidadesRestaurante.ProductoIngrediente;
+import enumEntidades.TipoPlatillo;
 import excepcionesRestaurante.PersistenciaException;
 import java.util.List;
 
@@ -23,5 +24,7 @@ public interface IProductoDAO {
     public void actualizarNombre(Long id, String nuevoNombre) throws PersistenciaException;
     
     public void actualizarPrecio(Long id, Double nuevoPrecio) throws PersistenciaException;
+    
+    public List<Producto> consultarPorCategoria(TipoPlatillo tipo) throws PersistenciaException;
     
 }

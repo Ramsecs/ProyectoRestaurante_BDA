@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 import validadores.Validaciones;
 
 /**
- * 
+ *
  * @author RAMSES
  */
 public class ClienteBO implements IClienteBO {
@@ -36,18 +36,21 @@ public class ClienteBO implements IClienteBO {
     private IClienteDAO clienteDAO = ClienteDAO.getInstanceClienteDAO();
 
     /**
-     * Utilidad de validaciones para verificar el formato de los datos de entrada.
+     * Utilidad de validaciones para verificar el formato de los datos de
+     * entrada.
      */
     private Validaciones validar = new Validaciones();
 
     /**
-     * Constructor privado para evitar la instanciacion externa y mantener el patron Singleton.
+     * Constructor privado para evitar la instanciacion externa y mantener el
+     * patron Singleton.
      */
     private ClienteBO() {
     }
 
     /**
      * Obtiene la instancia unica de ClienteBO. Si no existe, la crea.
+     *
      * @return La instancia unica de ClienteBO.
      */
     public static ClienteBO getInstanceClienteBO() {
@@ -58,12 +61,15 @@ public class ClienteBO implements IClienteBO {
     }
 
     /**
-     * Registra un nuevo cliente en el sistema después de validar sus datos personales.
-     * Se encarga de convertir el DTO recibido en una entidad de persistencia.
-     * @param cliente Objeto DTO que contiene la informacion del cliente a registrar.
+     * Registra un nuevo cliente en el sistema después de validar sus datos
+     * personales. Se encarga de convertir el DTO recibido en una entidad de
+     * persistencia.
+     *
+     * @param cliente Objeto DTO que contiene la informacion del cliente a
+     * registrar.
      * @return true si el registro fue exitoso, false en caso contrario.
-     * @throws NegocioException Si los datos del cliente no pasan las validaciones de formato
-     * o si ocurre un error en la capa de persistencia.
+     * @throws NegocioException Si los datos del cliente no pasan las
+     * validaciones de formato o si ocurre un error en la capa de persistencia.
      */
     @Override
     public boolean registrarCliente(ClienteDTO cliente) throws NegocioException {
@@ -98,17 +104,21 @@ public class ClienteBO implements IClienteBO {
             }
             return true;
 
-        } catch (PersistenciaException ex) {
-            throw new NegocioException("Ocurrio un error en negocio al intentar registrar el cliente.");
+        } catch (Exception ex) {
+            ex.printStackTrace(); 
+            throw new NegocioException("Error al registrar: " + ex.getMessage());
         }
     }
 
     /**
-     * Busca clientes basados en un filtro de texto y calcula estadísticas adicionales 
-     * como total de visitas, suma de ventas y puntos acumulados.
-     * @param filtro Cadena de texto para filtrar la busqueda (nombre, telefono, etc.).
+     * Busca clientes basados en un filtro de texto y calcula estadísticas
+     * adicionales como total de visitas, suma de ventas y puntos acumulados.
+     *
+     * @param filtro Cadena de texto para filtrar la busqueda (nombre, telefono,
+     * etc.).
      * @return ClienteBusquedaDTO.
-     * @throws NegocioException Si ocurre un error al consultar los datos en la base de datos.
+     * @throws NegocioException Si ocurre un error al consultar los datos en la
+     * base de datos.
      */
     @Override
     public List<ClienteBusquedaDTO> buscarClientes(String filtro) throws NegocioException {
@@ -150,9 +160,13 @@ public class ClienteBO implements IClienteBO {
     }
 
     /**
-     * Actualiza la información personal de un cliente existente en la base de datos.
-     * @param clienteDTO Objeto que contiene los datos actualizados del cliente y su ID identificador.
-     * @throws NegocioException Si el cliente no existe o si ocurre un error durante la actualización.
+     * Actualiza la información personal de un cliente existente en la base de
+     * datos.
+     *
+     * @param clienteDTO Objeto que contiene los datos actualizados del cliente
+     * y su ID identificador.
+     * @throws NegocioException Si el cliente no existe o si ocurre un error
+     * durante la actualización.
      */
     @Override
     public void actualizarDatosCliente(ClienteBusquedaDTO clienteDTO) throws NegocioException {
