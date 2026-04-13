@@ -155,15 +155,16 @@ public class VentanaDialogComandaCliente extends JDialog {
                     //Esto nos ahorrara conflictos al momento de dibujar la tabla
                     //como puede ser la omisión de eventos que es con lo principal que se tiene
                     //problema
-                    invokeLater(()->{
+                    invokeLater(() -> {
                         for (int i = 0; i < modelo_tabla.getRowCount(); i++) {
                             /**
-                             * Al usar boolean le estamos diciendo a Java el 
+                             * Al usar boolean le estamos diciendo a Java el
                              * tipo de objeto que se encuentra en esa columna
-                             * */
+                             *
+                             */
                             if (i != row && (Boolean) modelo_tabla.getValueAt(i, 5)) {
                                 modelo_tabla.setValueAt(false, i, 5);
-                                
+
                             }
                         }
                     });
@@ -183,7 +184,7 @@ public class VentanaDialogComandaCliente extends JDialog {
                     ClienteBusquedaDTO seleccionado = lista_clientes_actual.get(fila);
                     System.out.println("Click en fila: " + fila + " - Cliente: " + seleccionado.getNombre());
 
-                   //Hacemos que la atención se centre en la fila seleccionada
+                    //Hacemos que la atención se centre en la fila seleccionada
                     modelo_tabla.setValueAt(true, fila, 5);
 
                     //Avisamos al coordinador
@@ -232,17 +233,27 @@ public class VentanaDialogComandaCliente extends JDialog {
      * @param lista de los clientes
      */
     public void cargarTabla(List<ClienteBusquedaDTO> lista) {
-        this.lista_clientes_actual = lista; // Guardamos la lista para saber qué ID corresponde a qué fila
-        modelo_tabla.setRowCount(0); // Limpiamos la tabla
+        // 1. Limpiamos la tabla
+        modelo_tabla.setRowCount(0);
 
-        for (ClienteBusquedaDTO cliente : lista) {
+        // 2. IMPORTANTE: Removemos al cliente general de la lista de referencia 
+        // antes de guardarla, para que los índices coincidan con la tabla.
+        lista.removeIf(cliente
+                -> cliente.getNombre().equalsIgnoreCase("Cliente")
+                && cliente.getApellido_paterno().equalsIgnoreCase("Frecuente")
+        );
+
+        this.lista_clientes_actual = lista;
+
+        // 3. Ahora llenamos la tabla con la lista ya limpia
+        for (ClienteBusquedaDTO cliente : lista_clientes_actual) {
             Object[] fila = {
                 cliente.getNombre(),
                 cliente.getApellido_paterno(),
                 cliente.getApellido_materno(),
                 cliente.getCorreo(),
                 cliente.getTelefono(),
-                false // El RadioButton inicia desmarcado
+                false
             };
             modelo_tabla.addRow(fila);
         }

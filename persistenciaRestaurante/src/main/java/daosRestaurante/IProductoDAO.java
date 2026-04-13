@@ -27,4 +27,6 @@ public interface IProductoDAO {
     
     public List<Producto> consultarPorCategoria(TipoPlatillo tipo) throws PersistenciaException;
     
+    public Producto buscarPorId(Long id) throws PersistenciaException;
+    
 }

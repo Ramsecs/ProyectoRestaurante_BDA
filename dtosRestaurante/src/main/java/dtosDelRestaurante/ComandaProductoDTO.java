@@ -26,13 +26,13 @@ public class ComandaProductoDTO {
      */
     private Integer cantidad;
     /**
-     * Precio unitario del producto.
-     */
-    private Double precio_unitario;
-    /**
      * Detalles que tenga la comanda, como apuntes u otros. 
      */
     private String detalles;
+    /**
+     * Precio del producto unitario.
+     */
+    private Double precio; 
     /**
      * Constructor vacio.
      */
@@ -106,20 +106,6 @@ public class ComandaProductoDTO {
         this.cantidad = cantidad;
     }
     /**
-     * get del precio unitario del producto
-     * @return 
-     */
-    public Double getPrecio_unitario() {
-        return precio_unitario;
-    }
-    /**
-     * set del precio unitario del producto
-     * @param precio_unitario corresponde al precio por undiad del producto
-     */
-    public void setPrecio_unitario(Double precio_unitario) {
-        this.precio_unitario = precio_unitario;
-    }
-    /**
      * get de detalles de la comanda
      * @return 
      */
@@ -135,13 +121,30 @@ public class ComandaProductoDTO {
         this.detalles = detalles;
     }
     /**
+     * Obtener el precio del producto
+     * @return 
+     */
+    public Double getPrecio() {
+        return precio;
+    }
+    /**
+     * setear el precio del producto
+     * @param precio del producto
+     */
+    public void setPrecio(Double precio) {
+        this.precio = precio;
+    }
+    
+    /**
      * toString con todos los datos del DTO 
      * @return 
      */
     @Override
     public String toString() {
-        return "ComandaProductoDTO{" + "id=" + id + ", id_producto=" + id_producto + ", nombre_producto=" + nombre_producto + ", cantidad=" + cantidad + ", precio_unitario=" + precio_unitario + ", detalles=" + detalles + '}';
+        return "ComandaProductoDTO{" + "id=" + id + ", id_producto=" + id_producto + ", nombre_producto=" + nombre_producto + ", cantidad=" + cantidad + ", detalles=" + detalles + ", precio=" + precio + '}';
     }
+    
+    
     
     
 }
