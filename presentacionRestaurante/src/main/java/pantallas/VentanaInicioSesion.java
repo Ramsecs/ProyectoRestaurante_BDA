@@ -89,7 +89,7 @@ public class VentanaInicioSesion extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.anchor = GridBagConstraints.CENTER;
-        gbc.fill = GridBagConstraints.NONE; // Importante: No estirar
+        gbc.fill = GridBagConstraints.NONE;
 
         // Titulo
         JLabel lbl_titulo = new JLabel("Bienvenido a el sistema", SwingConstants.CENTER);
@@ -177,16 +177,14 @@ public class VentanaInicioSesion extends JFrame {
             }
 
             try {
-                // Buscamos al empleado por código
+               
                 EmpleadoRegistroDTO emp = coordinador.validarIngresoPorCodigo(codigoIngresado);
 
-                // VALIDACION DE ROL:
-                // Comparamos el rol del DTO con el esperado en esta pantalla
+             
                 if (emp.getRol().equalsIgnoreCase(rolEsperado)) {
                     
                     JOptionPane.showMessageDialog(this, "¡Bienvenido " + emp.getNombres() + "!");
                     
-                    // Abrir la ventana correspondiente
                     if (emp.getRol().equalsIgnoreCase("ADMINISTRADOR")) {
                         txtCodigo.setText("");
                         coordinador.abrirVentanaMenuAdmin();
@@ -198,7 +196,6 @@ public class VentanaInicioSesion extends JFrame {
                     this.dispose();
 
                 } else {
-                    // Si el codigo existe pero no es para este acceso
                     JOptionPane.showMessageDialog(this, 
                         "Acceso denegado: Este código no pertenece a un " + rolEsperado, 
                         "Error de Rol", 
@@ -207,7 +204,6 @@ public class VentanaInicioSesion extends JFrame {
                 }
 
             } catch (Exception ex) {
-                // Si el código no existe en la BD o hay error de conexión
                 JOptionPane.showMessageDialog(this, "Código de acceso incorrecto", "Error", JOptionPane.ERROR_MESSAGE);
                 txtCodigo.setText("");
             }
