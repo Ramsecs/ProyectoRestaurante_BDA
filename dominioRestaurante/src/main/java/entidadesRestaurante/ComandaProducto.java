@@ -52,7 +52,7 @@ public class ComandaProducto implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_comandas", nullable = false)
     private Comanda comandas;
-
+    
     /**
      * Constructor por defecto requerido por JPA para la gestión de entidades.
      */
@@ -134,7 +134,21 @@ public class ComandaProducto implements Serializable {
      * @param comandas La comanda a la cual vincular este registro. 
      */
     public void setComandas(Comanda comandas) { this.comandas = comandas; }
-
+    /**
+     * Regresa el producto comprado
+     * @return 
+     */
+    public Producto getProductos_comprados() {
+        return productos_comprados;
+    }
+    /**
+     * Setea el producto comprado
+     * @param productos_comprados pertenece a comanda
+     */
+    public void setProductos_comprados(Producto productos_comprados) {
+        this.productos_comprados = productos_comprados;
+    }
+    
     /**
      * Genera un código hash basado en el ID del registro.
      * @return Valor hash calculado.
@@ -158,6 +172,8 @@ public class ComandaProducto implements Serializable {
         final ComandaProducto other = (ComandaProducto) obj;
         return Objects.equals(this.id, other.id);
     }
+    
+    
 
     /**
      * Devuelve una cadena con la información descriptiva del detalle de la comanda.

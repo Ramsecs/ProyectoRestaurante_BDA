@@ -27,7 +27,8 @@ public class VentanaMenuCliente extends JFrame {
 
     private final Coordinador coordinador;
     //Observador 
-    private Observador metiche; 
+    private Observador metiche;
+
     //Enchufe  o puerta para que nuestro observador pueda funcionar, es un setter de Intefaz
     // es como decir que la ventana es el radio y el observador la frecuencia
     //la ventana puede estar activa, pero si no esta vinculada con el observador nadie
@@ -201,15 +202,7 @@ public class VentanaMenuCliente extends JFrame {
         gbc_fondo.insets = new Insets(40, 60, 40, 60);
 
         panel_fondo.add(cuadro_blanco, gbc_fondo);
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
 //==============================================ACTIONS LISTENER================        
         btn_volver.addActionListener(a -> {
             coordinador.regresarMenuMesero();
@@ -219,14 +212,14 @@ public class VentanaMenuCliente extends JFrame {
             if (txt_nombre.getText().trim().isEmpty() || txt_apellido_paterno.getText().trim().isEmpty()
                     || txt_apellido_materno.getText().trim().isEmpty()
                     || txt_telefono.getText().trim().isEmpty()) {
-                
+
                 JOptionPane.showMessageDialog(null, "Los campos no pueden ser nulos");
                 return;
             }
-            
+
             if (txt_correo.getText().trim().isEmpty()) {
                 clienteDTO.setCorreo(null);
-            }else{
+            } else {
                 clienteDTO.setCorreo(txt_correo.getText());
             }
             clienteDTO.setNombre(txt_nombre.getText());
@@ -295,7 +288,23 @@ public class VentanaMenuCliente extends JFrame {
         modelo_tabla.setRowCount(0);
         // Recorremos la lista de DTOs que nos mando el BO por medio del cordi
 
+        if (lista == null) {
+            return;
+        }
+
+        // 2. Recorremos la lista de DTOs
         for (ClienteBusquedaDTO dto : lista) {
+
+            // --- FILTRO PARA OCULTAR CLIENTE GENERAL ---
+            // Usamos equalsIgnoreCase para evitar problemas con mayúsculas/minúsculas
+            boolean esGeneral = dto.getNombre().equalsIgnoreCase("Cliente")
+                    && dto.getApellido_paterno().equalsIgnoreCase("Frecuente");
+
+            if (esGeneral) {
+                continue; // Si es el general, se salta el addRow y va al siguiente
+            }
+
+            // Si no es el general, se agrega a la tabla con todas sus columnas
             Object[] fila = {
                 dto.getNombre(),
                 dto.getApellido_paterno(),
@@ -339,11 +348,10 @@ public class VentanaMenuCliente extends JFrame {
         String correo = modelo_tabla.getValueAt(fila, 3).toString().trim();
         String telefono = modelo_tabla.getValueAt(fila, 4).toString().trim();
 
-        // --- VALIDACION A: CAMPOS NULOS O VACIOS ---
-        // El materno a veces es opcional, pero nombre, paterno, correo y tel son ley.
+        // --- SECCIÓN DE VALIDACIONES ---
         if (nombre.isEmpty() || paterno_apellido.isEmpty() || materno_apellido.isEmpty() || telefono.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No puede haber campos obligatorios vacíos", "Validación", JOptionPane.WARNING_MESSAGE);
-            notificarError(); //metodo para refrescar la tabla
+            notificarError(); // Refresca la tabla para revertir el cambio visual
             return;
         }
         
@@ -376,7 +384,7 @@ public class VentanaMenuCliente extends JFrame {
                 notificarError();
                 return;
             }
-            correo_final = correo; 
+            correo_final = correo;
         }
 
         //VALIDACION DEL TELEFONO
@@ -396,16 +404,21 @@ public class VentanaMenuCliente extends JFrame {
         ClienteBusquedaDTO cliente_editado = new ClienteBusquedaDTO();
         cliente_editado.setId(id_real); // Le pasamos el ID que rescatamos de la lista
 
-        cliente_editado.setNombre((String) modelo_tabla.getValueAt(fila, 0));
-        cliente_editado.setApellido_paterno((String) modelo_tabla.getValueAt(fila, 1));
-        cliente_editado.setApellido_materno((String) modelo_tabla.getValueAt(fila, 2));
-        cliente_editado.setCorreo(correo_final);
-        cliente_editado.setTelefono((String) modelo_tabla.getValueAt(fila, 4));
-        
-        //Aqui entra en accion el observador (metiche) 
-        
-        if (this.metiche != null) {
-            this.metiche.actualizar_empleado(cliente_editado);
+            cliente_editado.setNombre(nombre);
+            cliente_editado.setApellido_paterno(paterno_apellido);
+            cliente_editado.setApellido_materno(materno_apellido);
+            cliente_editado.setCorreo(correo_final);
+            cliente_editado.setTelefono(telefono);
+
+            // Notificamos al observador para persistir en la base de datos
+            if (this.metiche != null) {
+                this.metiche.actualizar_empleado(cliente_editado);
+            }
+
+            System.out.println("Actualización exitosa para el cliente ID: " + id_real);
+        } else {
+            JOptionPane.showMessageDialog(this, "Error de sincronización: No se encontró el registro original.");
+            notificarError();
         }
     }
     

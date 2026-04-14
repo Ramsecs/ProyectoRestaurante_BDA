@@ -6,6 +6,8 @@ package controladorRestaurante;
 
 import dtosDelRestaurante.ClienteBusquedaDTO;
 import dtosDelRestaurante.ClienteDTO;
+import dtosDelRestaurante.ComandaDTO;
+import dtosDelRestaurante.ComandaProductoDTO;
 import dtosDelRestaurante.EmpleadoRegistroDTO;
 import dtosDelRestaurante.IngredienteDTOLista;
 import dtosDelRestaurante.ProductoDTO;
@@ -23,12 +25,16 @@ import excepcionesRestaurante.NegocioException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import objetosNegocioRestaurante.ClienteBO;
+import objetosNegocioRestaurante.ComandaBO;
 import objetosNegocioRestaurante.EmpleadoBO;
 import objetosNegocioRestaurante.IClienteBO;
+import objetosNegocioRestaurante.IComandaBO;
 import objetosNegocioRestaurante.IEmpleadoBO;
 import objetosNegocioRestaurante.IIngredienteProductoBO;
 import objetosNegocioRestaurante.IProductoBO;
@@ -65,8 +71,10 @@ public class Coordinador implements Observador {
     private final IEmpleadoBO empleadoBO;
     private final IReporteBO reporteBO;
     
+    private final IComandaBO comandaBO;
+
     private Validaciones validar;
-    
+
     private final IIngredienteBO ingredienteBO;
 
     //Parte del dto para las comandas
@@ -93,6 +101,7 @@ public class Coordinador implements Observador {
         this.ingredienteBO = IngredienteBO.getInstanceIngredienteBO();
         this.empleadoBO = EmpleadoBO.getInstanceEmpleadoBO();
         this.reporteBO = ReporteBO.getInstanceReporteBO();
+        this.comandaBO = ComandaBO.getInstanceComandaBO();
         validar = new Validaciones();
     }
 
@@ -122,9 +131,9 @@ public class Coordinador implements Observador {
         if (ventana_menu_admin == null) {
             ventana_menu_admin = new VentanaMenuAdmin(this);
         }
-        
+
         ventana_menu_admin.setVisible(true);
-        
+
     }
     
     /**
@@ -134,9 +143,9 @@ public class Coordinador implements Observador {
         if (ventana_menu_mesero == null) {
             ventana_menu_mesero = new VentanaMenuMesero(this);
         }
-        
+
         ventana_menu_mesero.setVisible(true);
-        
+
     }
 
     /**
@@ -147,7 +156,7 @@ public class Coordinador implements Observador {
         if (ventana_menu_mesero != null) {
             ventana_menu_mesero.setVisible(false);
         }
-        
+
         if (ventana_menu_cliente == null) {
             ventana_menu_cliente = new VentanaMenuCliente(this);
             ventana_menu_cliente.setConexionObservador(this);
@@ -156,7 +165,7 @@ public class Coordinador implements Observador {
         this.buscarClientes("");
         ventana_menu_cliente.setVisible(true);
         ventana_menu_cliente.toFront();
-        
+
     }
 
     /**
@@ -167,7 +176,7 @@ public class Coordinador implements Observador {
         if (ventana_menu_ingrediente != null) {
             ventana_menu_ingrediente.setVisible(false);
         }
-        
+
         if (ventana_menu_ingrediente == null) {
             ventana_menu_ingrediente = new VentanaMenuIngrediente(this);
             ventana_menu_ingrediente.setConexionObservador(this);
@@ -186,11 +195,11 @@ public class Coordinador implements Observador {
         if (ventana_menu_admin != null) {
             ventana_menu_admin.setVisible(false);
         }
-        
+
         if (ventana_menu_producto == null) {
             ventana_menu_producto = new VentanaMenuProducto(this);
         }
-        
+
         ventana_menu_producto.setVisible(true);
         ventana_menu_producto.toFront();
     }
@@ -204,7 +213,7 @@ public class Coordinador implements Observador {
         if (ventana_menu_cliente != null) {
             ventana_menu_cliente.dispose();
         }
-        
+
         if (ventana_menu_mesero != null) {
             ventana_menu_mesero.setVisible(true);
             ventana_menu_mesero.toFront();
@@ -219,7 +228,7 @@ public class Coordinador implements Observador {
         if (ventana_menu_ingrediente != null) {
             ventana_menu_ingrediente.dispose();
         }
-        
+
         if (ventana_menu_admin != null) {
             ventana_menu_admin.setVisible(true);
             ventana_menu_admin.toFront();
@@ -233,14 +242,14 @@ public class Coordinador implements Observador {
      * @param clienteDTO 
      */
     public void agregarClienteFrecuente(ClienteDTO clienteDTO) {
-        
+
         try {
             clienteBO.registrarCliente(clienteDTO);
             JOptionPane.showMessageDialog(null, "Se agrego el cliente");
         } catch (NegocioException e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
         }
-        
+
     }
     
     /**
@@ -250,14 +259,14 @@ public class Coordinador implements Observador {
      * @param filtro 
      */
     public void buscarClientes(String filtro) {
-        
+
         try {
             List<ClienteBusquedaDTO> lista = clienteBO.buscarClientes(filtro);
             ventana_menu_cliente.actualizarTabla(lista);
         } catch (NegocioException e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
         }
-        
+
     }
 
     /**
@@ -277,7 +286,7 @@ public class Coordinador implements Observador {
 
             // 3. Refrescamos la tabla para que se reflejen los cambios
             this.buscarClientes("");
-            
+
         } catch (NegocioException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error de Actualizacion", JOptionPane.ERROR_MESSAGE);
 
@@ -307,7 +316,56 @@ public class Coordinador implements Observador {
         dialogo.setVisible(true);
     }
 
-    //-------------------------METODOS JOS JOS----------------------------------
+    //==========================================================================
+    //==========================METODOS JOS JOS=================================
+    //==========================================================================
+    /**
+     * Para obtener el di del lciente general
+     *
+     * @return
+     */
+    public Long obtenerIdClienteGeneral() {
+        try {
+            // Buscamos al cliente que se llame "Cliente" y apellido "Frecuente" (según tu imagen)
+            List<ClienteBusquedaDTO> lista = clienteBO.buscarClientes("Cliente");
+            for (ClienteBusquedaDTO cliente : lista) {
+                if (cliente.getNombre().equals("Cliente") && cliente.getApellido_paterno().equals("Frecuente")) {
+                    return cliente.getId(); // Aquí devolvería el 8 automáticamente
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error al recuperar ID de cliente general");
+        }
+        return null;
+    }
+
+    /**
+     * Solo para la main para poder registrar el cliente general
+     *
+     * @param cliente
+     * @throws NegocioException
+     */
+    public void registrarCliente(ClienteDTO cliente) throws NegocioException {
+        this.clienteBO.registrarCliente(cliente);
+    }
+
+    /**
+     * Metodo para guardar la comanda
+     *
+     * @param comandaDTO
+     * @throws NegocioException
+     */
+    public void guardarComanda(ComandaDTO comandaDTO) throws NegocioException {
+        try {
+            // Extraemos la lista de productos que ya vive dentro del DTO 
+            // y se la pasamos al BO junto con el DTO principal
+            this.comandaBO.guardarComanda(comandaDTO, comandaDTO.getProductos());
+        } catch (NegocioException ex) {
+            // Mantenemos la logica de lanzar la excepción hacia la ventana
+            throw new NegocioException(ex.getMessage());
+        }
+    }
+
     /**
      * Metodo para mostrar por categoria los productos en el apartado de comanda
      *
@@ -317,7 +375,7 @@ public class Coordinador implements Observador {
         try {
             //1.Llamar al BO para que nos despliegue los platillos segun el tipo
             List<ProductoComandaDTO> productos = productoBO.listarProductosPorCategoria(tipo);
-            
+
             if (productos != null) {
                 //2. Pasamos los  DTOs a la ventana para que los muestre en la tabla
                 this.ventana_crear_comanda.cargarTablaProductos(productos);
@@ -340,13 +398,24 @@ public class Coordinador implements Observador {
         if (ventana_menu_comanda != null) {
             ventana_menu_comanda.dispose();
         }
-        
+
         if (ventana_crear_comanda == null) {
             ventana_crear_comanda = new VentanaCrearComanda(this);
         }
-        
+
         ventana_crear_comanda.setVisible(true);
         ventana_crear_comanda.toFront();
+    }
+    public void volverMenuComanda(){
+        if (ventana_crear_comanda != null) {
+            ventana_crear_comanda.dispose();
+        }
+        if (ventana_menu_comanda == null) {
+            ventana_menu_comanda = new VentanaMenuComanda(this);
+        }
+        
+        ventana_menu_comanda.setVisible(true);
+        ventana_menu_comanda.toFront();
     }
 
     /**
@@ -357,7 +426,7 @@ public class Coordinador implements Observador {
         if (ventana_menu_mesero != null) {
             ventana_menu_mesero.dispose();
         }
-        
+
         if (ventana_menu_comanda == null) {
             ventana_menu_comanda = new VentanaMenuComanda(this);
             ventana_menu_comanda.setConexionObservador(this);
@@ -374,7 +443,7 @@ public class Coordinador implements Observador {
         if (ventana_menu_comanda != null) {
             ventana_menu_comanda.dispose();
         }
-        
+
         if (ventana_menu_mesero == null) {
             ventana_menu_mesero = new VentanaMenuMesero(this);
         }
@@ -394,7 +463,7 @@ public class Coordinador implements Observador {
 
         // 2. Cargamos la lista inicial
         this.buscarClientesParaComanda("");
-        
+
         this.ventana_dialog_cliente.setVisible(true);
     }
 
@@ -415,17 +484,15 @@ public class Coordinador implements Observador {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
     }
-    
+
     public void mostrarDialogModificarComanda(JFrame padre) {
         VentanaDialogModificar dialogo = new VentanaDialogModificar(this, padre);
         dialogo.setVisible(true);
     }
-    
+
     public void setClienteEnComanda(ClienteBusquedaDTO cliente) {
-        System.out.println("--- FLAG COORDINADOR ---");
-        System.out.println("Recibido en Coordinador: " + (cliente != null ? cliente.getNombre() : "NULL"));
 
 // 1. Guardamos el cliente en una variable del coordinador para la persistencia final
         if (cliente != null) {
@@ -474,15 +541,15 @@ public class Coordinador implements Observador {
     public List<ProductoDTO> obtenerListaProductos() {
         List<ProductoDTO> lista_productos = new ArrayList<>();
         try {
-            
+
             lista_productos = productoBO.listarProductos();
-            
+
         } catch (NegocioException ex) {
             System.out.println("No se consiguio de manera correcta la lista de productos de negocio.");
         }
-        
+
         return lista_productos;
-        
+
     }
 
     /**
@@ -510,18 +577,18 @@ public class Coordinador implements Observador {
      * @param frame
      */
     public void ventanaProductosAAgregarIngredientes(JFrame frame) {
-        
+
         if (ventana_menu_producto != null) {
             ventana_menu_producto.setVisible(false);
         }
-        
+
         if (ventana_agregar_ingredientes == null) {
             ventana_agregar_ingredientes = new VentanaDialogAgregarIngrediente(this, frame);
             ventana_agregar_ingredientes.setConexionObservador(this);
         }
         ventana_agregar_ingredientes.setVisible(true);
         ventana_agregar_ingredientes.toFront();
-        
+
     }
 
     /**
@@ -532,7 +599,7 @@ public class Coordinador implements Observador {
         if (ventana_menu_producto != null) {
             ventana_menu_producto.setVisible(false);
         }
-        
+
         if (ventana_menu_admin != null) {
             ventana_menu_admin.setVisible(true);
             ventana_menu_admin.toFront();
@@ -558,7 +625,7 @@ public class Coordinador implements Observador {
             Ingrediente ing = new Ingrediente();
             ing.setId(dto.getIdIngrediente());
             pi.setIngredientes(ing);
-            
+
             detalles.add(pi);
         }
 
@@ -570,11 +637,11 @@ public class Coordinador implements Observador {
             // Opcional: Refrescar la tabla de la ventana productos
             ventana_menu_producto.llenarTabla();
             ventana_menu_producto.limpiarCampos();
-            
+
         } catch (NegocioException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage());
         }
-        
+
     }
 
     /**
@@ -643,7 +710,7 @@ public class Coordinador implements Observador {
             ventana_ver_detalles = new VentanaDialogVerIngredientes(this, padre, true, detalles);
             ventana_ver_detalles.setTitle("Ingredientes de: " + nombre_producto);
             ventana_ver_detalles.setVisible(true);
-            
+
         } catch (NegocioException e) {
             JOptionPane.showMessageDialog(padre, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -678,7 +745,7 @@ public class Coordinador implements Observador {
             JOptionPane.showMessageDialog(null, e.getMessage());
         }
     }
-    
+
     public void registrarIngrediente(IngredientesDTO ingredienteDTO) {
         try {
             ingredienteBO.registrarIngredientes(ingredienteDTO);
@@ -744,9 +811,9 @@ public class Coordinador implements Observador {
         if (ventana_inicio_sesion == null) {
             ventana_inicio_sesion = new VentanaInicioSesion(this);
         }
-        
+
         ventana_inicio_sesion.setVisible(true);
-        
+
     }
 
     /**
@@ -781,10 +848,10 @@ public class Coordinador implements Observador {
         if (ventana_menu_admin == null) {
             ventana_menu_admin = new VentanaMenuAdmin(this);
         }
-        
+
         ventana_menu_admin.setVisible(true);
         ventana_menu_admin.toFront();
-        
+
     }
 
     /**
@@ -797,10 +864,10 @@ public class Coordinador implements Observador {
         if (ventana_menu_mesero == null) {
             ventana_menu_mesero = new VentanaMenuMesero(this);
         }
-        
+
         ventana_menu_mesero.setVisible(true);
         ventana_menu_mesero.toFront();
-        
+
     }
 
     /**
@@ -811,7 +878,7 @@ public class Coordinador implements Observador {
      */
     public void regresarInicioSesion(JFrame frame) {
         frame.setVisible(false);
-        
+
         if (ventana_inicio_sesion == null) {
             ventana_inicio_sesion = new VentanaInicioSesion(this);
         }

@@ -205,5 +205,17 @@ public class ProductoDAO implements IProductoDAO{
             em.close();
         }
     }
+
+    @Override
+    public Producto buscarPorId(Long id) throws PersistenciaException {
+        EntityManager em = ConexionBD.crearConexion();
+        try{
+            return em.find(Producto.class, id);
+        }catch(Exception e){
+            throw new PersistenciaException("Error al buscar el producto " + e.getMessage());
+        }finally{
+            em.close();
+        }
+    }
     
 }

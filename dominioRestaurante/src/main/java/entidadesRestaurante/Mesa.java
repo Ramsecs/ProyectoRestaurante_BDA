@@ -32,7 +32,7 @@ public class Mesa implements Serializable {
     private EstadoMesa mesa_estado;
 
     /**
-     * Documentar de nuevo!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * Comandas que pertenecen a la mesa.
      */
     @OneToMany(mappedBy = "mesa", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comanda> comandas;

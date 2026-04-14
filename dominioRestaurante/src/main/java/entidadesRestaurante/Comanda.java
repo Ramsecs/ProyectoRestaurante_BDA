@@ -7,6 +7,7 @@ package entidadesRestaurante;
 import enumEntidades.EstadoComanda;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
 
@@ -15,7 +16,7 @@ import javax.persistence.*;
  * @author RAMSES
  */
 @Entity
-@Table(name = "comanda")
+@Table(name = "comandas")
 public class Comanda implements Serializable {
 
     /**
@@ -47,13 +48,13 @@ public class Comanda implements Serializable {
     private Double total_venta;
 
     /**
-     * Mesero al que se le asigno la comanda. Relación de muchos a uno: Varias comandas
-     * pueden pertenecer a un mismo mesero.
+     * Mesero al que se le asigno la comanda. Relación de muchos a uno: Varias
+     * comandas pueden pertenecer a un mismo mesero.
      */
     @ManyToOne
     @JoinColumn(name = "fk_mesero", nullable = false)
     private Mesero mesero;
-    
+
     /**
      * Cliente que realizó el pedido Relación de muchos a uno: Varias comandas
      * pueden pertenecer a un mismo cliente.
@@ -63,7 +64,7 @@ public class Comanda implements Serializable {
     private Cliente cliente;
 
     /**
-     * Mesa  a la que esta asociada la comanda.
+     * Mesa a la que esta asociada la comanda.
      */
     @ManyToOne
     @JoinColumn(name = "fk_mesa", nullable = false) // Esta será la columna en la tabla comanda
@@ -81,6 +82,7 @@ public class Comanda implements Serializable {
      * Constructor por defecto para JPA.
      */
     public Comanda() {
+        this.lista_productos = new ArrayList<>();
     }
 
     /**
@@ -115,7 +117,8 @@ public class Comanda implements Serializable {
     // --- Métodos de Acceso (Getters y Setters) ---
     /**
      * Obtener el id de la comanda
-     * @return 
+     *
+     * @return
      */
     public Long getId() {
         return id;
@@ -123,6 +126,7 @@ public class Comanda implements Serializable {
 
     /**
      * Setea el id de la comanda
+     *
      * @param id El nuevo ID de la comanda.
      */
     public void setId(Long id) {
@@ -131,6 +135,7 @@ public class Comanda implements Serializable {
 
     /**
      * Obtiene el estado de la comanda
+     *
      * @return El estado actual de la comanda.
      */
     public EstadoComanda getEstado_comanda() {
@@ -139,7 +144,8 @@ public class Comanda implements Serializable {
 
     /**
      * Setea el estado de la comanda
-     * @param estado_comanda 
+     *
+     * @param estado_comanda
      */
     public void setEstado_comanda(EstadoComanda estado_comanda) {
         this.estado_comanda = estado_comanda;
@@ -147,7 +153,8 @@ public class Comanda implements Serializable {
 
     /**
      * Obtener la fecha y hora en que se creo la comanda
-     * @return 
+     *
+     * @return
      */
     public LocalDateTime getFecha_hora_creacion() {
         return fecha_hora_creacion;
@@ -155,6 +162,7 @@ public class Comanda implements Serializable {
 
     /**
      * Cambia la fecha y hora
+     *
      * @param fecha_hora_creacion La nueva fecha y hora a asignar.
      */
     public void setFecha_hora_creacion(LocalDateTime fecha_hora_creacion) {
@@ -163,7 +171,8 @@ public class Comanda implements Serializable {
 
     /**
      * Obtener el total de la venta
-     * @return 
+     *
+     * @return
      */
     public Double getTotal_venta() {
         return total_venta;
@@ -178,14 +187,16 @@ public class Comanda implements Serializable {
 
     /**
      * Regresa la lista de productos de la comanda
-     * @return 
+     *
+     * @return
      */
     public List<ComandaProducto> getLista_productos() {
         return lista_productos;
     }
 
     /**
-     * Permite modificar  o setear por asi decirlo la lista de productos
+     * Permite modificar o setear por asi decirlo la lista de productos
+     *
      * @param lista_productos La lista de productos a asociar.
      */
     public void setLista_productos(List<ComandaProducto> lista_productos) {
@@ -193,65 +204,79 @@ public class Comanda implements Serializable {
     }
 
     /**
-     * Obtiene el mesero que esta atendiendo la comanda.
-     * 
+     * Obtiene el mesero asociado a la ocmanda
+     *
      * @return
      */
+
     public Mesero getMesero() {
         return mesero;
     }
 
     /**
-     * Actualiza el mesero que se encarga de la comanda.
-     * 
-     * @param mesero 
+     * Setea el mesero
+     *
+     * @param mesero asociado a la comanda
      */
     public void setMesero(Mesero mesero) {
         this.mesero = mesero;
     }
 
     /**
-     * Obtiene el cliente que esta relacionado con la comanda.
-     * 
-     * @return 
+     * Obtiene el cliente asociado a la comanda
+     *
+     * @return
      */
     public Cliente getCliente() {
         return cliente;
     }
 
     /**
-     * Actualizamos el cliente que esta relacionado con la comanda.
-     * 
-     * @param cliente 
+     * Setea el cliente
+     *
+     * @param cliente asociado a la comanda
      */
     public void setCliente(Cliente cliente) {
         this.cliente = cliente;
     }
 
     /**
-     * Obetenemos la mesa donde se esta haciendo la comanda.
-     * 
-     * @return 
+     * Obtiene la mesa asociada a la comanda
+     *
+     * @return
      */
     public Mesa getMesa() {
         return mesa;
     }
 
     /**
-     * Actualizamos la mesa donde se esta haciendo la comanda.
-     * @param mesa 
+     * Setea la mesa
+     *
+     * @param mesa asociada a la comanda
      */
     public void setMesa(Mesa mesa) {
         this.mesa = mesa;
     }
-    
-    
+
+    /**
+     * Metodo que nos ayuda a la hora de persistir, sin las entidades no saben
+     * cual formar primero
+     *
+     * @param producto de la comanda
+     */
+    public void agregarProducto(ComandaProducto producto) {
+        if (this.lista_productos == null) {
+            this.lista_productos = new ArrayList<>();
+        }
+        this.lista_productos.add(producto);
+        producto.setComandas(this);
+    }
 
     /**
      * Devuelve una representación en texto de la comanda con sus atributos
      * principales.
      *
-     * @return 
+     * @return
      */
     @Override
     public String toString() {
