@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author RAMSES
+ * @author RAMSES / DANIEL / JOSMARA
  */
 public class Validaciones {
 
@@ -22,6 +22,12 @@ public class Validaciones {
     public Validaciones() {
     }
 
+    /**
+     * Metodo de validacion para el correo electronico.
+     * 
+     * @param correo
+     * @return boolean
+     */
     public boolean validarCorreo(String correo) {
 
         Pattern patt = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
@@ -33,6 +39,12 @@ public class Validaciones {
         return false;
     }
 
+    /**
+     * Metodo de validacion del telefono.
+     * 
+     * @param telefono
+     * @return boolean
+     */
     public boolean validarTelefono(String telefono) {
         Pattern patt = Pattern.compile("^[0-9]{10}$");
         Matcher match = patt.matcher(telefono);
@@ -43,6 +55,12 @@ public class Validaciones {
         return false;
     }
 
+    /**
+     * Metodo de validacion para el nombre.
+     * 
+     * @param nombres
+     * @return boolean
+     */
     public boolean validarNombres(String nombres) {
         Pattern patt = Pattern.compile("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{1,100}$");
         Matcher match = patt.matcher(nombres);
@@ -53,6 +71,12 @@ public class Validaciones {
         return false;
     }
 
+    /**
+     * Metodo de validacion para los apellidos.
+     * 
+     * @param apellido
+     * @return boolean
+     */
     public boolean validarApellidos(String apellido) {
         Pattern patt = Pattern.compile("^[a-zA-ZáéíóúÁÉÍÓÚñÑ]{1,100}$");
         Matcher match = patt.matcher(apellido);
@@ -63,6 +87,12 @@ public class Validaciones {
         return false;
     }
 
+    /**
+     * Metodo de validacion para el stock.
+     * 
+     * @param stock
+     * @return boolean
+     */
     public boolean validarStock(Integer stock) {
         // Verificamos que el objeto no sea nulo para evitar un NullPointerException
         if (stock == null) {
@@ -77,23 +107,39 @@ public class Validaciones {
         return false;
     }
     
+    /**
+     * Metodo de validacion para saber si es que ya 
+     * esiste un ingrediente registrado.
+     * 
+     * @param nombre
+     * @param unidadMedida
+     * @return boolean
+     * @throws NegocioException 
+     */
     public boolean validarRepetido(String nombre, UnidadMedida unidadMedida) throws NegocioException {
-    // 1. Verificamos que los parámetros no sean nulos
-    if (nombre == null || unidadMedida == null) {
-        throw new NegocioException("Datos insuficientes para validar duplicados.");
-    }
+        // Verificamos que los parámetros no sean nulos
+        if (nombre == null || unidadMedida == null) {
+            throw new NegocioException("Datos insuficientes para validar duplicados.");
+        }
 
-    // 2. Consultamos al DAO
-    boolean existe = ingredienteDAO.existeIngrediente(nombre.trim(), unidadMedida);
+        // Consultamos al DAO
+        boolean existe = ingredienteDAO.existeIngrediente(nombre.trim(), unidadMedida);
 
-    // 3. Si existe, devolvemos false (o lanzamos la excepción directamente)
-    if (existe) {
-        return false; // Significa que NO es válido porque ya está repetido
+        // Si existe, devolvemos false
+        if (existe) {
+            return false; // Significa que NO es valido porque ya esta repetido
+        }
+
+        return true; // Es valido, no esta repetido
     }
     
-    return true; // Es válido, no está repetido
-}
     
+    /**
+     * Metodo de validacion de precios.
+     * 
+     * @param precio
+     * @return boolean
+     */
     public boolean validarPrecio(String precio){
         
         Pattern patt = Pattern.compile("^\\d+(\\.\\d{1,2})?$");
@@ -105,6 +151,13 @@ public class Validaciones {
         return false;
     }
     
+    /**
+     * Metodo de validacion para una cantidad como
+     * un stock o cantidad de productos.
+     * 
+     * @param cant
+     * @return boolean
+     */
     public boolean validarCant(String cant){
         Pattern patt = Pattern.compile("^\\d+$");
         Matcher match = patt.matcher(cant);

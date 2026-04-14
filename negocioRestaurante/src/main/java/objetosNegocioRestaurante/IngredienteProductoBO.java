@@ -37,7 +37,11 @@ public class IngredienteProductoBO implements IIngredienteProductoBO{
         this.ingrediente_adapter = new IngredienteAdapter();
     }
 
-    //Metodo para el singleton
+    /**
+     * Obtener instancia de IngredienteProductoBO.
+     * 
+     * @return IngredienteProductoBO.
+     */
     public static IngredienteProductoBO getInstanceIngredienteBO() {
         if (ingredienteProductoBO == null) {
             ingredienteProductoBO = new IngredienteProductoBO();
@@ -48,9 +52,10 @@ public class IngredienteProductoBO implements IIngredienteProductoBO{
     
     /**
      * Mediante el uso de este metodo recuperamos la lista de ingredientes en el formato de una lista
-     * de IngredientesDTOLista
-     * @return
-     * @throws NegocioException 
+     * de IngredientesDTOLista.
+     * 
+     * @return List.
+     * @throws NegocioException.
      */
     @Override
     public List<IngredienteDTOLista> recuperarListaIngredientes() throws NegocioException{
@@ -73,10 +78,11 @@ public class IngredienteProductoBO implements IIngredienteProductoBO{
     
     /**
      * Este metodo obtiene la lista de ingredientes del producto y la convierte en una lista de ingredientes 
-     * tipo DTO
-     * @param idProducto
-     * @return
-     * @throws NegocioException 
+     * tipo DTO.
+     * 
+     * @param idProducto.
+     * @return List.
+     * @throws NegocioException.
      */
     @Override
     public List<IngredienteDTOLista> listarDetallesProducto(Long idProducto) throws NegocioException {

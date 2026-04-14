@@ -15,8 +15,6 @@ import excepcionesRestaurante.NegocioException;
 import excepcionesRestaurante.PersistenciaException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import validadores.Validaciones;
 
 /**
@@ -49,9 +47,9 @@ public class ClienteBO implements IClienteBO {
     }
 
     /**
-     * Obtiene la instancia unica de ClienteBO. Si no existe, la crea.
+     * Obtiene la instancia unica de ClienteBO, si no existe, la crea.
      *
-     * @return La instancia unica de ClienteBO.
+     * @return ClienteBO.
      */
     public static ClienteBO getInstanceClienteBO() {
         if (clienteBO == null) {

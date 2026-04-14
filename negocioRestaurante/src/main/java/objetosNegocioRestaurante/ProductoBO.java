@@ -38,7 +38,11 @@ public class ProductoBO implements IProductoBO {
 
     }
 
-    //Metodo para el singleton
+    /**
+     * Obtener la instancia de ProductoBO.
+     * 
+     * @return ProductoBO.
+     */
     public static ProductoBO getInstanceProductoBO() {
         if (productoBO == null) {
             productoBO = new ProductoBO();
@@ -50,8 +54,8 @@ public class ProductoBO implements IProductoBO {
     /**
      * Lista la lista de productos que hay en la base de datos.
      *
-     * @return
-     * @throws NegocioException
+     * @return List.
+     * @throws NegocioException.
      */
     @Override
     public List<ProductoDTO> listarProductos() throws NegocioException {
@@ -88,12 +92,12 @@ public class ProductoBO implements IProductoBO {
 
     /**
      * Mediante este metodo se registra el producto con la lista de detalles que
-     * son los ingredientes que tiene el producto
+     * son los ingredientes que tiene el producto.
      *
-     * @param productoDTO
-     * @param detalles
-     * @return
-     * @throws NegocioException
+     * @param productoDTO.
+     * @param detalles.
+     * @return boolean.
+     * @throws NegocioException.
      */
     @Override
     public boolean registrarProducto(ProductoDTO productoDTO, List<ProductoIngrediente> detalles) throws NegocioException {
@@ -122,6 +126,14 @@ public class ProductoBO implements IProductoBO {
 
     }
 
+    /**
+     * Actualizar el nombre de un producto usando el id 
+     * para encotrar el producto a actualizar.
+     * 
+     * @param id.
+     * @param nuevoNombre.
+     * @throws NegocioException.
+     */
     @Override
     public void actualizarNombre(Long id, String nuevoNombre) throws NegocioException {
         // 1. Validaciones de Negocio
@@ -142,6 +154,14 @@ public class ProductoBO implements IProductoBO {
         }
     }
 
+    /**
+     * Actualizar el precio de un producto usando el id 
+     * para encotrar el producto a actualizar.
+     * 
+     * @param id.
+     * @param nuevoPrecio.
+     * @throws NegocioException.
+     */
     @Override
     public void actualizarPrecio(Long id, Double nuevoPrecio) throws NegocioException {
         // 1. Validaciones de Negocio
@@ -163,11 +183,11 @@ public class ProductoBO implements IProductoBO {
 
     /**
      * Metodo en BO para hacer validación y asi poder llamar al metodo de la DAO
-     * para mostrar en el apartado de comandas los productos por categoria
+     * para mostrar en el apartado de comandas los productos por categoria.
      *
-     * @param tipoDTO
-     * @return
-     * @throws NegocioException
+     * @param tipoDTO.
+     * @return List.
+     * @throws NegocioException.
      */
     @Override
     public List<ProductoComandaDTO> listarProductosPorCategoria(TipoPlatilloDTO tipoDTO) throws NegocioException {

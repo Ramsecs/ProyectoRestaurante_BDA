@@ -6,8 +6,9 @@ package pantallas;
 
 import controladorRestaurante.Coordinador;
 import dtosDelRestaurante.IngredienteDTOLista;
-import dtosDelRestaurante.ProductoIngredienteDTO;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import recursos.*;
@@ -15,7 +16,7 @@ import java.util.List;
 import javax.swing.table.TableRowSorter;
 /**
  *
- * @author josma
+ * @author josma / RAMSES
  */
 public class VentanaDialogVerIngredientes extends JDialog {
     private final Coordinador coordinador;
@@ -59,7 +60,7 @@ public class VentanaDialogVerIngredientes extends JDialog {
         Font fuente_rabbits_pequena = GestorFuentes.obtenerFuente("Rabbits-Bro.ttf", 14f);
         Font fuente_botones = GestorFuentes.obtenerFuente("Agbalumo-Regular.ttf", 18f);
 
-        // -----------------------TITULO (Fila 0)-----------------------------
+        // -----------------------TITULO-----------------------------
         // Puedes dinamizar esto pasando el nombre del producto al constructor
         JLabel lbl_titulo = new JLabel("Ingredientes del Producto", SwingConstants.CENTER);
         lbl_titulo.setFont(fuente_titulo);
@@ -67,21 +68,21 @@ public class VentanaDialogVerIngredientes extends JDialog {
         gbc.insets = new Insets(0, 0, 20, 0);
         cuadro_blanco.add(lbl_titulo, gbc);
 
-        // ---------------LABEL BUSCAR (Fila 1)-------------------------------
+        // ---------------LABEL BUSCAR-------------------------------
         JLabel lbl_buscar = new JLabel("Buscar Ingrediente");
         lbl_buscar.setFont(fuente_rabbits_mediana);
         gbc.gridy = 1;
         gbc.insets = new Insets(0, 0, 0, 0);
         cuadro_blanco.add(lbl_buscar, gbc);
 
-        // ---------------------TXT BUSCADOR (Fila 2)-------------------------
+        // ---------------------TXT BUSCADOR-------------------------
         TextFieldPersonalizado txt_buscador = new TextFieldPersonalizado(20);
         txt_buscador.setPreferredSize(new Dimension(0, 40));
         gbc.gridy = 2;
         gbc.insets = new Insets(5, 0, 20, 0);
         cuadro_blanco.add(txt_buscador, gbc);
 
-        // --------------------------TABLA (Fila 3)---------------------------
+        // --------------------------TABLA---------------------------
         gbc.gridy = 3;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
@@ -98,10 +99,10 @@ public class VentanaDialogVerIngredientes extends JDialog {
         scroll.setBorder(BorderFactory.createLineBorder(naranja, 2));
         cuadro_blanco.add(scroll, gbc);
 
-        // ----------------------BOTON VOLVER (Fila 4)------------------------
+        // ----------------------BOTON VOLVER------------------------
         gbc.gridy = 4;
         gbc.weighty = 0;
-        gbc.fill = GridBagConstraints.NONE; // Para que el botón no se estire a lo ancho
+        gbc.fill = GridBagConstraints.NONE; // Para que el boton no se estire a lo ancho
         gbc.insets = new Insets(20, 0, 0, 0);
 
         BotonMenuAdministrador btn_volver = new BotonMenuAdministrador("Volver", "/imagenes/volverPNG.png", rojo, 25, 25, fuente_botones);
@@ -109,7 +110,7 @@ public class VentanaDialogVerIngredientes extends JDialog {
         
         cuadro_blanco.add(btn_volver, gbc);
 
-        // ---------------------AGREGACIÓN AL FONDO---------------------------
+        // ---------------------AGREGACION AL FONDO---------------------------
         gbc.gridy = 0;
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.CENTER;
@@ -118,21 +119,21 @@ public class VentanaDialogVerIngredientes extends JDialog {
         //---------------------------EVENTOS----------------------------------
         btn_volver.addActionListener(e -> this.dispose());
         
-        // 1. Cargar los datos en la tabla
+        // Cargar los datos en la tabla
         llenarTabla();
 
-        // 2. Configurar el Filtro de búsqueda
+        // Configurar el Filtro de busqueda
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(modelo_tabla);
         tabla.setRowSorter(sorter);
 
-        txt_buscador.addKeyListener(new java.awt.event.KeyAdapter() {
+        txt_buscador.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyReleased(java.awt.event.KeyEvent e) {
+            public void keyReleased(KeyEvent e) {
                 String texto = txt_buscador.getText().trim();
                 if (texto.isEmpty()) {
                     sorter.setRowFilter(null);
                 } else {
-                    // (?i) hace que ignore mayúsculas y minúsculas
+                    // (?i) hace que ignore mayusculas y minusculas
                     // El 0 es la columna "Nombre" y el 2 es la columna "Medida"
                     sorter.setRowFilter(RowFilter.regexFilter("(?i)" + texto, 0, 2));
                 }
@@ -141,17 +142,21 @@ public class VentanaDialogVerIngredientes extends JDialog {
         
     }
     
+    /**
+     * Llenan la tabla de la ver ingredientes mediante 
+     * el uso de la lista de la lista de ingredientes tipo DTO.
+     */
     public void llenarTabla() {
-        // 1. Limpiamos por seguridad
+        // Limpiamos por seguridad
         modelo_tabla.setRowCount(0);
 
-        // 2. Validamos que la lista no sea nula
+        // Validamos que la lista no sea nula
         if (lista_ingredientes != null) {
             for (IngredienteDTOLista ing : lista_ingredientes) {
                 Object[] fila = {
                     ing.getNombre(), // Columna 0: Nombre
                     ing.getStock(),// Columna 1: Cantidad
-                    ing.getUnidad_medida()// Columna 2: Medida (puedes traerlo del DTO si lo tienes)
+                    ing.getUnidad_medida()// Columna 2: Medida
                 };
                 modelo_tabla.addRow(fila);
             }

@@ -27,6 +27,11 @@ public class ProductoDAO implements IProductoDAO{
 
     }
 
+    /**
+     * Obtener instancia de ProductoDAO.
+     * 
+     * @return ProductoDAO.
+     */
     public static ProductoDAO getInstanceProductoDAO() {
         if (productoDAO == null) {
             productoDAO = new ProductoDAO();
@@ -37,8 +42,9 @@ public class ProductoDAO implements IProductoDAO{
     
     /**
      * Este metodo regresa la lista de productos que hay en la base de datos.
-     * @return
-     * @throws PersistenciaException 
+     * 
+     * @return List.
+     * @throws PersistenciaException.
      */
     @Override
     public List<Producto> listarTodo() throws PersistenciaException{
@@ -58,10 +64,11 @@ public class ProductoDAO implements IProductoDAO{
     
     /**
      * Este metodo registra el producto con su lista de ingredientes.
-     * @param nuevoProducto
-     * @param detalles
-     * @return
-     * @throws PersistenciaException 
+     * 
+     * @param nuevoProducto.
+     * @param detalles.
+     * @return boolean.
+     * @throws PersistenciaException. 
      */
     @Override
     public boolean registrarProductoConIngredientes(Producto nuevoProducto, List<ProductoIngrediente> detalles) throws PersistenciaException {
@@ -108,6 +115,14 @@ public class ProductoDAO implements IProductoDAO{
         }
     }
     
+    /**
+     * Se actualiza el precio de un producto, primero buscando el producto
+     * exacto con la ayuda del id, y desde ahi se le establece el nuevo precio.
+     * 
+     * @param id
+     * @param nuevoPrecio
+     * @throws PersistenciaException 
+     */
     @Override
     public void actualizarPrecio(Long id, Double nuevoPrecio) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
@@ -125,6 +140,14 @@ public class ProductoDAO implements IProductoDAO{
         }
     }
     
+    /**
+     * Se actualiza el nombre de un producto, primero buscando el producto
+     * exacto con la ayuda del id, y desde ahi se le establece el nuevo nombre.
+     * 
+     * @param id
+     * @param nuevoNombre
+     * @throws PersistenciaException 
+     */
     @Override
     public void actualizarNombre(Long id, String nuevoNombre) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
@@ -153,11 +176,20 @@ public class ProductoDAO implements IProductoDAO{
         }
     }
 
+    /**
+     * Se realiza una consulta o busqueda de los productos que tengan 
+     * cierto tipo de platillo, y se obtiene una lista de solo
+     * los productos que tengan ese tipo de platillo.
+     * 
+     * @param tipo
+     * @return List
+     * @throws PersistenciaException 
+     */
     @Override
     public List<Producto> consultarPorCategoria(TipoPlatillo tipo) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
         try{
-            //1.Creamos la consulta con la entidad Producto, usaremos TypedQuery
+            // Creamos la consulta con la entidad Producto, usaremos TypedQuery
             String comandoJPQL = "SELECT p FROM Producto p WHERE p.tipo_platilo = :platillo_tipo";
             
             TypedQuery<Producto> query = em.createQuery(comandoJPQL, Producto.class);

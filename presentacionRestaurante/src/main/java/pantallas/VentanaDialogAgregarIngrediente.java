@@ -9,6 +9,8 @@ import dtosDelRestaurante.IngredienteDTOLista;
 import dtosDelRestaurante.ProductoIngredienteDTO;
 import enumEntidades.UnidadMedida;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -19,7 +21,7 @@ import java.util.List;
 import javax.swing.table.TableRowSorter;
 
 /**
- * @author josma
+ * @author josma / RAMSES
  */
 public class VentanaDialogAgregarIngrediente extends JDialog {
 
@@ -92,8 +94,9 @@ public class VentanaDialogAgregarIngrediente extends JDialog {
         modelo_tabla = new ModeloTablaEditable(columnas, 0, 4) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                // Solo ID (0) y Nombre (1) son NO editables
-                return column != 0 && column != 1 && super.isCellEditable(row, column);
+                // Solo Cantidad (2) y Seleccionado (4) son editables. 
+                // Unidad (3) se deja como NO editable si solo queremos que se vea lo que ya tiene el ingrediente.
+                return column != 0 && column != 1 && column != 3 && super.isCellEditable(row, column);
             }
 
             @Override
@@ -117,18 +120,18 @@ public class VentanaDialogAgregarIngrediente extends JDialog {
         scroll.setBorder(BorderFactory.createLineBorder(naranja, 2));
         cuadro_blanco.add(scroll, gbc);
         
-        // --- CONFIGURACIÓN DEL FILTRO ---
+        // --- CONFIGURACION DEL FILTRO ---
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(modelo_tabla);
         tabla.setRowSorter(sorter);
 
-        txt_buscador.addKeyListener(new java.awt.event.KeyAdapter() {
+        txt_buscador.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyReleased(java.awt.event.KeyEvent e) {
+            public void keyReleased(KeyEvent e) {
                 String texto = txt_buscador.getText().trim();
                 if (texto.isEmpty()) {
                     sorter.setRowFilter(null);
                 } else {
-                    // Filtra por columna 1 (Nombre) y columna 3 (Unidad) ignorando mayúsculas/minúsculas
+                    // Filtra por columna 1 el Nombre y columna 3 la Unidad ignorando mayusculas/minusculas
                     sorter.setRowFilter(RowFilter.regexFilter("(?i)" + texto, 1, 3));
                 }
             }
@@ -164,13 +167,13 @@ public class VentanaDialogAgregarIngrediente extends JDialog {
         btn_agregar.addActionListener(e -> {
             List<ProductoIngredienteDTO> seleccionados = new ArrayList<>();
 
-            // 1. Recorremos las filas que el usuario ve actualmente
+            // Recorremos las filas que el usuario ve actualmente
             for (int i = 0; i < tabla.getRowCount(); i++) {
 
-                // 2. Traducimos el índice de la vista al índice real del modelo de datos
+                // Traducimos el índice de la vista al índice real del modelo de datos
                 int model_row = tabla.convertRowIndexToModel(i);
 
-                // 3. Obtenemos el estado del Checkbox usando el índice del modelo
+                // Obtenemos el estado del Checkbox usando el índice del modelo
                 Boolean esta_seleccionado = (Boolean) modelo_tabla.getValueAt(model_row, 4); 
 
                 if (esta_seleccionado != null && esta_seleccionado) {
@@ -188,7 +191,7 @@ public class VentanaDialogAgregarIngrediente extends JDialog {
 
                         String cant_texto = val_cantidad.toString().trim();
 
-                        // Usamos la validación del coordinador que creamos al inicio (Regex \\d+)
+                        // Usamos la validacion del coordinador que creamos al inicio
                         if (!coordinador.validarCantidad(cant_texto)) { 
                             JOptionPane.showMessageDialog(this, "La cantidad de '" + nombre_ing + "' debe ser un número entero positivo.");
                             return;
@@ -196,13 +199,13 @@ public class VentanaDialogAgregarIngrediente extends JDialog {
 
                         Integer cantidad = Integer.parseInt(cant_texto);
 
-                        // Validación lógica de negocio (no puede ser cero)
+                        // Validación logica de negocio
                         if (cantidad <= 0) {
                             JOptionPane.showMessageDialog(this, "La cantidad de '" + nombre_ing + "' debe ser mayor a cero.");
                             return;
                         }
 
-                        // 4. Si todo está bien, lo agregamos a la lista de seleccionados
+                        // Si todo esta bien, lo agregamos a la lista de seleccionados
                         seleccionados.add(new ProductoIngredienteDTO(id_ing, nombre_ing, cantidad));
 
                     } catch (NumberFormatException ex) {
@@ -212,13 +215,13 @@ public class VentanaDialogAgregarIngrediente extends JDialog {
                 }
             }
 
-            // 5. Verificamos si al menos seleccionó un ingrediente
+            // Verificamos si al menos seleccionó un ingrediente
             if (seleccionados.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "No has seleccionado ningún ingrediente para agregar.");
                 return;
             }
 
-            // 6. Notificamos al observador y cerramos
+            // Notificamos al observador y cerramos
             if (metiche != null) {
                 metiche.enviarProductoConListaARegistro(seleccionados); 
             }
@@ -228,26 +231,38 @@ public class VentanaDialogAgregarIngrediente extends JDialog {
         llenarTabla();
     }
 
+    /**
+     * Configura el componente JComboBox para la columna de Unidades.
+     */
     private void configurarRenderizadoUnidad() {
         JComboBox<UnidadMedida> comboUnidad = new JComboBox<>(UnidadMedida.values());
+        // Desactivamos la edición manual de texto en el combo
+        comboUnidad.setEditable(false); 
+        
         // La Unidad está en la columna 3
         TableColumn colUnidad = tabla.getColumnModel().getColumn(3);
         colUnidad.setCellEditor(new DefaultCellEditor(comboUnidad));
     }
     
+    /**
+     * Llena la tabla de la ventana de ingredientes con 
+     * la lista de ingredientes de tipo DTO que obtenemos.
+     */
     public void llenarTabla() {
         modelo_tabla.setRowCount(0);
         List<IngredienteDTOLista> lista = coordinador.obtenerListaIngredientes();
 
-        for (IngredienteDTOLista ing : lista) {
-            Object[] fila = {
-                ing.getId(),            // Col 0
-                ing.getNombre(),        // Col 1
-                "",                     // Col 2: Cantidad (Editable)
-                ing.getUnidad_medida(), // Col 3: Unidad (Editable)
-                false                   // Col 4: Seleccionado
-            };
-            modelo_tabla.addRow(fila);
+        if (lista != null) {
+            for (IngredienteDTOLista ing : lista) {
+                Object[] fila = {
+                    ing.getId(),            // Col 0
+                    ing.getNombre(),        // Col 1
+                    "",                     // Col 2: Cantidad
+                    ing.getUnidad_medida(), // Col 3: Unidad 
+                    false                   // Col 4: Seleccionado
+                };
+                modelo_tabla.addRow(fila);
+            }
         }
 
         // Ocultar ID

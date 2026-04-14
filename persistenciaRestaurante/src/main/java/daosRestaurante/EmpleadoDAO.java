@@ -12,7 +12,7 @@ import javax.persistence.EntityManager;
 import seguridad.PasswordHasher;
 
 /**
- *
+ * 
  * @author RAMSES
  */
 public class EmpleadoDAO implements IEmpleadoDAO{
@@ -23,6 +23,11 @@ public class EmpleadoDAO implements IEmpleadoDAO{
 
     }
 
+    /**
+     * Obtener instancia de EmpleadoDAO.
+     * 
+     * @return EmpleadoDAO.
+     */
     public static EmpleadoDAO getInstanceEmpleadoDAO() {
         if (empleadoDAO == null) {
             empleadoDAO = new EmpleadoDAO();
@@ -33,8 +38,9 @@ public class EmpleadoDAO implements IEmpleadoDAO{
     
     /**
      * Este metodo nos ayuda a registrar a los empleados en la base de datos.
-     * @param empleados
-     * @throws PersistenciaException 
+     * 
+     * @param empleados.
+     * @throws PersistenciaException.
      */
     @Override
     public void registrarMasivo(List<Empleado> empleados) throws PersistenciaException {
@@ -55,8 +61,10 @@ public class EmpleadoDAO implements IEmpleadoDAO{
     }
 
     /**
-     * Mediante este metodo obtenemos la lista completa de todos los empleados en la base de datos
-     * @return 
+     * Mediante este metodo obtenemos la lista completa de
+     * todos los empleados en la base de datos.
+     * 
+     * @return List.
      */
     @Override
     public List<Empleado> obtenerTodos() {

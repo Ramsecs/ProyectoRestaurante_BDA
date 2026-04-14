@@ -15,9 +15,12 @@ import entidadesRestaurante.ProductoIngrediente;
 import dtosDelRestaurante.IngredienteBusquedaDTO;
 import dtosDelRestaurante.IngredientesDTO;
 import dtosDelRestaurante.ProductoComandaDTO;
+import dtosDelRestaurante.ReporteClienteDTO;
+import dtosDelRestaurante.ReporteComandaDTO;
 import entidadesEnumeradorDTO.TipoPlatilloDTO;
 import entidadesRestaurante.Empleado;
 import excepcionesRestaurante.NegocioException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFrame;
@@ -32,7 +35,9 @@ import objetosNegocioRestaurante.IProductoBO;
 import objetosNegocioRestaurante.IngredienteProductoBO;
 import objetosNegocioRestaurante.ProductoBO;
 import objetosNegocioRestaurante.IIngredienteBO;
+import objetosNegocioRestaurante.IReporteBO;
 import objetosNegocioRestaurante.IngredienteBO;
+import objetosNegocioRestaurante.ReporteBO;
 import observadorRestaurante.Observador;
 import pantallas.*;
 import validadores.Validaciones;
@@ -43,10 +48,8 @@ import validadores.Validaciones;
  */
 public class Coordinador implements Observador {
 
-    //Lista temporal para los ingredientes que el usuario seleccione para cuando agrega el producto
-    private List<ProductoIngredienteDTO> ingredientesTemporales;
     // Guardamos temporalmente los datos del producto que estan en la ventana
-    private ProductoDTO productoTemporal;
+    private ProductoDTO producto_temporal;
     //Ventana para mostrar detalles
     private VentanaDialogVerIngredientes ventana_ver_detalles;
     /**
@@ -60,6 +63,7 @@ public class Coordinador implements Observador {
     private final IProductoBO productoBO;
     private final IIngredienteProductoBO ingredienteProductoBO;
     private final IEmpleadoBO empleadoBO;
+    private final IReporteBO reporteBO;
     
     private Validaciones validar;
     
@@ -79,6 +83,7 @@ public class Coordinador implements Observador {
     private VentanaDialogAgregarIngrediente ventana_agregar_ingredientes;
     private VentanaInicioSesion ventana_inicio_sesion;
     private VentanaDialogComandaCliente ventana_dialog_cliente;
+    private VentanaReportes ventana_reportes;
     //No mover es mio (Jos)
 
     public Coordinador() {
@@ -87,6 +92,7 @@ public class Coordinador implements Observador {
         this.ingredienteProductoBO = IngredienteProductoBO.getInstanceIngredienteBO();
         this.ingredienteBO = IngredienteBO.getInstanceIngredienteBO();
         this.empleadoBO = EmpleadoBO.getInstanceEmpleadoBO();
+        this.reporteBO = ReporteBO.getInstanceReporteBO();
         validar = new Validaciones();
     }
 
@@ -121,6 +127,9 @@ public class Coordinador implements Observador {
         
     }
     
+    /**
+     * Metodo para inciar el menu del mesero.
+     */
     public void iniciarMenuMesero() {
         if (ventana_menu_mesero == null) {
             ventana_menu_mesero = new VentanaMenuMesero(this);
@@ -202,6 +211,10 @@ public class Coordinador implements Observador {
         }
     }
     
+    /**
+     * Metodo para regresar al menu administrador 
+     * desde la ventana de menu ingrediente.
+     */
     public void regresarMenuAdmin() {
         if (ventana_menu_ingrediente != null) {
             ventana_menu_ingrediente.dispose();
@@ -214,9 +227,10 @@ public class Coordinador implements Observador {
     }
 
     /**
-     *
-     *
-     *
+     * Metodo para registrar un cliente 
+     * frecuente en la base de datos.
+     * 
+     * @param clienteDTO 
      */
     public void agregarClienteFrecuente(ClienteDTO clienteDTO) {
         
@@ -229,6 +243,12 @@ public class Coordinador implements Observador {
         
     }
     
+    /**
+     * Mediante este metodo buscamos un cliente
+     * usando un filtro de busqueda.
+     * 
+     * @param filtro 
+     */
     public void buscarClientes(String filtro) {
         
         try {
@@ -449,7 +469,7 @@ public class Coordinador implements Observador {
      * Este metodo nos da la lista completa de los productos que hay en el
      * registro.
      *
-     * @return
+     * @return Una lista de productos DTO con la que podemos trabajar.
      */
     public List<ProductoDTO> obtenerListaProductos() {
         List<ProductoDTO> lista_productos = new ArrayList<>();
@@ -469,7 +489,7 @@ public class Coordinador implements Observador {
      * Mediante este metodo obtenemos la lista de ingredientes que hay en la
      * base de datos.
      *
-     * @return
+     * @return Una lista de ingredientes DTO con la cual podamos trabajar.
      */
     public List<IngredienteDTOLista> obtenerListaIngredientes() {
         // Inicializa con una lista vacia, no con null
@@ -544,7 +564,7 @@ public class Coordinador implements Observador {
 
         // 2. Llamamos al BO para registrar
         try {
-            productoBO.registrarProducto(productoTemporal, detalles);
+            productoBO.registrarProducto(producto_temporal, detalles);
             JOptionPane.showMessageDialog(null, "¡Producto registrado con éxito!");
 
             // Opcional: Refrescar la tabla de la ventana productos
@@ -565,7 +585,7 @@ public class Coordinador implements Observador {
      * @param datosProducto
      */
     public void mostrarDialogoIngredientes(VentanaMenuProducto ventana, ProductoDTO datosProducto) {
-        this.productoTemporal = datosProducto; // Guardamos el nombre, precio, etc.
+        this.producto_temporal = datosProducto; // Guardamos el nombre, precio, etc.
 
         VentanaDialogAgregarIngrediente dialog = new VentanaDialogAgregarIngrediente(this, ventana);
         dialog.setConexionObservador(this); // El Coordinador se conecta como observador
@@ -573,11 +593,11 @@ public class Coordinador implements Observador {
     }
 
     /**
-     * Este metodo devuelve el valor boolean de la validacion que se hace a el
+     * Devuelve el valor boolean de la validacion que se hace a el
      * texto de nombre.
      *
      * @param nombre
-     * @return
+     * @return boolean
      */
     public boolean validarNombre(String nombre) {
         return validar.validarNombres(nombre);
@@ -588,7 +608,7 @@ public class Coordinador implements Observador {
      * texto de cant(Cantidad).
      *
      * @param cant
-     * @return
+     * @return boolean
      */
     public boolean validarCantidad(String cant) {
         return validar.validarCant(cant);
@@ -599,7 +619,7 @@ public class Coordinador implements Observador {
      * texto de precio.
      *
      * @param precio
-     * @return
+     * @return boolean
      */
     public boolean validarPrecio(String precio) {
         return validar.validarPrecio(precio);
@@ -784,7 +804,7 @@ public class Coordinador implements Observador {
     }
 
     /**
-     * Este metodo oculta la pantalla con la que estamos trabajando, para
+     * Oculta la pantalla con la que estamos trabajando, para
      * despues regresarnos a la ventana de incio de sesion.
      *
      * @param frame
@@ -797,6 +817,56 @@ public class Coordinador implements Observador {
         }
         ventana_inicio_sesion.setVisible(true);
         ventana_inicio_sesion.toFront();
+    }
+    
+    /**
+     * Valida la estrcutura del correo del cliente.
+     * 
+     * @param correo
+     * @return boolean
+     */
+    public boolean validarCorreo(String correo){
+        return validar.validarCorreo(correo);
+    }
+    
+    /**
+     * Valida la estructura de cualquier apellido.
+     * 
+     * @param apellido
+     * @return boolean
+     */
+    public boolean validarApellidos(String apellido){
+        return validar.validarApellidos(apellido);
+    }
+    
+    /**
+     * Valida la estructura del telefono.
+     * 
+     * @param telefono
+     * @return boolean
+     */
+    public boolean validarTelefono(String telefono){
+        return validar.validarTelefono(telefono);
+    }
+    
+    
+    public List<ReporteComandaDTO> generarReporteComandas(LocalDateTime ini, LocalDateTime fin) {
+        return reporteBO.generarReporteComandas(ini, fin);
+    }
+
+    public List<ReporteClienteDTO> generarReporteClientes(String nombre, int visitas) {
+        return reporteBO.obtenerReporteClientes(nombre, visitas);
+    }
+    
+    public void abrirReportes(){
+        if (ventana_menu_admin != null) {
+            ventana_menu_admin.setVisible(false);
+        }
+        if (ventana_reportes == null) {
+            ventana_reportes = new VentanaReportes(this);
+        }
+        ventana_reportes.setVisible(true);
+        ventana_reportes.toFront();
     }
     
 }

@@ -25,6 +25,11 @@ public class IngredienteProductoDAO implements IIngredienteProductoDAO{
 
     }
 
+    /**
+     * Obtener instancia de IngredienteProductoDAO.
+     * 
+     * @return IngredienteProductoDAO.
+     */
     public static IngredienteProductoDAO getInstanceIngredienteProductoDAO() {
         if (ingredienteProductoDAO == null) {
             ingredienteProductoDAO = new IngredienteProductoDAO();
@@ -34,9 +39,11 @@ public class IngredienteProductoDAO implements IIngredienteProductoDAO{
     }
     
     /**
-     * Con este metodo se obtiene la lista completa de todos los registros de ingredientes que hay en la base de datos.
-     * @return
-     * @throws PersistenciaException 
+     * Con este metodo se obtiene la lista completa de todos los 
+     * registros de ingredientes que hay en la base de datos.
+     * 
+     * @return List.
+     * @throws PersistenciaException.
      */
     @Override
     public List<Ingrediente> listarTodo() throws PersistenciaException{
@@ -56,10 +63,12 @@ public class IngredienteProductoDAO implements IIngredienteProductoDAO{
     }
     
     /**
-     * Busca la lista de ingredientes que hay en el producto y la devuelve en una lista de entidad ProductoIngrediente
-     * @param id_producto
-     * @return
-     * @throws PersistenciaException 
+     * Busca la lista de ingredientes que hay en el producto y 
+     * la devuelve en una lista de entidad ProductoIngrediente.
+     * 
+     * @param id_producto.
+     * @return List.
+     * @throws PersistenciaException.
      */
     @Override
     public List<ProductoIngrediente> buscarPorProducto(Long id_producto) throws PersistenciaException {

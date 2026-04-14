@@ -23,6 +23,11 @@ public class ClienteDAO implements IClienteDAO {
 
     }
 
+    /**
+     * Obtener instancia de ClienteDAO.
+     * 
+     * @return ClienteDAO.
+     */
     public static ClienteDAO getInstanceClienteDAO() {
         if (clienteDAO == null) {
             clienteDAO = new ClienteDAO();
@@ -36,9 +41,9 @@ public class ClienteDAO implements IClienteDAO {
      * incluyendo los clientes frecuentes ya que siendo el cliente la clase
      * padre es posible registrar tambien el cliente frecuente
      *
-     * @param cliente
-     * @return Cliente
-     * @throws PersistenciaException
+     * @param cliente.
+     * @return Cliente.
+     * @throws PersistenciaException.
      */
     @Override
     public Cliente registrarCliente(Cliente cliente) throws PersistenciaException {
@@ -66,9 +71,9 @@ public class ClienteDAO implements IClienteDAO {
      * el string de busqueda, que busca por nombre, apellidos (implementación
      * extra), correo y teléfono.
      *
-     * @param filtro_busqueda
-     * @return List
-     * @throws PersistenciaException
+     * @param filtro_busqueda.
+     * @return List.
+     * @throws PersistenciaException.
      */
     @Override
     public List<Object[]> buscarCliente(String filtro_busqueda) throws PersistenciaException {
@@ -102,11 +107,11 @@ public class ClienteDAO implements IClienteDAO {
     }
 
     /**
-     * Mediante este metodo se permite modifcar al cliente con EntityManager
+     * Mediante este metodo se permite modifcar al cliente con EntityManager.
      *
-     * @param cliente
-     * @return Cliente
-     * @throws PersistenciaException
+     * @param cliente.
+     * @return Cliente.
+     * @throws PersistenciaException.
      */
     @Override
     public Cliente modificarCliente(Cliente cliente) throws PersistenciaException {
@@ -127,11 +132,11 @@ public class ClienteDAO implements IClienteDAO {
         }
     }
 /**
- * Permite hacer la busqueda de clientes que coincida su id
+ * Permite hacer la busqueda de clientes que coincida su id.
  * 
- * @param id
- * @return Cliente
- * @throws PersistenciaException 
+ * @param id.
+ * @return Cliente.
+ * @throws PersistenciaException.
  */
     @Override
     public Cliente buscarPorId(Long id) throws PersistenciaException {

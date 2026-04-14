@@ -6,8 +6,6 @@ package objetosNegocioRestaurante;
 
 import daosRestaurante.EmpleadoDAO;
 import daosRestaurante.IEmpleadoDAO;
-import daosRestaurante.IIngredienteDAO;
-import daosRestaurante.IngredienteDAO;
 import dtosDelRestaurante.EmpleadoRegistroDTO;
 import entidadesRestaurante.Empleado;
 import entidadesRestaurante.Mesero;
@@ -33,6 +31,11 @@ public class EmpleadoBO implements IEmpleadoBO{
 
     }
 
+    /**
+     * Obtenemos la instancia de EmpleadoBO.
+     * 
+     * @return EmpleadoBO.
+     */
     public static EmpleadoBO getInstanceEmpleadoBO() {
         if (empleadoBO == null) {
             empleadoBO = new EmpleadoBO();
@@ -41,9 +44,11 @@ public class EmpleadoBO implements IEmpleadoBO{
     }
     
     /**
-     * Mediante este metodo obtenemos la lista de empleados para poder encriptar sus cotraseñas.
+     * Mediante este metodo obtenemos la lista de empleados 
+     * para poder encriptar sus cotraseñas.
+     * 
      * @param lista
-     * @throws NegocioException 
+     * @throws NegocioException.
      */
     @Override
     public void registrarEmpleados(List<Empleado> lista) throws NegocioException {
@@ -65,10 +70,12 @@ public class EmpleadoBO implements IEmpleadoBO{
     }
 
     /**
-     * Mediante este metodo iniciamos sesion validando la contraseña que obtenemos por el usuario.
+     * Mediante este metodo iniciamos sesion validando la 
+     * contraseña que obtenemos por el usuario.
+     * 
      * @param codigo_ingresado
-     * @return
-     * @throws NegocioException 
+     * @return EmpleadoRegistroDTO.
+     * @throws NegocioException.
      */
     @Override
     public EmpleadoRegistroDTO loginPorCodigo(String codigo_ingresado) throws NegocioException {

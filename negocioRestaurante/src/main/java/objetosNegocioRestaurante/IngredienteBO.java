@@ -57,7 +57,6 @@ public class IngredienteBO implements IIngredienteBO {
     @Override
     public boolean registrarIngredientes(IngredientesDTO ingrediente) throws NegocioException {
         try {
-
             if (!validar.validarNombres(ingrediente.getNombre())) {
                 throw new NegocioException("El nombre del ingrediente está mal escrito o es demasiado largo.");
             }
@@ -65,7 +64,6 @@ public class IngredienteBO implements IIngredienteBO {
             if (!validar.validarStock(ingrediente.getStock())) {
                 throw new NegocioException("El Stock no puede estar vacío o ser negativo.");
             }
-
 
             if (!validar.validarRepetido(ingrediente.getNombre(), ingrediente.getUnidad_Medida())) {
                 throw new NegocioException("Ya existe un ingrediente registrado con ese nombre y esa unidad de medida.");
@@ -102,19 +100,19 @@ public class IngredienteBO implements IIngredienteBO {
         try {
 
             List<Ingrediente> resultados = ingredienteDAO.buscarIngrediente(filtro);
-            List<IngredienteBusquedaDTO> listaDTO = new ArrayList<>();
+            List<IngredienteBusquedaDTO> lista_DTO = new ArrayList<>();
 
             for (Ingrediente ingrediente : resultados) {
 
-                IngredienteBusquedaDTO ingredienteDTO = new IngredienteBusquedaDTO();
-                ingredienteDTO.setId(ingrediente.getId());
-                ingredienteDTO.setNombre(ingrediente.getNombre());
-                ingredienteDTO.setStock(ingrediente.getStock());
-                ingredienteDTO.setUnidad_medida(ingrediente.getUnidad_medida());
+                IngredienteBusquedaDTO ingrediente_DTO = new IngredienteBusquedaDTO();
+                ingrediente_DTO.setId(ingrediente.getId());
+                ingrediente_DTO.setNombre(ingrediente.getNombre());
+                ingrediente_DTO.setStock(ingrediente.getStock());
+                ingrediente_DTO.setUnidad_medida(ingrediente.getUnidad_medida());
 
-                listaDTO.add(ingredienteDTO);
+                lista_DTO.add(ingrediente_DTO);
             }
-            return listaDTO;
+            return lista_DTO;
 
         } catch (PersistenciaException ex) {
             throw new NegocioException("Ocurrio un error en negocio al intentar devolver la lista de ingredientes: " + ex.getMessage());

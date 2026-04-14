@@ -193,6 +193,61 @@ public class Comanda implements Serializable {
     }
 
     /**
+     * Obtiene el mesero que esta atendiendo la comanda.
+     * 
+     * @return
+     */
+    public Mesero getMesero() {
+        return mesero;
+    }
+
+    /**
+     * Actualiza el mesero que se encarga de la comanda.
+     * 
+     * @param mesero 
+     */
+    public void setMesero(Mesero mesero) {
+        this.mesero = mesero;
+    }
+
+    /**
+     * Obtiene el cliente que esta relacionado con la comanda.
+     * 
+     * @return 
+     */
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    /**
+     * Actualizamos el cliente que esta relacionado con la comanda.
+     * 
+     * @param cliente 
+     */
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    /**
+     * Obetenemos la mesa donde se esta haciendo la comanda.
+     * 
+     * @return 
+     */
+    public Mesa getMesa() {
+        return mesa;
+    }
+
+    /**
+     * Actualizamos la mesa donde se esta haciendo la comanda.
+     * @param mesa 
+     */
+    public void setMesa(Mesa mesa) {
+        this.mesa = mesa;
+    }
+    
+    
+
+    /**
      * Devuelve una representación en texto de la comanda con sus atributos
      * principales.
      *

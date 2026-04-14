@@ -106,11 +106,11 @@ public class VentanaMenuAdmin extends JFrame {
         });
 
         btn_reporte.addActionListener(e -> {
-            coordinador.mostrarMenuCliente();
+            coordinador.abrirReportes();
         });
 
         btn_producto.addActionListener(e -> {
-            coordinador.mostrarMenuProducto();// ---> MODIFICAR
+            coordinador.mostrarMenuProducto();
         });
         btn_ingrediente.addActionListener(e -> {
             coordinador.mostrarMenuIngrediente();
