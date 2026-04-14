@@ -42,8 +42,10 @@ import objetosNegocioRestaurante.IProductoBO;
 import objetosNegocioRestaurante.IngredienteProductoBO;
 import objetosNegocioRestaurante.ProductoBO;
 import objetosNegocioRestaurante.IIngredienteBO;
+import objetosNegocioRestaurante.IMesaBO;
 import objetosNegocioRestaurante.IReporteBO;
 import objetosNegocioRestaurante.IngredienteBO;
+import objetosNegocioRestaurante.MesaBO;
 import objetosNegocioRestaurante.ReporteBO;
 import observadorRestaurante.Observador;
 import pantallas.*;
@@ -71,6 +73,7 @@ public class Coordinador implements Observador {
     private final IIngredienteProductoBO ingredienteProductoBO;
     private final IEmpleadoBO empleadoBO;
     private final IReporteBO reporteBO;
+    private final IMesaBO mesaBO;
     
     private final IComandaBO comandaBO;
 
@@ -103,6 +106,7 @@ public class Coordinador implements Observador {
         this.empleadoBO = EmpleadoBO.getInstanceEmpleadoBO();
         this.reporteBO = ReporteBO.getInstanceReporteBO();
         this.comandaBO = ComandaBO.getInstanceComandaBO();
+        this.mesaBO = MesaBO.getInstanceComandaBO();
         validar = new Validaciones();
     }
 
@@ -320,6 +324,18 @@ public class Coordinador implements Observador {
     //==========================================================================
     //==========================METODOS JOS JOS=================================
     //==========================================================================
+    /**
+     * Metodo para obtener las mesas ocupadas en el restaurante
+     * @return 
+     */
+    public List<Long> obtenerMesasOcupadas(){
+        try{
+            return mesaBO.obtenerMesasOcupadas();
+        }catch(NegocioException e){
+            System.err.println(e.getMessage());
+            return new ArrayList<>();
+        }
+    }
     /**
      * Para obtener el di del lciente general
      *

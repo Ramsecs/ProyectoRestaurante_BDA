@@ -139,4 +139,12 @@ public class BotonMenuAdministrador extends JButton {
 
         super.paintComponent(g);
     }
+
+    @Override
+    public void setBackground(Color bg) {
+        super.setBackground(bg);
+        this.color_fondo = bg;
+        this.color_original = bg; // Actualizamos el original para que el MouseExited no lo regrese al verde
+        repaint();
+    }
 }

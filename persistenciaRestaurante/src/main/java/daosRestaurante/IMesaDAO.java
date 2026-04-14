@@ -6,6 +6,7 @@ package daosRestaurante;
 
 import entidadesRestaurante.Mesa;
 import excepcionesRestaurante.PersistenciaException;
+import java.util.List;
 
 /**
  *
@@ -13,4 +14,5 @@ import excepcionesRestaurante.PersistenciaException;
  */
 public interface IMesaDAO {
     public Mesa buscarPorId(Long id) throws PersistenciaException; 
+    public List<Long> obtenerMesasOcupadas() throws PersistenciaException; 
 }

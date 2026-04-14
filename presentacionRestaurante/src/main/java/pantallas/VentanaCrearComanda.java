@@ -11,6 +11,7 @@ import dtosDelRestaurante.ProductoComandaDTO;
 import entidadesEnumeradorDTO.TipoPlatilloDTO;
 import enumEntidades.EstadoComanda;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -41,6 +42,8 @@ public class VentanaCrearComanda extends JFrame {
     private final int TOTAL_MESAS = 20;
 
     private List<ProductoComandaDTO> productos_tabla; //Esto nos servira para poder traer el id de los productos
+    private List<BotonMenuAdministrador> lista_mesas_botones = new ArrayList<>(); //Este arreglo nos sirve para poder recorrer los botones y ver cuales
+    //tienen una comanda ABIERTA
     private final Map<Long, ComandaProductoDTO> carro_productos = new HashMap<>();
     //Este hash map nos va a ayudar para poder crear la lista de productos
     //Lo hago asi porque como actualizo la tabla se queda solo el ultimo producto seleccionado
@@ -73,9 +76,14 @@ public class VentanaCrearComanda extends JFrame {
         panel_cartas = new JPanel(navegador);
         panel_cartas.setOpaque(false);
 
+        
+
         //CREAR LAS DOS VISTAS--------------------------------------------------
         panel_cartas.add(crearVistaSeleccionMesa(), "SELECCION");
         panel_cartas.add(crearVistaFormularioComanda(), "FORMULARIO");
+        
+        //========================ACTUALIZAR EL ESTADO DE LAS MESAS=============
+        actualizarEstadoMesas();
 
         //EL BOTON INICIA DESEACTIVADO------------------------------------------
         btn_buscar_cliente.setEnabled(false);
@@ -87,10 +95,12 @@ public class VentanaCrearComanda extends JFrame {
         gbc_fondo.weighty = 1.0;
         gbc_fondo.insets = new Insets(20, 40, 20, 40);
         panel_principal.add(panel_cartas, gbc_fondo);
+
     }
 //==============================================================================
 
     private JPanel crearVistaSeleccionMesa() {
+        lista_mesas_botones.clear();
         PanelRedondeado panel = new PanelRedondeado(50, Color.WHITE);
         panel.setLayout(new GridBagLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(40, 60, 40, 60));
@@ -111,10 +121,28 @@ public class VentanaCrearComanda extends JFrame {
 
         for (int i = 1; i <= TOTAL_MESAS; i++) {
             BotonMenuAdministrador btn_mesa = new BotonMenuAdministrador("Mesa " + i, null, verde, 0, 0, fuente_mesas);
+            lista_mesas_botones.add(btn_mesa);
             final long numero_mesa = i;
             btn_mesa.addActionListener(e -> {
-                this.id_mesa_seleccionada = numero_mesa;
-                navegador.show(panel_cartas, "FORMULARIO");
+                if (btn_mesa.getBackground().equals(rojo)) {
+                    int respuesta = JOptionPane.showConfirmDialog(this, "La mesa"
+                            + numero_mesa + "tiene una comanda activa. ¿Desea cancelarla?",
+                            "Mesa Ocupada", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if (respuesta == JOptionPane.YES_OPTION) {
+                        try {
+                            //AQUI SE CANCELA LA COMANDA
+                            //coordinador.cancelarComandas(numero_mesa);
+                            actualizarEstadoMesas();
+                            JOptionPane.showMessageDialog(this, "Se libero la mesa");
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(this, "Error al liberar la mesa " + ex.getMessage());
+                        }
+
+                    }
+                } else {
+                    this.id_mesa_seleccionada = numero_mesa;
+                    navegador.show(panel_cartas, "FORMULARIO");
+                }
             });
             grilla.add(btn_mesa);
         }
@@ -264,7 +292,6 @@ public class VentanaCrearComanda extends JFrame {
 
         btn_volver = new BotonMenuAdministrador("Volver", "/imagenes/volverPNG.png", rojo, 25, 25, fuente_botones);
         btn_volver.setPreferredSize(new Dimension(180, 50));
-        
 
         btn_agregar = new BotonMenuAdministrador("Agregar", "/imagenes/aceptarPNG.png", verde, 25, 25, fuente_botones);
         btn_agregar.setPreferredSize(new Dimension(180, 50));
@@ -276,6 +303,7 @@ public class VentanaCrearComanda extends JFrame {
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         panel.add(panelBotones, gbc);
+
 //===============ACTION LISTENER================================================
         btn_buscar_cliente.addActionListener(a -> {
             coordinador.mostrarSelectorCliente(this);
@@ -289,9 +317,14 @@ public class VentanaCrearComanda extends JFrame {
         });
 
         btn_agregar.addActionListener(e -> {
+
             //1. Recogemos el DTO con la información de la pantalla
             ComandaDTO nueva_comanda = recolectarDatosComanda();
 
+            //Validamos que la comanda no venga vacia
+            if (nueva_comanda == null) {
+                return;
+            }
             int respuesta = JOptionPane.showConfirmDialog(this,
                     "¿Desea registrar la comanda por un total de $" + nueva_comanda.getTotal() + "?",
                     "Confirmar Registro", JOptionPane.YES_NO_OPTION);
@@ -342,8 +375,9 @@ public class VentanaCrearComanda extends JFrame {
             TipoPlatilloDTO categoria = (TipoPlatilloDTO) cb_tipo_producto.getSelectedItem();
             coordinador.cargarProductosPorCategoria(categoria);
         });
-        
+
         btn_volver.addActionListener(e -> {
+            actualizarEstadoMesas();
             coordinador.volverMenuComanda();
         });
         //TODOS LOS ACTIONS LISTENER TIENEN QUE IR ANTES DE ESTE RETURN JOS=====
@@ -368,6 +402,28 @@ public class VentanaCrearComanda extends JFrame {
         }
     }
 
+    public void actualizarEstadoMesas() {
+        //1.Obtener la lista de las mesas ocupadas desde el coordinador
+        List<Long> mesas_ocupadas = coordinador.obtenerMesasOcupadas();
+        System.out.println("Mesas ocupadas" + mesas_ocupadas);
+        //2. Recorrer los botones guardados en una lista 
+        for (int i = 0; i < lista_mesas_botones.size(); i++) {
+            long numero_mesa = i + 1;
+            BotonMenuAdministrador boton = lista_mesas_botones.get(i);
+
+            if (mesas_ocupadas.contains(Long.valueOf(numero_mesa))) {
+                boton.setBackground(rojo);
+                System.out.println("Pintando de verde mesa: " + numero_mesa); // DEBUG
+                //AQUI VA LA LOGICA PARA LIBERAR LA MESA TAMBIEEENN
+            } else {
+                boton.setBackground(verde);
+            }
+        }
+
+        this.revalidate(); //Se asegura que el layout se actualice
+        this.repaint(); //Fuerza a redibujar por si falla
+    }
+
     private ComandaDTO recolectarDatosComanda() {
         // 1. Sincronizamos lo que hay en la pantalla actual al carrito 
         actualizarCarritoDesdeTabla();
@@ -378,6 +434,15 @@ public class VentanaCrearComanda extends JFrame {
         }
 
         ComandaDTO comandaDTO = new ComandaDTO();
+
+        //--VALIDACIÓN PARA EL CLIENTE--
+        Object item_seleccionado = cmb_tipo_cliente.getSelectedItem();
+
+        if (item_seleccionado == null || item_seleccionado.toString().equals("Seleccionar...")) {
+            JOptionPane.showMessageDialog(this, "Por favor, seleccione un tipo de cliente (General o Frecuente).",
+                    "Dato faltante", JOptionPane.WARNING_MESSAGE);
+            return null; // Detenemos todo y devolvemos nulo
+        }
 
         // --- Logica de Cliente y Mesero ---
         String tipo_cliente = cmb_tipo_cliente.getSelectedItem().toString();
@@ -466,6 +531,8 @@ public class VentanaCrearComanda extends JFrame {
         }
 
         this.carro_productos.clear();
+
+        actualizarEstadoMesas();
 
         // 4. Regresar a la vista de Selección de Mesa
         navegador.show(panel_cartas, "SELECCION");
