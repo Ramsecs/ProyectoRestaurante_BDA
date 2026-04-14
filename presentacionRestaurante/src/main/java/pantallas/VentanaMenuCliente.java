@@ -13,7 +13,6 @@ import java.util.List;
 import java.time.LocalDate;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.*;
 import observadorRestaurante.Observador;
@@ -36,8 +35,8 @@ public class VentanaMenuCliente extends JFrame {
     public void setConexionObservador(Observador metiche) {
         this.metiche = metiche;
     }
-    
-    private List<ClienteBusquedaDTO> lista_clientes_actual;
+
+    private List<ClienteBusquedaDTO> listaClientesActual;
     private ClienteDTO clienteDTO;
     private final Color naranja = new Color(255, 184, 77);
     private final Color verde = new Color(116, 155, 87);
@@ -57,7 +56,7 @@ public class VentanaMenuCliente extends JFrame {
         this.clienteDTO = new ClienteDTO();
 
         //CONFIGURACION BASE----------------------------------------------------
-        setTitle("Gestion de Clientes - Sistema Restaurante");
+        setTitle("Gestión de Clientes - Sistema Restaurante");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 850);
         setLocationRelativeTo(null);
@@ -66,11 +65,11 @@ public class VentanaMenuCliente extends JFrame {
     }
 
     private void initComponents() {
-        //-------------SECCION DEL FONDO----------------------------------------
+        //-------------SECCIÓN DEL FONDO----------------------------------------
         PanelFondo panel_fondo = new PanelFondo();
         panel_fondo.setLayout(new GridBagLayout());
         setContentPane(panel_fondo);
-        //-------------SECCION DEL PANEL BLANCO---------------------------------
+        //-------------SECCIÓN DEL PANEL BLANCO---------------------------------
         PanelRedondeado cuadro_blanco = new PanelRedondeado(50, Color.WHITE);
         cuadro_blanco.setLayout(new GridBagLayout());
         cuadro_blanco.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
@@ -89,14 +88,14 @@ public class VentanaMenuCliente extends JFrame {
         Font fuente_rabbits_mediana = GestorFuentes.obtenerFuente("Rabbits-Bro.ttf", 18f);
         Font fuente_rabbits_pequena = GestorFuentes.obtenerFuente("Rabbits-Bro.ttf", 14f);
 
-        //--------------------------TITULO LABEL-------------------------------
-        JLabel lbl_titulo = new JLabel("Menu de Cliente", SwingConstants.CENTER);
+        //--------------------------TITULO LABEL (FILA 0)-------------------------------
+        JLabel lbl_titulo = new JLabel("Menú de Cliente", SwingConstants.CENTER);
         lbl_titulo.setFont(fuente_titulo);
         gbc.gridy = 0;
         gbc.weighty = 0.02;
         cuadro_blanco.add(lbl_titulo, gbc);
 
-        //-------------------------BUSCADOR LABEL y TXTFIELD-------------------------------
+        //-------------------------BUSCADOR LABEL y TXTFIELD (FILA 1 Y 2)-------------------------------
         gbc.gridy = 1;
         gbc.weighty = 0;
         JLabel lbl_buscar = new JLabel("Buscar cliente");
@@ -108,17 +107,17 @@ public class VentanaMenuCliente extends JFrame {
         txt_buscador.setPreferredSize(new Dimension(0, 35)); // Altura fija
         cuadro_blanco.add(txt_buscador, gbc);
 
-        //----------------------------TABLA-------------------------------------
+        //----------------------------TABLA (FILA 3)-------------------------------------
         gbc.gridy = 3;
         gbc.weighty = 0.3;
         gbc.fill = GridBagConstraints.BOTH;
-        // Definimos las columnas que va a contener la tabla
+        //1. Definimos las columnas que va a contener la tabla
         String[] columnas = {
             "Nombre", "Apellido Paterno", "Apellido Materno", "Correo",
             "Teléfono", "Visitas", "Puntos", "Total Acumulado"
         };
 
-        // Ahora implementamos ModeloTablaEditable, para permitir que datos se van a editar
+        //2. Ahora implementamos ModeloTablaEditable, para permitir que datos se van a editar
         modelo_tabla = new ModeloTablaEditable(columnas, 0, 4);
 
         tabla = new TablaEstilizada(modelo_tabla, fuente_rabbits_pequena);
@@ -129,8 +128,9 @@ public class VentanaMenuCliente extends JFrame {
 
         cuadro_blanco.add(scroll, gbc);
 
+        //MODELO DE PRUEBA PARA LA TABLA========================================
         //======================================================================
-        //----------------SECCION PARA AGREGAR AL CLIENTE (panel)---------------
+        //----------------SECCIÓN PARA AGREGAR AL CLIENTE (panel)---------------
         PanelBordePunteado panel_agregar = new PanelBordePunteado();
         panel_agregar.setLayout(new GridLayout(0, 2, 10, 2));
 
@@ -164,7 +164,7 @@ public class VentanaMenuCliente extends JFrame {
         txt_correo = new TextFieldPersonalizado(10);
         panel_agregar.add(txt_correo);
 
-        JLabel lbl_telefono = new JLabel("Telefono:");
+        JLabel lbl_telefono = new JLabel("Teléfono:");
         lbl_telefono.setFont(fuente_rabbits_pequena);
         panel_agregar.add(lbl_telefono);
         txt_telefono = new TextFieldPersonalizado(10);
@@ -174,7 +174,7 @@ public class VentanaMenuCliente extends JFrame {
         gbc.weighty = 0.2;
         cuadro_blanco.add(panel_agregar, gbc);
 
-        //-----------------SECCION PARA LOS BOTONES-----------------------------
+        //-----------------SECCIÓN PARA LOS BOTONES-----------------------------
         gbc.gridy = 5;
         gbc.weighty = 0.1;
         JPanel panel_boton = new JPanel(new BorderLayout());
@@ -190,7 +190,7 @@ public class VentanaMenuCliente extends JFrame {
 
         cuadro_blanco.add(panel_boton, gbc);
 
-        // CONFIGURACION PARA EL CUADRO BLANCO DENTRO DEL FONDO
+        // CONFIGURACIÓN PARA EL CUADRO BLANCO DENTRO DEL FONDO
         GridBagConstraints gbc_fondo = new GridBagConstraints();
         gbc_fondo.gridx = 0;
         gbc_fondo.gridy = 0;
@@ -235,26 +235,22 @@ public class VentanaMenuCliente extends JFrame {
         });
 
 //============================Busqueda tiempo real==============================
-        txt_buscador.getDocument().addDocumentListener(new DocumentListener() {
+        txt_buscador.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 buscar();
             }
 
-            @Override 
+            @Override
             public void removeUpdate(DocumentEvent e) {
                 buscar();
             }
- 
-            @Override 
+
+            @Override
             public void changedUpdate(DocumentEvent e) {
                 buscar();
             }
-            
-            /**
-             * Usando este metodo se busca a un cliente mediante el uso del filtro que 
-             * se obtiene del campo de texto que hay en la pantalla
-             */
+
             private void buscar() {
                 String filtro = txt_buscador.getText().trim();
                 coordinador.buscarClientes(filtro);
@@ -264,12 +260,12 @@ public class VentanaMenuCliente extends JFrame {
 //==================MODIFICACION================================================
 // Escucha cambios en las celdas de la tabla
         modelo_tabla.addTableModelListener(e -> {
-            // Solo actuamos si el evento es una ACTUALIZACION
+            // Solo actuamos si el evento es una ACTUALIZACIÓN
             if (e.getType() == TableModelEvent.UPDATE) {
                 int fila = e.getFirstRow();
                 int columna = e.getColumn();
 
-                //SOLO SE EDITA SI ESTA DENTRO DE LAS PERMITIDAS
+                //sOLO SE EDITA SI ESTA DENTRO DE LAS PERMITIDAS
                 if (columna >= 0 && columna <= 4) {
                     ejecutarActualizacionDesdeTabla(fila);
                 }
@@ -277,16 +273,10 @@ public class VentanaMenuCliente extends JFrame {
         });
     }
 
-    /**
-     * Mediante este metodo se actualiza la tabla de clientes con la 
-     * lista de cleintes que obtiene en sus parametros.
-     * @param lista 
-     */
     public void actualizarTabla(List<ClienteBusquedaDTO> lista) {
-        this.lista_clientes_actual = lista;
-        // Limpiamos la tabla
+        this.listaClientesActual = lista;
+        // 1. Limpiamos la tabla
         modelo_tabla.setRowCount(0);
-        // Recorremos la lista de DTOs que nos mando el BO por medio del cordi
 
         if (lista == null) {
             return;
@@ -319,10 +309,6 @@ public class VentanaMenuCliente extends JFrame {
         }
     }
 
-    /**
-     * Mediante este metodo se limpian los campos 
-     * en la tabla que se muestra en la pantalla de clientes.
-     */
     public void limpiarCampos() {
         txt_nombre.setText("");
         txt_apellido_paterno.setText("");
@@ -332,16 +318,8 @@ public class VentanaMenuCliente extends JFrame {
         txt_nombre.requestFocus();
     }
 
-    /**
-     * Mediante este metodo se actualiza la tabla y la informacion 
-     * cuando el usuario modifica la informacion dentro.
-     * 
-     * @param fila 
-     */
     private void ejecutarActualizacionDesdeTabla(int fila) {
-
-        //PRIMERO VALIDACIONES =============================
-        // Extraer los datos de la fila editada
+        // 1. Extraer los datos editados directamente de la vista (JTable)
         String nombre = modelo_tabla.getValueAt(fila, 0).toString().trim();
         String paterno_apellido = modelo_tabla.getValueAt(fila, 1).toString().trim();
         String materno_apellido = modelo_tabla.getValueAt(fila, 2).toString().trim();
@@ -354,32 +332,10 @@ public class VentanaMenuCliente extends JFrame {
             notificarError(); // Refresca la tabla para revertir el cambio visual
             return;
         }
-        
-        //VALIDACION DEL NOMBRE DEL CLIENTE
-        if (!coordinador.validarNombre(nombre)) {
-            JOptionPane.showMessageDialog(this, "El nombre esta mal escrito.");
-            notificarError();
-            return;
-        }
-        
-        //VALIDACION DEL APELLIDO PATERNO
-        if (!coordinador.validarApellidos(paterno_apellido)) {
-            JOptionPane.showMessageDialog(this, "El apellido paterno esta mal escrito.");
-            notificarError();
-            return;
-        }
-        
-        //VALIDACION DEL APELLIDO MATERNO
-        if (!coordinador.validarApellidos(materno_apellido)) {
-            JOptionPane.showMessageDialog(this, "El apellido materno esta mal escrito.");
-            notificarError();
-            return;
-        }
-        
-        //VALIDACION DEL CORREO PARA QUE LO ACEPTE NULL
-        String correo_final = null; 
+
+        String correo_final = null;
         if (!correo.isEmpty()) {
-            if (!coordinador.validarCorreo(correo)) {
+            if (!correo.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$")) {
                 JOptionPane.showMessageDialog(this, "El formato del correo no es válido");
                 notificarError();
                 return;
@@ -387,22 +343,29 @@ public class VentanaMenuCliente extends JFrame {
             correo_final = correo;
         }
 
-        //VALIDACION DEL TELEFONO
-        if (!coordinador.validarTelefono(telefono)) {
-            JOptionPane.showMessageDialog(this, "El teléfono debe contener exactamente 10 dígitos numéricos");
+        if (!telefono.matches("\\d{10}")) {
+            JOptionPane.showMessageDialog(this, "El teléfono debe contener exactamente 10 dígitos numéricos", "Error de Formato", JOptionPane.ERROR_MESSAGE);
             notificarError();
             return;
         }
 
-        //======================================================================
-        // Buscamos el DTO original en la lista que creamos para usarla como tipo espejo
-        //fue como la manera más segura que encontre
-        ClienteBusquedaDTO cliente_original = lista_clientes_actual.get(fila);
-        Long id_real = cliente_original.getId();
+        // --- BÚSQUEDA SEGURA DEL ID ---
+        // Buscamos en la lista completa (espejo) al cliente que tiene este teléfono
+        Long id_real = null;
+        if (listaClientesActual != null) {
+            for (ClienteBusquedaDTO c : listaClientesActual) {
+                // Comparamos el teléfono de la tabla con el de la lista original
+                if (c.getTelefono().equals(telefono)) {
+                    id_real = c.getId();
+                    break;
+                }
+            }
+        }
 
-        // Creamos el DTO con los nuevos datos de la tabla
-        ClienteBusquedaDTO cliente_editado = new ClienteBusquedaDTO();
-        cliente_editado.setId(id_real); // Le pasamos el ID que rescatamos de la lista
+        // 2. Si encontramos el ID, procedemos a enviar la actualización
+        if (id_real != null) {
+            ClienteBusquedaDTO cliente_editado = new ClienteBusquedaDTO();
+            cliente_editado.setId(id_real); // Usamos el ID recuperado de la lista, no el de la fila
 
             cliente_editado.setNombre(nombre);
             cliente_editado.setApellido_paterno(paterno_apellido);
@@ -421,12 +384,9 @@ public class VentanaMenuCliente extends JFrame {
             notificarError();
         }
     }
-    
-    
-    /**
-     * Metodo para reevertir cambios visuales dentro de la tabla en clientes.
-     */
-    private void notificarError(){
+    //Metodo para reevertir cambios visuales dentro de la tabla 
+
+    private void notificarError() {
         if (coordinador != null) {
             coordinador.buscarClientes(txt_buscador.getText().trim());
         }
