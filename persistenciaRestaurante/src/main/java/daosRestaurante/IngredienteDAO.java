@@ -185,7 +185,7 @@ public class IngredienteDAO implements IIngredienteDAO {
 
                         em.merge(ingrediente);
                     } else {
-                        System.err.println("STOCK INSUFICIENTE: " + ingrediente.getNombre());
+                        System.err.println("STOCK INSUFICIENTE: " + ingrediente.getNombre()+" STOCK "+ingrediente.getStock());
                         em.getTransaction().rollback();
                         return false;
                     }

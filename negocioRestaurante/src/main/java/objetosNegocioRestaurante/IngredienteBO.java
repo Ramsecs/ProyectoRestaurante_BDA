@@ -4,10 +4,21 @@
  */
 package objetosNegocioRestaurante;
 
+import adaptadores.ComandaAdapter;
 import conexionRestaurante.ConexionBD;
+import daosRestaurante.ClienteDAO;
+import daosRestaurante.IClienteDAO;
 import daosRestaurante.IngredienteDAO;
 import validadores.Validaciones;
 import daosRestaurante.IIngredienteDAO;
+import daosRestaurante.IMesaDAO;
+import daosRestaurante.IMeseroDAO;
+import daosRestaurante.IProductoDAO;
+import daosRestaurante.MesaDAO;
+import daosRestaurante.MeseroDAO;
+import daosRestaurante.ProductoDAO;
+import dtosDelRestaurante.ComandaDTO;
+import dtosDelRestaurante.ComandaProductoDTO;
 import dtosDelRestaurante.IngredienteBusquedaDTO;
 import dtosDelRestaurante.IngredientesDTO;
 import entidadesRestaurante.Comanda;
@@ -36,6 +47,8 @@ public class IngredienteBO implements IIngredienteBO {
 
     /** Utilidad para validaciones de formato y reglas de negocio */
     private Validaciones validar = new Validaciones();
+    
+    private ComandaAdapter adapter = new ComandaAdapter();
 
     /** Constructor privado para evitar instanciación externa */
     private IngredienteBO() {
@@ -124,7 +137,7 @@ public class IngredienteBO implements IIngredienteBO {
             throw new NegocioException("Ocurrio un error en negocio al intentar devolver la lista de ingredientes: " + ex.getMessage());
         }
     }
-
+    
     /**
      * Actualiza el stock de un ingrediente existente.
      * 
@@ -150,49 +163,26 @@ public class IngredienteBO implements IIngredienteBO {
         }
     }
     
+    /**
+     * Convertimos el DTO de comanda a una entidad de dominio 
+     * para despues mandar a que valide todos los ingredientes de cada producto
+     * y que cada uno sea valido o que alcance para realizar la comanda.
+     * 
+     * @param dto
+     * @return verdadero si todos los ingredientes estan bien, falso si es que no alcanza
+     * @throws NegocioException 
+     */
     @Override
-    public boolean procesarStockDeComanda(Comanda comanda) {
-    EntityManager em = ConexionBD.crearConexion(); 
-    
-    try {
-        em.getTransaction().begin();
-
-        for (ComandaProducto comanda_Producto : comanda.getLista_productos()) {
+    public boolean restarStockIngredientesParaComanda(ComandaDTO dto) throws NegocioException {
+        // Convertir DTO a Entidad de Dominio
+        Comanda comanda = adapter.convertirDtoAEntidad(dto);
+        try{
             
-            int cantidadPlatos = comanda_Producto.getCant_cada_producto();
-            Producto producto = comanda_Producto.getProductos_comprados();
+        return ingredienteDAO.procesarStockDeComanda(comanda);
 
-            for (ProductoIngrediente receta : producto.getLista_ingredientes()) {
-                
-                Ingrediente ingrediente = receta.getIngredientes();
-                
-                int gasto_Unitario = receta.getCantidad_ingrediente();
-                int total_A_Restar = gasto_Unitario * cantidadPlatos;
-                int stock_Actual = ingrediente.getStock();
-
-                if (stock_Actual >= total_A_Restar) {
-                    ingrediente.setStock(stock_Actual - total_A_Restar);
-                    
-                    em.merge(ingrediente);
-                } else {
-                    System.err.println("Stock insuficiente de " + ingrediente.getNombre());
-                    em.getTransaction().rollback();
-                    return false;
-                }
-            }
+        } catch (PersistenciaException e) {
+            throw new NegocioException("Error al guardar la comanda: " + e.getMessage());
         }
-
-        em.getTransaction().commit();
-        return true;
-
-    } catch (Exception e) {
-        if (em.getTransaction().isActive()) {
-            em.getTransaction().rollback();
-        }
-        e.printStackTrace();
-        return false;
-    } finally {
-        em.close();
     }
-}
+
 }

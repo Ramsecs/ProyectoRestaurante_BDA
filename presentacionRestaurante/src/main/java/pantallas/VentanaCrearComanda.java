@@ -318,7 +318,7 @@ public class VentanaCrearComanda extends JFrame {
 
         btn_agregar.addActionListener(e -> {
 
-            //1. Recogemos el DTO con la información de la pantalla
+            // Recogemos el DTO con la información de la pantalla
             ComandaDTO nueva_comanda = recolectarDatosComanda();
 
             //Validamos que la comanda no venga vacia
@@ -331,10 +331,15 @@ public class VentanaCrearComanda extends JFrame {
 
             if (respuesta == JOptionPane.YES_OPTION) {
                 try {
-                    // 3. El coordinador guarda
+                    // El coordinador guarda y valida que si es posible hacer la comanda.
+                    boolean validacion = coordinador.restarStockYValidarIngredientes(nueva_comanda);
+                    if (!validacion) {
+                        JOptionPane.showMessageDialog(null, "El stock de ingredientes es insuficiente para\ncompletar esta comanda.");
+                        return;
+                    }
                     coordinador.guardarComanda(nueva_comanda);
                     coordinador.volverMenuComanda();
-                    // 4. Caso de exito
+                    // Caso de exito
                     JOptionPane.showMessageDialog(this, "Comanda registrada con éxito", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
                     limpiarFormulario();

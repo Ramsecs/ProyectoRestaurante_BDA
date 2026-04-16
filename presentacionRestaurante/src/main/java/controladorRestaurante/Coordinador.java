@@ -987,4 +987,23 @@ public class Coordinador implements Observador {
         }
     }
     
+    
+    /**
+     * Restamos la cantidad que se requiera de ingredientes para la comanda
+     * con el stock original de cada ingrediente.
+     * 
+     * @param nuevaComanda
+     * @return verdadero si todos los ingredientes estan bien, falso si es que no alcanza
+     * @throws Exception 
+     */
+    public boolean restarStockYValidarIngredientes(ComandaDTO nuevaComanda) throws Exception {
+        try {
+            // Llamamos al BO para procesar todo
+            return ingredienteBO.restarStockIngredientesParaComanda(nuevaComanda);
+        } catch (NegocioException e) {
+            // Propagamos la excepcion para que la ventana la muestre en un JOptionPane
+            throw new Exception(e.getMessage());
+        }
+    }
+    
 }
