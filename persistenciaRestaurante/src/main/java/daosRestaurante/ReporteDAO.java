@@ -5,17 +5,24 @@
 package daosRestaurante;
 
 import conexionRestaurante.ConexionBD;
+import entidadesRestaurante.ClienteFrecuente;
 import entidadesRestaurante.Comanda;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  *
  * @author RAMSES
  */
-public class ReporteDAO implements IReporteDAO{
-    
+public class ReporteDAO implements IReporteDAO {
+
     private static ReporteDAO reporteDAO;
 
     private ReporteDAO() {
@@ -24,7 +31,7 @@ public class ReporteDAO implements IReporteDAO{
 
     /**
      * Obtener instancia de ReporteDAO.
-     * 
+     *
      * @return ReporteDAO.
      */
     public static ReporteDAO getInstanceReporteDAO() {
@@ -36,8 +43,9 @@ public class ReporteDAO implements IReporteDAO{
     }
 
     /**
-     * Se obtiene la lista de comandas usando el periodo de fechas que el usuario otorga.
-     * 
+     * Se obtiene la lista de comandas usando el periodo de fechas que el
+     * usuario otorga.
+     *
      * @param inicio
      * @param fin
      * @return Lista de comandas
@@ -46,46 +54,67 @@ public class ReporteDAO implements IReporteDAO{
     public List<Comanda> consultarComandasPorPeriodo(LocalDateTime inicio, LocalDateTime fin) {
         EntityManager em = ConexionBD.crearConexion();
         try {
-            // Traemos la comanda, su mesa y su cliente (si tiene)
-            String jpql = "SELECT c FROM Comanda c " +
-                          "LEFT JOIN FETCH c.cliente " + 
-                          "JOIN FETCH c.mesa " +
-                          "WHERE c.fecha_hora_creacion BETWEEN :inicio AND :fin " +
-                          "ORDER BY c.fecha_hora_creacion DESC";
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Comanda> cq = cb.createQuery(Comanda.class);
+            Root<Comanda> c = cq.from(Comanda.class);
 
-            return em.createQuery(jpql, Comanda.class).setParameter("inicio", inicio).setParameter("fin", fin).getResultList();
+            c.fetch("cliente", JoinType.LEFT);
+
+            c.fetch("mesa", JoinType.INNER);
+
+            cq.where(cb.between(c.get("fecha_hora_creacion"), inicio, fin));
+
+            cq.orderBy(cb.desc(c.get("fecha_hora_creacion")));
+
+            return em.createQuery(cq).getResultList();
+
         } finally {
             em.close();
         }
     }
 
     /**
-     * Se obtiene la lista con los datos necesarios para la vista de reportes de clientes 
-     * frecuentes, esta lista contiene diferentes datos referentes a los clientes que hay
-     * registrados.
-     * 
+     * Se obtiene la lista con los datos necesarios para la vista de reportes de
+     * clientes frecuentes, esta lista contiene diferentes datos referentes a
+     * los clientes que hay registrados.
+     *
+     * @param filtro_nombre
+     * @param minVisitas
      * @return lista de datos de los clientes.
      */
     @Override
     public List<Object[]> consultarReporteClientes(String filtro_nombre, int minVisitas) {
         EntityManager em = ConexionBD.crearConexion();
         try {
-            // Usamos COALESCE para que si no hay ventas, devuelva 0.0 en lugar de null
-            String jpql = "SELECT c.nombre, c.apellido_paterno, COUNT(com), " +
-                          "COALESCE(SUM(com.total_venta), 0.0), MAX(com.fecha_hora_creacion) " +
-                          "FROM ClienteFrecuente c LEFT JOIN c.comandas com " + 
-                          "WHERE (LOWER(c.nombre) LIKE LOWER(:nombre) OR LOWER(c.apellido_paterno) LIKE LOWER(:nombre)) " +
-                          "GROUP BY c.id, c.nombre, c.apellido_paterno " +
-                          "HAVING COUNT(com) >= :minVisitas";
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
 
-            return em.createQuery(jpql).setParameter("nombre", "%" + filtro_nombre + "%")
-                     .setParameter("minVisitas", (long) minVisitas)
-                     .getResultList();
-        } finally { 
-            em.close(); 
+            Root<ClienteFrecuente> c = cq.from(ClienteFrecuente.class);
+
+            Join<ClienteFrecuente, Comanda> com = c.join("comandas", JoinType.LEFT);
+
+            cq.multiselect(
+                    c.get("nombre"),
+                    c.get("apellido_paterno"),
+                    cb.count(com),
+                    cb.coalesce(cb.sum(com.get("total_venta")), 0.0),
+                    cb.max(com.get("fecha_hora_creacion"))
+            );
+
+            String pattern = "%" + filtro_nombre.toLowerCase() + "%";
+            Predicate nombrePredicate = cb.like(cb.lower(c.get("nombre")), pattern);
+            Predicate apellidoPredicate = cb.like(cb.lower(c.get("apellido_paterno")), pattern);
+            cq.where(cb.or(nombrePredicate, apellidoPredicate));
+
+            cq.groupBy(c.get("id"), c.get("nombre"), c.get("apellido_paterno"));
+
+            cq.having(cb.greaterThanOrEqualTo(cb.count(com), (long) minVisitas));
+
+            return em.createQuery(cq).getResultList();
+
+        } finally {
+            em.close();
         }
     }
-    
-    
-    
+
 }

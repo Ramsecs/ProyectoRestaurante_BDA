@@ -112,7 +112,7 @@ public class VentanaReportes extends JFrame {
 
         btn_clientes.addActionListener(e -> card_lay.show(cards, "CLIENTES"));
         btn_comandas.addActionListener(e -> card_lay.show(cards, "COMANDAS"));
-        btn_volver.addActionListener(e -> coordinador.regresarMenuMesero());
+        btn_volver.addActionListener(e -> coordinador.regresarMenuAdmin());
 
         return panel;
     }

@@ -228,11 +228,13 @@ public class Coordinador implements Observador {
     
     /**
      * Metodo para regresar al menu administrador 
-     * desde la ventana de menu ingrediente.
      */
     public void regresarMenuAdmin() {
         if (ventana_menu_ingrediente != null) {
             ventana_menu_ingrediente.dispose();
+        }
+        if (ventana_reportes != null) {
+            ventana_reportes.dispose();
         }
 
         if (ventana_menu_admin != null) {
@@ -762,6 +764,7 @@ public class Coordinador implements Observador {
         }
     }
 
+    @Override
     public void registrarIngrediente(IngredientesDTO ingredienteDTO) {
         try {
             ingredienteBO.registrarIngredientes(ingredienteDTO);
@@ -778,6 +781,7 @@ public class Coordinador implements Observador {
      *
      * @param filtro Texto para filtrar por nombre o unidad.
      */
+    @Override
     public void buscarIngredientes(String filtro) {
         try {
             List<IngredienteBusquedaDTO> lista = ingredienteBO.buscarIngredientes(filtro);
