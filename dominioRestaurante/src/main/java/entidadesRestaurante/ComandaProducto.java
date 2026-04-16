@@ -9,7 +9,7 @@ import java.util.Objects;
 import javax.persistence.*;
 
 /**
- *
+ *Relacion entre comanda y producto
  * @author RAMSES
  */
 @Entity

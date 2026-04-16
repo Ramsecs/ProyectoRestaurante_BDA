@@ -5,6 +5,9 @@
 package pantallas;
 
 import controladorRestaurante.Coordinador;
+import dtosDelRestaurante.ClienteBusquedaDTO;
+import dtosDelRestaurante.ComandaListaDTO;
+import entidadesEnumeradorDTO.EstadoComandaDTO;
 import enumEntidades.EstadoComanda;
 import java.awt.*;
 import javax.swing.*;
@@ -12,7 +15,16 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import observadorRestaurante.Observador;
 import recursos.*;
+import java.util.List;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
+/**
+ * Ventana que tiene las vista de las comandas ABIERTAS (son las que importan) y
+ * la parte para modificar (solo el estado y los productos)
+ *
+ * @author josma
+ */
 public class VentanaMenuComanda extends JFrame {
 
     private final Coordinador coordinador;
@@ -31,6 +43,8 @@ public class VentanaMenuComanda extends JFrame {
     private final Color rojo = new Color(188, 55, 30);
     private DefaultTableModel modelo_tabla;
     private TablaEstilizada tabla;
+
+    private JComboBox<EstadoComandaDTO> cmb_tabla;
 
     private TextFieldPersonalizado txt_nombre;
     private TextFieldPersonalizado txt_mesa;
@@ -161,18 +175,76 @@ public class VentanaMenuComanda extends JFrame {
         gbc_fondo.insets = new Insets(20, 40, 20, 40);
         panel_fondo.add(cuadro_blanco, gbc_fondo);
 
-        //DATOS FAKE============================================================
-        modelo_tabla.addRow(new Object[]{"1", "Juan Pérez", EstadoComanda.ABIERTA, "MODIFICAR", "CMD-001"});
-        modelo_tabla.addRow(new Object[]{"5", "Maria Garcia", EstadoComanda.CANCELADA, "MODIFICAR", "CMD-002"});
 //================ACTION LISTENER DE LOS BOTONES AGREGAR Y VOLVER===============
         btn_agregar.addActionListener(e -> coordinador.mostrarCrearComanda());
         btn_volver.addActionListener(e -> coordinador.volverComandaMesero());
+
+        cmb_tabla.addActionListener(e -> {
+            if (!cmb_tabla.isShowing()) {
+                return;
+            }
+
+            int fila = tabla.getSelectedRow();
+
+            // 2. Validar que realmente haya una fila seleccionada 
+            if (fila != -1 && fila < tabla.getRowCount()) {
+
+                // Recuperamos el DTO
+                ComandaListaDTO dto = (ComandaListaDTO) tabla.getValueAt(fila, 4);
+                EstadoComandaDTO estado = (EstadoComandaDTO) cmb_tabla.getSelectedItem();
+
+                // Si el estado es el mismo que ya tiene, no hacemos nada para evitar bucles
+                if (dto.getEstado() == estado) {
+                    return;
+                }
+
+                int resp = JOptionPane.showConfirmDialog(this, "¿Cambiar estado?");
+                if (resp == JOptionPane.YES_OPTION) {
+                    // 3. ANTES de llamar al coordinador, detenemos la edición
+                    if (tabla.isEditing()) {
+                        tabla.getCellEditor().stopCellEditing();
+                    }
+                    coordinador.actualizarEstadoComanda(dto.getId(), estado);
+                } else {
+                    // Si cancela, refrescamos para revertir el combo visualmente
+                    coordinador.cargarComandasAbiertas();
+                }
+            }
+        });
+
+        txt_nombre.getDocument().addDocumentListener((new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filtrar();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filtrar();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                filtrar();
+            }
+
+            private void filtrar() {
+                String texto = txt_nombre.getText().trim();
+                if (texto.isEmpty()) {
+                    coordinador.cargarComandasAbiertas();
+                } else {
+                    coordinador.buscarClientesComanda(texto);
+                }
+            }
+
+        }));
+
     }
 //=====================================OTRAS CONFIGURACIONES====================
 
     private void configurarRenderizadoUnidad() {
         // 1. CONFIGURAR COMBO EN TABLA
-        JComboBox<EstadoComanda> cmb_tabla = new JComboBox<>(EstadoComanda.values());
+        cmb_tabla = new JComboBox<>(EstadoComandaDTO.values());
         TableColumn colEstado = tabla.getColumnModel().getColumn(2);
         colEstado.setCellEditor(new DefaultCellEditor(cmb_tabla));
 
@@ -199,15 +271,15 @@ public class VentanaMenuComanda extends JFrame {
         columna_boton.setCellEditor(new BotonTablaEditor(btn_editor, e -> {
             int fila = tabla.getSelectedRow();
             if (fila != -1) {
-                //VALDACION DEL ESTADO
-                Object estado = tabla.getValueAt(fila, 2);
-                if (estado != null && estado.toString().equalsIgnoreCase("ABIERTA")) {
+                int filaModelo = tabla.convertRowIndexToModel(fila);
+                ComandaListaDTO dto = (ComandaListaDTO) tabla.getModel().getValueAt(filaModelo, 4);
 
-                    coordinador.mostrarDialogModificarComanda(this);
-
+                // 2. Validamos el estado
+                if (dto.getEstado().toString().equals("ABIERTA")) {
+                    // Pasamos el DTO (los datos) y el Frame (this)
+                    coordinador.prepararVentanaModificacion(dto, this);
                 } else {
-                    // Si no es abierta, detenemos la edición y no hacemos nada
-                    System.out.println("Acción bloqueada: La comanda no está ABIERTA");
+                    JOptionPane.showMessageDialog(this, "Solo se pueden modificar comandas ABIERTAS.");
                 }
             }
 
@@ -217,4 +289,45 @@ public class VentanaMenuComanda extends JFrame {
             }
         }));
     }
+
+    public void llenarTabla(List<ComandaListaDTO> lista) {
+        modelo_tabla.setRowCount(0); //limpiamos la tabla
+
+        for (ComandaListaDTO dto : lista) {
+            //Formateamos el nombre completo para la tabla 
+            String nombre_completo = dto.getNombre_cliente();
+            if (dto.getApellido_cliente_paterno() != null || dto.getApellido_cliente_materno() != null) {
+                nombre_completo += " " + dto.getApellido_cliente_paterno() + " " + dto.getApellido_cliente_materno();
+            }
+
+            Object[] fila = {
+                dto.getId_mesa(),
+                nombre_completo,
+                dto.getEstado(),
+                "MODIFICAR",
+                dto
+
+            };
+            modelo_tabla.addRow(fila);
+        }
+    }
+
+    public void actualizarTabla(List<ComandaListaDTO> lista) {
+        modelo_tabla.setRowCount(0);
+
+        for (ComandaListaDTO dto : lista) {
+            String nombre_completo = dto.getNombre_cliente() + (dto.getApellido_cliente_paterno() != null ? " " + dto.getApellido_cliente_paterno() : "");
+
+            Object[] fila = {
+                dto.getId_mesa(),
+                nombre_completo,
+                dto.getEstado(),
+                "MODIFICAR",
+                dto // Guardamos el objeto completo en la columna del Folio como acordamos
+            };
+            modelo_tabla.addRow(fila);
+
+        }
+    }
+
 }

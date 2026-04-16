@@ -13,4 +13,5 @@ import java.util.List;
  */
 public interface IMesaBO {
     public List<Long> obtenerMesasOcupadas() throws NegocioException;
+    public void cancelarComandaMesa(Long id_mesa) throws NegocioException;
 }

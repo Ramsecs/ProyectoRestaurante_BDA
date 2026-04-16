@@ -81,4 +81,33 @@ public class MesaDAO implements IMesaDAO{
             
         }
     }
+
+    @Override
+    public void cancelarComandaPorMesa(Long id_mesa) throws PersistenciaException {
+        EntityManager em = ConexionBD.crearConexion();
+        
+        try{
+            em.getTransaction().begin();
+            
+            String comandoJPQL = "UPDATE Comanda c SET c.estado_comanda = :nuevo_estado WHERE c.mesa.id = :mesa_id AND c.estado_comanda = :comanda_abierta";
+            
+            int comanda_cancelada = em.createQuery(comandoJPQL)
+                    .setParameter("nuevo_estado",EstadoComanda.CANCELADA)
+                    .setParameter("mesa_id", id_mesa)
+                    .setParameter("comanda_abierta", EstadoComanda.ABIERTA)
+                    .executeUpdate();
+            
+            em.getTransaction().commit();
+            System.out.println("Se cancelo la comanda de la mesa");
+        }catch(Exception e){
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new PersistenciaException("Error al cancelar la comnada " + e.getMessage());
+        }finally{
+            em.close();
+        }
+    }
+    
+    
 }

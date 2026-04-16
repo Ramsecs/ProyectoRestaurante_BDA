@@ -65,4 +65,18 @@ public class MesaBO implements IMesaBO {
             throw new NegocioException("Error al consultar el estado de las mesas " + e.getMessage());
         }
     }
+
+    @Override
+    public void cancelarComandaMesa(Long id_mesa) throws NegocioException {
+        //Validación por si a caso
+        try{
+            if (id_mesa == null || id_mesa <0) {
+                throw new NegocioException("ID de la mesa no válido");
+            }
+            
+            mesaDAO.cancelarComandaPorMesa(id_mesa);
+        }catch(Exception e){
+            throw new NegocioException("Error al cancelar la comanda" + e.getMessage());
+        }
+    }
 }

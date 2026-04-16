@@ -8,7 +8,9 @@ import pantallas.VentanaMenuCliente;
 import dtosDelRestaurante.ClienteBusquedaDTO;
 import dtosDelRestaurante.ClienteDTO;
 import dtosDelRestaurante.ComandaDTO;
+import dtosDelRestaurante.ComandaListaDTO;
 import dtosDelRestaurante.ComandaProductoDTO;
+import dtosDelRestaurante.DetalleComandaDTO;
 import dtosDelRestaurante.EmpleadoRegistroDTO;
 import dtosDelRestaurante.IngredienteDTOLista;
 import dtosDelRestaurante.ProductoDTO;
@@ -20,6 +22,7 @@ import dtosDelRestaurante.IngredientesDTO;
 import dtosDelRestaurante.ProductoComandaDTO;
 import dtosDelRestaurante.ReporteClienteDTO;
 import dtosDelRestaurante.ReporteComandaDTO;
+import entidadesEnumeradorDTO.EstadoComandaDTO;
 import entidadesEnumeradorDTO.TipoPlatilloDTO;
 import entidadesRestaurante.Empleado;
 import excepcionesRestaurante.NegocioException;
@@ -30,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import static javax.swing.SwingUtilities.invokeLater;
 import javax.swing.table.DefaultTableModel;
 import objetosNegocioRestaurante.ClienteBO;
 import objetosNegocioRestaurante.ComandaBO;
@@ -74,7 +78,7 @@ public class Coordinador implements Observador {
     private final IEmpleadoBO empleadoBO;
     private final IReporteBO reporteBO;
     private final IMesaBO mesaBO;
-    
+
     private final IComandaBO comandaBO;
 
     private Validaciones validar;
@@ -93,6 +97,7 @@ public class Coordinador implements Observador {
     private VentanaMenuComanda ventana_menu_comanda;
     private VentanaCrearComanda ventana_crear_comanda;
     private VentanaDialogAgregarIngrediente ventana_agregar_ingredientes;
+    private VentanaDialogModificar ventana_modifcar_comanda;
     private VentanaInicioSesion ventana_inicio_sesion;
     private VentanaDialogComandaCliente ventana_dialog_cliente;
     private VentanaReportes ventana_reportes;
@@ -140,7 +145,7 @@ public class Coordinador implements Observador {
         ventana_menu_admin.setVisible(true);
 
     }
-    
+
     /**
      * Metodo para inciar el menu del mesero.
      */
@@ -188,8 +193,6 @@ public class Coordinador implements Observador {
         }
         ventana_menu_ingrediente.setVisible(true);
         ventana_menu_ingrediente.toFront();
-        //------> AQUI FALTA LA PROGRAMACIÓN DE LA TABLA PARA QUE SE MUESTREN LOS INGREDIENTES
-        //ES MUY SIMILAR POR NO DECIR QUE IGUAL A LA DE mostrarMenuCliente
     }
 
     /**
@@ -224,10 +227,10 @@ public class Coordinador implements Observador {
             ventana_menu_mesero.toFront();
         }
     }
-    
+
     /**
-     * Metodo para regresar al menu administrador 
-     * desde la ventana de menu ingrediente.
+     * Metodo para regresar al menu administrador desde la ventana de menu
+     * ingrediente.
      */
     public void regresarMenuAdmin() {
         if (ventana_menu_ingrediente != null) {
@@ -241,10 +244,9 @@ public class Coordinador implements Observador {
     }
 
     /**
-     * Metodo para registrar un cliente 
-     * frecuente en la base de datos.
-     * 
-     * @param clienteDTO 
+     * Metodo para registrar un cliente frecuente en la base de datos.
+     *
+     * @param clienteDTO
      */
     public void agregarClienteFrecuente(ClienteDTO clienteDTO) {
 
@@ -256,12 +258,11 @@ public class Coordinador implements Observador {
         }
 
     }
-    
+
     /**
-     * Mediante este metodo buscamos un cliente
-     * usando un filtro de busqueda.
-     * 
-     * @param filtro 
+     * Mediante este metodo buscamos un cliente usando un filtro de busqueda.
+     *
+     * @param filtro
      */
     public void buscarClientes(String filtro) {
 
@@ -324,20 +325,139 @@ public class Coordinador implements Observador {
     //==========================================================================
     //==========================METODOS JOS JOS=================================
     //==========================================================================
+    public void prepararVentanaModificacion(ComandaListaDTO comanda_resumen, JFrame padre) {
+        try {
+            List<DetalleComandaDTO> detalles_actuales = comandaBO.consultarDetallesPorComanda(comanda_resumen.getId());
+            List<ProductoDTO> catalogo_completo = productoBO.listarProductos();
+
+            if (ventana_modifcar_comanda == null) {
+                ventana_modifcar_comanda = new VentanaDialogModificar(this, padre);
+            }
+
+            ventana_modifcar_comanda.cargarDatosEdicion(comanda_resumen, detalles_actuales, catalogo_completo);
+            ventana_modifcar_comanda.setVisible(true);
+            ventana_modifcar_comanda.toFront();
+        } catch (NegocioException e) {
+            JOptionPane.showMessageDialog(null, "Error al cargar la comanda: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Metodo para guardar todos los cambios realizados en la ventana de
+     * modificación.
+     *
+     * * @param idComanda El ID de la comanda padre.
+     * @param modificados Lista de productos que ya existían pero cambiaron
+     * (cantidad/notas).
+     * @param eliminados Lista de productos que el usuario marcó para borrar.
+     * @param nuevos Lista de productos que se agregaron desde el catálogo.
+     */
+    public void guardarCambiosComanda(Long id_comanda, List<DetalleComandaDTO> modificados,
+            List<DetalleComandaDTO> eliminados, List<DetalleComandaDTO> nuevos) {
+        try {
+            // 1. Mandamos llamar al BO para que procese la transacción
+            // El BO se encargará de validar que las cantidades sean correctas
+            comandaBO.guardarCambiosComanda(id_comanda, modificados, eliminados, nuevos);
+
+            // 2. Si no hubo excepciones, notificamos al usuario
+            JOptionPane.showMessageDialog(null,
+                    "La comanda ha sido actualizada exitosamente.",
+                    "Operación Exitosa",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            if (ventana_menu_comanda != null) {
+                List<ComandaListaDTO> lista_actualizada = comandaBO.mostrarComandasAbiertas();
+                ventana_menu_comanda.actualizarTabla(lista_actualizada);
+            }
+
+        } catch (NegocioException e) {
+            JOptionPane.showMessageDialog(null,
+                    "No se pudieron aplicar los cambios: " + e.getMessage(),
+                    "Error de Validación",
+                    JOptionPane.WARNING_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "Ocurrió un error inesperado en el sistema: " + e.getMessage(),
+                    "Error Crítico",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Cambia el estado de la comanda desde la tabla
+     *
+     * @param id de la comanda
+     * @param estado de la comanda
+     */
+    public void actualizarEstadoComanda(Long id, EstadoComandaDTO estado) {
+        try {
+            comandaBO.actualizarEstadoComanda(id, estado);
+
+            invokeLater(() -> {
+                cargarComandasAbiertas();
+            });
+
+            JOptionPane.showMessageDialog(ventana_menu_comanda, "Estado actualizado con éxito", "Confirmación", JOptionPane.INFORMATION_MESSAGE);
+            cargarComandasAbiertas();
+        } catch (NegocioException e) {
+            JOptionPane.showMessageDialog(null,
+                    "No se pudo actualizar " + e.getMessage(),
+                    "Error de Sistema",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Metodo que coordina unica y exclusivamente las comandas abiertas.
+     */
+    public void cargarComandasAbiertas() {
+        try {
+            List<ComandaListaDTO> lista = comandaBO.mostrarComandasAbiertas();
+
+            if (ventana_menu_comanda != null) {
+                ventana_menu_comanda.llenarTabla(lista); //Falta programar esto
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "Error al cargar las comandas: " + e.getMessage(),
+                    "Error de Sistema",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Metodo para poder cancelar una comanda desde los botones de mesa
+     *
+     * @param id_mesa pertenece a la mesa asociada con la comanda
+     */
+    public void cancelarComandas(Long id_mesa) {
+        try {
+            mesaBO.cancelarComandaMesa(id_mesa);
+        } catch (NegocioException e) {
+            System.err.println("Error al cancelar la comanda: " + e.getMessage());
+        }
+    }
+
     /**
      * Metodo para obtener las mesas ocupadas en el restaurante
-     * @return 
+     *
+     * @return
      */
-    public List<Long> obtenerMesasOcupadas(){
-        try{
+    public List<Long> obtenerMesasOcupadas() {
+        try {
             return mesaBO.obtenerMesasOcupadas();
-        }catch(NegocioException e){
+        } catch (NegocioException e) {
             System.err.println(e.getMessage());
             return new ArrayList<>();
         }
     }
+
     /**
-     * Para obtener el di del lciente general
+     * Para obtener el id del cliente general
      *
      * @return
      */
@@ -419,18 +539,19 @@ public class Coordinador implements Observador {
         if (ventana_crear_comanda == null) {
             ventana_crear_comanda = new VentanaCrearComanda(this);
         }
-
+        ventana_crear_comanda.prerarVistaAgain();
         ventana_crear_comanda.setVisible(true);
         ventana_crear_comanda.toFront();
     }
-    public void volverMenuComanda(){
+
+    public void volverMenuComanda() {
         if (ventana_crear_comanda != null) {
             ventana_crear_comanda.dispose();
         }
         if (ventana_menu_comanda == null) {
             ventana_menu_comanda = new VentanaMenuComanda(this);
         }
-        
+
         ventana_menu_comanda.setVisible(true);
         ventana_menu_comanda.toFront();
     }
@@ -448,6 +569,7 @@ public class Coordinador implements Observador {
             ventana_menu_comanda = new VentanaMenuComanda(this);
             ventana_menu_comanda.setConexionObservador(this);
         }
+        cargarComandasAbiertas();
         ventana_menu_comanda.setVisible(true);
         ventana_menu_comanda.toFront();
     }
@@ -504,11 +626,46 @@ public class Coordinador implements Observador {
 
     }
 
-    public void mostrarDialogModificarComanda(JFrame padre) {
-        VentanaDialogModificar dialogo = new VentanaDialogModificar(this, padre);
-        dialogo.setVisible(true);
+    /**
+     * Buscamos los clientes que tengan una comanda
+     *
+     * @param filtro nombre del cliente
+     */
+    public void buscarClientesComanda(String filtro) {
+
+        try {
+            List<ComandaListaDTO> lista = comandaBO.filtrarComandasAbiertas(filtro);
+            ventana_menu_comanda.actualizarTabla(lista);
+        } catch (NegocioException e) {
+            JOptionPane.showMessageDialog(null, "No se pudo filtrar" + e.getMessage());
+        }
+
     }
 
+    /**
+     * Abrir el dialog para modificar la comanda
+     *
+     * @param padre frame del dialog
+     */
+    public void mostrarDialogModificarComanda(JFrame padre) {
+
+        if (ventana_menu_comanda != null) {
+            ventana_menu_comanda.setVisible(false);
+        }
+
+        if (ventana_modifcar_comanda == null) {
+            ventana_modifcar_comanda = new VentanaDialogModificar(this, padre);
+        }
+        ventana_modifcar_comanda.setVisible(true);
+        ventana_modifcar_comanda.toFront();
+
+    }
+
+    /**
+     * Asginar cliente comanda
+     *
+     * @param cliente de la comanda
+     */
     public void setClienteEnComanda(ClienteBusquedaDTO cliente) {
 
 // 1. Guardamos el cliente en una variable del coordinador para la persistencia final
@@ -677,8 +834,8 @@ public class Coordinador implements Observador {
     }
 
     /**
-     * Devuelve el valor boolean de la validacion que se hace a el
-     * texto de nombre.
+     * Devuelve el valor boolean de la validacion que se hace a el texto de
+     * nombre.
      *
      * @param nombre
      * @return boolean
@@ -888,8 +1045,8 @@ public class Coordinador implements Observador {
     }
 
     /**
-     * Oculta la pantalla con la que estamos trabajando, para
-     * despues regresarnos a la ventana de incio de sesion.
+     * Oculta la pantalla con la que estamos trabajando, para despues
+     * regresarnos a la ventana de incio de sesion.
      *
      * @param frame
      */
@@ -902,38 +1059,37 @@ public class Coordinador implements Observador {
         ventana_inicio_sesion.setVisible(true);
         ventana_inicio_sesion.toFront();
     }
-    
+
     /**
      * Valida la estrcutura del correo del cliente.
-     * 
+     *
      * @param correo
      * @return boolean
      */
-    public boolean validarCorreo(String correo){
+    public boolean validarCorreo(String correo) {
         return validar.validarCorreo(correo);
     }
-    
+
     /**
      * Valida la estructura de cualquier apellido.
-     * 
+     *
      * @param apellido
      * @return boolean
      */
-    public boolean validarApellidos(String apellido){
+    public boolean validarApellidos(String apellido) {
         return validar.validarApellidos(apellido);
     }
-    
+
     /**
      * Valida la estructura del telefono.
-     * 
+     *
      * @param telefono
      * @return boolean
      */
-    public boolean validarTelefono(String telefono){
+    public boolean validarTelefono(String telefono) {
         return validar.validarTelefono(telefono);
     }
-    
-    
+
     public List<ReporteComandaDTO> generarReporteComandas(LocalDateTime ini, LocalDateTime fin) {
         return reporteBO.generarReporteComandas(ini, fin);
     }
@@ -941,8 +1097,8 @@ public class Coordinador implements Observador {
     public List<ReporteClienteDTO> generarReporteClientes(String nombre, int visitas) {
         return reporteBO.obtenerReporteClientes(nombre, visitas);
     }
-    
-    public void abrirReportes(){
+
+    public void abrirReportes() {
         if (ventana_menu_admin != null) {
             ventana_menu_admin.setVisible(false);
         }
@@ -952,5 +1108,5 @@ public class Coordinador implements Observador {
         ventana_reportes.setVisible(true);
         ventana_reportes.toFront();
     }
-    
+
 }

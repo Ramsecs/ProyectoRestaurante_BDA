@@ -48,8 +48,8 @@ public class VentanaCrearComanda extends JFrame {
     //Este hash map nos va a ayudar para poder crear la lista de productos
     //Lo hago asi porque como actualizo la tabla se queda solo el ultimo producto seleccionado
 
-    BotonMenuAdministrador btn_volver;
-    BotonMenuAdministrador btn_agregar;
+    private BotonMenuAdministrador btn_volver;
+    private BotonMenuAdministrador btn_agregar;
 
     // Colores corporativos
     private final Color verde = new Color(116, 155, 87);
@@ -131,7 +131,7 @@ public class VentanaCrearComanda extends JFrame {
                     if (respuesta == JOptionPane.YES_OPTION) {
                         try {
                             //AQUI SE CANCELA LA COMANDA
-                            //coordinador.cancelarComandas(numero_mesa);
+                            coordinador.cancelarComandas(numero_mesa);
                             actualizarEstadoMesas();
                             JOptionPane.showMessageDialog(this, "Se libero la mesa");
                         } catch (Exception ex) {
@@ -334,6 +334,7 @@ public class VentanaCrearComanda extends JFrame {
                     // 3. El coordinador guarda
                     coordinador.guardarComanda(nueva_comanda);
                     coordinador.volverMenuComanda();
+                    coordinador.cargarComandasAbiertas();
                     // 4. Caso de exito
                     JOptionPane.showMessageDialog(this, "Comanda registrada con éxito", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
@@ -378,6 +379,7 @@ public class VentanaCrearComanda extends JFrame {
 
         btn_volver.addActionListener(e -> {
             actualizarEstadoMesas();
+            limpiarFormulario();
             coordinador.volverMenuComanda();
         });
         //TODOS LOS ACTIONS LISTENER TIENEN QUE IR ANTES DE ESTE RETURN JOS=====
@@ -536,6 +538,15 @@ public class VentanaCrearComanda extends JFrame {
 
         // 4. Regresar a la vista de Selección de Mesa
         navegador.show(panel_cartas, "SELECCION");
+    }
+    
+    public void prerarVistaAgain(){
+        //1. Limpiar los datos 
+        limpiarFormulario();
+        //2. Mostrar la carta de seleccion
+        navegador.show(panel_cartas, "SELECCION");
+        //3. Actualizar los estados de las mesas
+        actualizarEstadoMesas();
     }
 
 }

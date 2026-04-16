@@ -15,4 +15,5 @@ import java.util.List;
 public interface IMesaDAO {
     public Mesa buscarPorId(Long id) throws PersistenciaException; 
     public List<Long> obtenerMesasOcupadas() throws PersistenciaException; 
+    public void cancelarComandaPorMesa(Long id_mesa) throws PersistenciaException; 
 }
