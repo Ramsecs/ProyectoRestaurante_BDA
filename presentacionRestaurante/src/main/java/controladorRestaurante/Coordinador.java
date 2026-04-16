@@ -799,11 +799,9 @@ public class Coordinador implements Observador {
         try {
             ingredienteBO.actualizarStock(ingredienteDTO);
             System.out.println("Stock actualizado para: " + ingredienteDTO.getNombre());
-            // No refrescamos toda la tabla aquí para no perder el foco del usuario, 
-            // a menos que sea necesario.
         } catch (NegocioException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error de Actualización", JOptionPane.ERROR_MESSAGE);
-            this.buscarIngredientes(""); // Revertir cambios visuales si falló
+            this.buscarIngredientes(""); 
         }
     }
 

@@ -155,7 +155,7 @@ public class IngredienteDAO implements IIngredienteDAO {
      * Descuenta del inventario los ingredientes necesarios para cumplir con una
      * comanda.
      *
-     * 
+     *
      * @param comanda La comanda que contiene la lista de productos y sus
      * cantidades.
      * @return true si el descuento se realizo con exito; false si hubo stock
@@ -190,7 +190,55 @@ public class IngredienteDAO implements IIngredienteDAO {
                         return false;
                     }
                 }
-            } 
+            }
+            em.getTransaction().commit();
+            return true;
+
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Repone los ingredientes al stock cuando una comanda o producto se
+     * cancela.
+     *
+     * @param lista_Detalles Lista de ComandaProducto que fueron cancelados.
+     * @return true si la reposicion fue exitosa, false en caso contrario.
+     */
+    @Override
+    public boolean reponerStockPorCancelacion(List<ComandaProducto> lista_Detalles) {
+        EntityManager em = ConexionBD.crearConexion();
+
+        try {
+            em.getTransaction().begin();
+            
+            for (ComandaProducto detalle : lista_Detalles) {
+                int cantidad_Productos = detalle.getCant_cada_producto();
+                Producto producto = detalle.getProductos_comprados();
+
+                for (ProductoIngrediente receta : producto.getLista_ingredientes()) {
+
+                    Ingrediente ingrediente_Base = receta.getIngredientes();
+                    Ingrediente ingrediente = em.find(Ingrediente.class, ingrediente_Base.getId());
+
+                    if (ingrediente != null) {
+                        int cantidad_A_Devolver = receta.getCantidad_ingrediente() * cantidad_Productos;
+                        int stock_Actual = ingrediente.getStock();
+
+                        ingrediente.setStock(stock_Actual + cantidad_A_Devolver);
+
+                        em.merge(ingrediente);
+                    }
+                }
+            }
+
             em.getTransaction().commit();
             return true;
 
