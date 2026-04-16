@@ -319,7 +319,7 @@ public class VentanaMenuCliente extends JFrame {
     }
 
     private void ejecutarActualizacionDesdeTabla(int fila) {
-        // 1. Extraer los datos editados directamente de la vista (JTable)
+        // 1. Extraer los datos editados de la tabla
         String nombre = modelo_tabla.getValueAt(fila, 0).toString().trim();
         String paterno_apellido = modelo_tabla.getValueAt(fila, 1).toString().trim();
         String materno_apellido = modelo_tabla.getValueAt(fila, 2).toString().trim();
@@ -332,55 +332,62 @@ public class VentanaMenuCliente extends JFrame {
             notificarError(); // Refresca la tabla para revertir el cambio visual
             return;
         }
+        
+        
+        if (!coordinador.validarApellidos(materno_apellido)) {
+            JOptionPane.showMessageDialog(this, "El apellido materno esta mal escrito.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+            notificarError();
+            return;
+        }
+        
+        if (!coordinador.validarApellidos(paterno_apellido)) {
+            JOptionPane.showMessageDialog(this, "El apellido paterno esta mal escrito.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+            notificarError();
+            return;
+        }
+        
+        if (!coordinador.validarNombre(nombre)) {
+            JOptionPane.showMessageDialog(this, "El nombre esta mal escrito.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+            notificarError();
+            return;
+        }
 
-        String correo_final = null;
         if (!correo.isEmpty()) {
-            if (!correo.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$")) {
+            if (!coordinador.validarCorreo(correo)) {
                 JOptionPane.showMessageDialog(this, "El formato del correo no es válido");
                 notificarError();
                 return;
             }
-            correo_final = correo;
         }
 
-        if (!telefono.matches("\\d{10}")) {
+        if (!coordinador.validarTelefono(telefono)) {
             JOptionPane.showMessageDialog(this, "El teléfono debe contener exactamente 10 dígitos numéricos", "Error de Formato", JOptionPane.ERROR_MESSAGE);
             notificarError();
             return;
         }
 
-        // --- BÚSQUEDA SEGURA DEL ID ---
-        // Buscamos en la lista completa (espejo) al cliente que tiene este teléfono
+        // --- OBTENCIÓN SEGURA DEL ID ---
         Long id_real = null;
-        if (listaClientesActual != null) {
-            for (ClienteBusquedaDTO c : listaClientesActual) {
-                // Comparamos el teléfono de la tabla con el de la lista original
-                if (c.getTelefono().equals(telefono)) {
-                    id_real = c.getId();
-                    break;
-                }
-            }
+
+        // IMPORTANTE: El ID se obtiene de la lista original usando el índice de la fila
+        if (listaClientesActual != null && fila < listaClientesActual.size()) {
+            id_real = listaClientesActual.get(fila).getId();
         }
 
-        // 2. Si encontramos el ID, procedemos a enviar la actualización
         if (id_real != null) {
             ClienteBusquedaDTO cliente_editado = new ClienteBusquedaDTO();
-            cliente_editado.setId(id_real); // Usamos el ID recuperado de la lista, no el de la fila
-
+            cliente_editado.setId(id_real);
             cliente_editado.setNombre(nombre);
             cliente_editado.setApellido_paterno(paterno_apellido);
             cliente_editado.setApellido_materno(materno_apellido);
-            cliente_editado.setCorreo(correo_final);
+            cliente_editado.setCorreo(correo);
             cliente_editado.setTelefono(telefono);
 
-            // Notificamos al observador para persistir en la base de datos
             if (this.metiche != null) {
                 this.metiche.actualizar_empleado(cliente_editado);
             }
-
-            System.out.println("Actualización exitosa para el cliente ID: " + id_real);
         } else {
-            JOptionPane.showMessageDialog(this, "Error de sincronización: No se encontró el registro original.");
+            JOptionPane.showMessageDialog(this, "Error: No se pudo recuperar el ID del cliente.");
             notificarError();
         }
     }

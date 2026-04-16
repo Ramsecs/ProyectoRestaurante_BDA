@@ -169,14 +169,26 @@ public class ClienteBO implements IClienteBO {
     @Override
     public void actualizarDatosCliente(ClienteBusquedaDTO clienteDTO) throws NegocioException {
         try {
-            Cliente cliente = clienteDAO.buscarPorId(clienteDTO.getId());
+            // 1. Verificación de ID
+            if (clienteDTO.getId() == null) {
+                throw new NegocioException("El ID del cliente es nulo, no se puede actualizar.");
+            }
 
+            // 2. Buscamos el cliente (esto usa un EntityManager que se cierra al terminar la búsqueda)
+            Cliente cliente = clienteDAO.buscarPorId(clienteDTO.getId());
+            System.out.println(cliente.getTelefono());
+            if (cliente == null) {
+                throw new NegocioException("El cliente con ID " + clienteDTO.getId() + " ya no existe en la base de datos.");
+            }
+
+            // 3. Mapeamos los nuevos datos al objeto que acabamos de traer
             cliente.setNombre(clienteDTO.getNombre());
             cliente.setApellido_paterno(clienteDTO.getApellido_paterno());
             cliente.setApellido_materno(clienteDTO.getApellido_materno());
             cliente.setCorreo(clienteDTO.getCorreo());
             cliente.setTelefono(clienteDTO.getTelefono());
 
+            // 4. Persistimos (aquí se abre un SEGUNDO EntityManager y se hace el merge)
             clienteDAO.modificarCliente(cliente);
 
         } catch (PersistenciaException ex) {

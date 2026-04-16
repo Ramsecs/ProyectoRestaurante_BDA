@@ -120,41 +120,41 @@ public class ClienteDAO implements IClienteDAO {
     @Override
     public Cliente modificarCliente(Cliente cliente) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
-
         try {
-
             em.getTransaction().begin();
-            em.merge(cliente);
-            em.getTransaction().commit();
-            return cliente;
 
+            Cliente clienteActualizado = em.merge(cliente);
+
+            em.getTransaction().commit();
+            return clienteActualizado;
         } catch (Exception ex) {
-            em.getTransaction().rollback();
-            throw new PersistenciaException("Ocurrio un error al querer registrar el cliente.");
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            throw new PersistenciaException("Error al actualizar en base de datos: " + ex.getMessage());
         } finally {
             em.close();
         }
     }
-            /**
-             * Permite hacer la busqueda de clientes que coincida su id.
-             *
-             * @param id.
-             * @return Cliente.
-             * @throws excepcionesRestaurante.PersistenciaException
-             * @throws PersistenciaException.
-             */
-            @Override
-            public Cliente buscarPorId
-            (Long id) throws PersistenciaException {
-                EntityManager em = ConexionBD.crearConexion();
-                try {
-                    // .find(ClaseEntidad, ValorID)
-                    return em.find(Cliente.class, id);
-                } catch (Exception e) {
-                    throw new PersistenciaException("Error al buscar cliente por ID: " + e.getMessage());
-                } finally {
-                    em.close();
-                }
-            }
-
+    
+    /**
+     * Permite hacer la busqueda de clientes que coincida su id.
+     *
+     * @param id.
+     * @return Cliente.
+     * @throws excepcionesRestaurante.PersistenciaException
+     * @throws PersistenciaException.
+     */
+    @Override
+    public Cliente buscarPorId
+    (Long id) throws PersistenciaException {
+        EntityManager em = ConexionBD.crearConexion();
+        try {
+            // .find(ClaseEntidad, ValorID)
+            return em.find(Cliente.class, id);
+        } catch (Exception e) {
+            throw new PersistenciaException("Error al buscar cliente por ID: " + e.getMessage());
+        } finally {
+            em.close();
         }
+    }
+
+}

@@ -289,13 +289,10 @@ public class Coordinador implements Observador {
      */
     public void actualizarCliente(ClienteBusquedaDTO clienteDTO) {
         try {
-            // 1. Mandamos a llamar el metodo del BO
+            // Mandamos a llamar el metodo del BO
             clienteBO.actualizarDatosCliente(clienteDTO);
 
-            // 2. Bandera por si a caso
-            System.out.println("Cliente con ID " + clienteDTO.getId() + " actualizado.");
-
-            // 3. Refrescamos la tabla para que se reflejen los cambios
+            // Refrescamos la tabla para que se reflejen los cambios
             this.buscarClientes("");
 
         } catch (NegocioException e) {
@@ -1137,6 +1134,7 @@ public class Coordinador implements Observador {
         return reporteBO.obtenerReporteClientes(nombre, visitas);
     }
 
+    
     /**
      * Abre la ventana de reportes despues de haber presionado el boton del menu
      * de administrador.
