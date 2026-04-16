@@ -88,7 +88,7 @@ public class IngredienteProductoBO implements IIngredienteProductoBO{
     public List<IngredienteDTOLista> listarDetallesProducto(Long idProducto) throws NegocioException {
         try {
             List<ProductoIngrediente> entidades = ingredienteProductoDAO.buscarPorProducto(idProducto);
-            List<IngredienteDTOLista> dtos = new ArrayList<>();
+            List<IngredienteDTOLista> lista_dtos_ingredientes = new ArrayList<>();
 
             for (ProductoIngrediente pi : entidades) {
                 // 1. Convertimos el Enum de la entidad al Enum del DTO usando name() y valueOf()
@@ -96,18 +96,45 @@ public class IngredienteProductoBO implements IIngredienteProductoBO{
                 UnidadMedidaDTO unidadDto = UnidadMedidaDTO.valueOf(unidadEntidad.name());
 
                 // 2. Creamos el DTO con los datos correctos
-                IngredienteDTOLista dto = new IngredienteDTOLista(
-                    pi.getIngredientes().getId(),
+                IngredienteDTOLista dto_ingredientes = new IngredienteDTOLista(
+                    pi.getId(),
                     pi.getIngredientes().getNombre(),
                     pi.getCantidad_ingrediente(), // Cantidad específica para este producto
                     unidadDto// La unidad ya convertida
                 );
 
-                dtos.add(dto);
+                lista_dtos_ingredientes.add(dto_ingredientes);
             }
-            return dtos;
+            return lista_dtos_ingredientes;
         } catch (PersistenciaException e) {
             throw new NegocioException("Error en negocio al procesar detalles: " + e.getMessage());
+        }
+    }
+    
+    
+    /**
+     * Actualiza la cantidad del ingrediente que ocupa 
+     * cierto producto.
+     * 
+     * @param id_relacion
+     * @param nueva_cantidad
+     * @throws NegocioException 
+     */
+    @Override
+    public void actualizarCantidad(Long id_relacion, Integer nueva_cantidad) throws NegocioException {
+        // REGLAS DE NEGOCIO
+        if (id_relacion == null) {
+            throw new NegocioException("El ID de la relacion es obligatorio.");
+        }
+        if (nueva_cantidad == null || nueva_cantidad < 0) {
+            throw new NegocioException("La cantidad debe ser un número positivo.");
+        }
+
+        try {
+            // Llamada al DAO
+            ingredienteProductoDAO.actualizarCantidad(id_relacion, nueva_cantidad);
+        } catch (PersistenciaException e) {
+            throw new NegocioException("Error al actualizar la receta: " + e.getMessage());
         }
     }
     

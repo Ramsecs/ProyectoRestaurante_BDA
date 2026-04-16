@@ -933,15 +933,35 @@ public class Coordinador implements Observador {
         return validar.validarTelefono(telefono);
     }
     
-    
+    /**
+     * Devuelve las comandas de un periodo de tiempo 
+     * especifico a reportes de comandas.
+     * 
+     * @param ini
+     * @param fin
+     * @return Lista de reportes de comandas.
+     */
     public List<ReporteComandaDTO> generarReporteComandas(LocalDateTime ini, LocalDateTime fin) {
         return reporteBO.generarReporteComandas(ini, fin);
     }
 
+    /**
+     * Devuelve la lista de clientes frecuentes con sus filtros de 
+     * nombre y numero de visitas minimo a la ventana de reportes
+     * de cliente frecuente.
+     * 
+     * @param nombre
+     * @param visitas
+     * @return Lista de reporte de clientes frecuentes.
+     */
     public List<ReporteClienteDTO> generarReporteClientes(String nombre, int visitas) {
         return reporteBO.obtenerReporteClientes(nombre, visitas);
     }
     
+    /**
+     * Abre la ventana de reportes despues de haber 
+     * presionado el boton del menu de administrador.
+     */
     public void abrirReportes(){
         if (ventana_menu_admin != null) {
             ventana_menu_admin.setVisible(false);
@@ -951,6 +971,22 @@ public class Coordinador implements Observador {
         }
         ventana_reportes.setVisible(true);
         ventana_reportes.toFront();
+    }
+    
+    
+    /**
+     * Actualiza la cantidad de la relacion que hay entre el 
+     * ingrediente y el producto de manera que la receta se 
+     * modifica.
+     * @param id_ingrediente
+     * @param nueva_cantidad 
+     */
+    public void actualizarCantidadIngredienteProducto(Long id_ingrediente, Integer nueva_cantidad) {
+        try {
+            ingredienteProductoBO.actualizarCantidad(id_ingrediente, nueva_cantidad);
+        } catch (NegocioException e) {
+            JOptionPane.showMessageDialog(null, "No se pudo actualizar: " + e.getMessage());
+        }
     }
     
 }

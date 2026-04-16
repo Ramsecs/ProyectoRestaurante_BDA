@@ -19,4 +19,6 @@ public interface IIngredienteProductoDAO {
     
     public List<ProductoIngrediente> buscarPorProducto(Long idProducto) throws PersistenciaException;
     
+    public void actualizarCantidad(Long id_relacion, Integer nueva_cantidad) throws PersistenciaException;
+    
 }
