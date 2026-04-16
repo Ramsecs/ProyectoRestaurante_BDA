@@ -4,6 +4,7 @@
  */
 package daosRestaurante;
 
+import entidadesRestaurante.Comanda;
 import entidadesRestaurante.Ingrediente;
 import enumEntidades.UnidadMedida;
 import excepcionesRestaurante.PersistenciaException;
@@ -20,4 +21,5 @@ public interface IIngredienteDAO {
     public Ingrediente modificarIngrediente(Ingrediente ingrediente) throws PersistenciaException;
     public boolean existeIngrediente(String nombre, UnidadMedida unidadMedida);
     public Ingrediente buscarPorId(Long id) throws PersistenciaException;
+    public boolean procesarStockDeComanda(Comanda comanda) throws PersistenciaException;
 }

@@ -4,17 +4,23 @@
  */
 package objetosNegocioRestaurante;
 
+import conexionRestaurante.ConexionBD;
 import daosRestaurante.IngredienteDAO;
 import validadores.Validaciones;
 import daosRestaurante.IIngredienteDAO;
 import dtosDelRestaurante.IngredienteBusquedaDTO;
 import dtosDelRestaurante.IngredientesDTO;
+import entidadesRestaurante.Comanda;
+import entidadesRestaurante.ComandaProducto;
 import entidadesRestaurante.Ingrediente;
+import entidadesRestaurante.Producto;
+import entidadesRestaurante.ProductoIngrediente;
 import enumEntidades.UnidadMedida;
 import excepcionesRestaurante.NegocioException;
 import excepcionesRestaurante.PersistenciaException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.EntityManager;
 
 /**
  *
@@ -143,4 +149,50 @@ public class IngredienteBO implements IIngredienteBO {
             throw new NegocioException("No se pudo actualizar el ingrediente: " + ex.getMessage());
         }
     }
+    
+    @Override
+    public boolean procesarStockDeComanda(Comanda comanda) {
+    EntityManager em = ConexionBD.crearConexion(); 
+    
+    try {
+        em.getTransaction().begin();
+
+        for (ComandaProducto comanda_Producto : comanda.getLista_productos()) {
+            
+            int cantidadPlatos = comanda_Producto.getCant_cada_producto();
+            Producto producto = comanda_Producto.getProductos_comprados();
+
+            for (ProductoIngrediente receta : producto.getLista_ingredientes()) {
+                
+                Ingrediente ingrediente = receta.getIngredientes();
+                
+                int gasto_Unitario = receta.getCantidad_ingrediente();
+                int total_A_Restar = gasto_Unitario * cantidadPlatos;
+                int stock_Actual = ingrediente.getStock();
+
+                if (stock_Actual >= total_A_Restar) {
+                    ingrediente.setStock(stock_Actual - total_A_Restar);
+                    
+                    em.merge(ingrediente);
+                } else {
+                    System.err.println("Stock insuficiente de " + ingrediente.getNombre());
+                    em.getTransaction().rollback();
+                    return false;
+                }
+            }
+        }
+
+        em.getTransaction().commit();
+        return true;
+
+    } catch (Exception e) {
+        if (em.getTransaction().isActive()) {
+            em.getTransaction().rollback();
+        }
+        e.printStackTrace();
+        return false;
+    } finally {
+        em.close();
+    }
+}
 }

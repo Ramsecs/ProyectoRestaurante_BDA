@@ -576,15 +576,13 @@ public class Coordinador implements Observador {
      * @return Una lista de ingredientes DTO con la cual podamos trabajar.
      */
     public List<IngredienteDTOLista> obtenerListaIngredientes() {
-        // Inicializa con una lista vacia, no con null
         List<IngredienteDTOLista> lista = new ArrayList<>();
         try {
             lista = ingredienteProductoBO.recuperarListaIngredientes();
         } catch (NegocioException ex) {
             System.out.println("Error en Coordinador: " + ex.getMessage());
-            // Aqui podrias mostrar un JOptionPane para avisar al usuario
         }
-        return lista; // Si falla, devuelve la lista vacia creada arriba
+        return lista; 
     }
 
     /**

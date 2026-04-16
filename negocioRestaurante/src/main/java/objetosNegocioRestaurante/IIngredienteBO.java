@@ -6,6 +6,7 @@ package objetosNegocioRestaurante;
 
 import dtosDelRestaurante.IngredienteBusquedaDTO;
 import dtosDelRestaurante.IngredientesDTO;
+import entidadesRestaurante.Comanda;
 import excepcionesRestaurante.NegocioException;
 import java.util.List;
 
@@ -18,4 +19,5 @@ public interface IIngredienteBO {
     public boolean registrarIngredientes(IngredientesDTO ingrediente) throws NegocioException;
     public List<IngredienteBusquedaDTO> buscarIngredientes(String filtro) throws NegocioException;
     public void actualizarStock(IngredienteBusquedaDTO ingredienteDTO) throws NegocioException;
+    public boolean procesarStockDeComanda(Comanda comanda);
 }

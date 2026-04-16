@@ -5,7 +5,11 @@
 package daosRestaurante;
 
 import conexionRestaurante.ConexionBD;
+import entidadesRestaurante.Comanda;
+import entidadesRestaurante.ComandaProducto;
 import entidadesRestaurante.Ingrediente;
+import entidadesRestaurante.Producto;
+import entidadesRestaurante.ProductoIngrediente;
 import enumEntidades.UnidadMedida;
 import excepcionesRestaurante.PersistenciaException;
 import java.util.List;
@@ -18,7 +22,9 @@ import javax.persistence.TypedQuery;
  */
 public class IngredienteDAO implements IIngredienteDAO {
 
-    /** Instancia única de la clase para el patrón Singleton. */
+    /**
+     * Instancia única de la clase para el patrón Singleton.
+     */
     private static IngredienteDAO ingredientesDAO;
 
     /**
@@ -28,10 +34,11 @@ public class IngredienteDAO implements IIngredienteDAO {
     }
 
     /**
-     * Obtiene la instancia única de IngredienteDAO.
-     * Si no existe, la crea; de lo contrario, devuelve la existente.
+     * Obtiene la instancia única de IngredienteDAO. Si no existe, la crea; de
+     * lo contrario, devuelve la existente.
+     *
      * * @return Instancia única de IngredienteDAO.
-     * @return 
+     * @return
      */
     public static IngredienteDAO getInstanceIngredientesDAO() {
         if (ingredientesDAO == null) {
@@ -42,7 +49,7 @@ public class IngredienteDAO implements IIngredienteDAO {
 
     /**
      * Registra un nuevo ingrediente en la base de datos.
-     * 
+     *
      * @param ingrediente El objeto Ingrediente a persistir.
      * @return El ingrediente registrado con su ID generado.
      * @throws PersistenciaException Si ocurre un error durante la transacción.
@@ -66,10 +73,12 @@ public class IngredienteDAO implements IIngredienteDAO {
     }
 
     /**
-     * Busca ingredientes cuyo nombre o unidad de medida coincidan con el filtro proporcionado.
-     * Utiliza lenguaje JPQL para realizar una busqueda insensible a mayusculas/minusculas.
-     * 
-     * @param filtro_busqueda Texto a buscar entre los registros de ingredientes.
+     * Busca ingredientes cuyo nombre o unidad de medida coincidan con el filtro
+     * proporcionado. Utiliza lenguaje JPQL para realizar una busqueda
+     * insensible a mayusculas/minusculas.
+     *
+     * @param filtro_busqueda Texto a buscar entre los registros de
+     * ingredientes.
      * @return Una lista de objetos Ingrediente que coinciden con el criterio.
      * @throws PersistenciaException Si ocurre un error al ejecutar la consulta.
      */
@@ -91,12 +100,14 @@ public class IngredienteDAO implements IIngredienteDAO {
     }
 
     /**
-     * Modifica un ingrediente existente en la base de datos.
-     * Utiliza el metodo merge para actualizar el estado del objeto en el contexto de persistencia.
-     * 
+     * Modifica un ingrediente existente en la base de datos. Utiliza el metodo
+     * merge para actualizar el estado del objeto en el contexto de
+     * persistencia.
+     *
      * @param ingrediente Objeto ingrediente con los datos actualizados.
      * @return El objeto ingrediente actualizado.
-     * @throws PersistenciaException Si ocurre un error al intentar modificar el registro.
+     * @throws PersistenciaException Si ocurre un error al intentar modificar el
+     * registro.
      */
     @Override
     public Ingrediente modificarIngrediente(Ingrediente ingrediente) throws PersistenciaException {
@@ -117,11 +128,13 @@ public class IngredienteDAO implements IIngredienteDAO {
     }
 
     /**
-     * Verifica si ya existe un ingrediente con el mismo nombre y unidad de medida.
-     * 
+     * Verifica si ya existe un ingrediente con el mismo nombre y unidad de
+     * medida.
+     *
      * @param nombre Nombre del ingrediente a verificar.
      * @param unidadMedida Enum de la unidad de medida a verificar.
-     * @return true si existe al menos una coincidencia, false en caso contrario.
+     * @return true si existe al menos una coincidencia, false en caso
+     * contrario.
      */
     @Override
     public boolean existeIngrediente(String nombre, UnidadMedida unidadMedida) {
@@ -139,8 +152,62 @@ public class IngredienteDAO implements IIngredienteDAO {
     }
 
     /**
-     * Busca un ingrediente específico utilizando su identificador único (ID).
+     * Descuenta del inventario los ingredientes necesarios para cumplir con una
+     * comanda.
+     *
      * 
+     * @param comanda La comanda que contiene la lista de productos y sus
+     * cantidades.
+     * @return true si el descuento se realizo con exito; false si hubo stock
+     * insuficiente o error en la persistencia.
+     */
+    @Override
+    public boolean procesarStockDeComanda(Comanda comanda) {
+        EntityManager em = ConexionBD.crearConexion();
+
+        try {
+            em.getTransaction().begin();
+
+            for (ComandaProducto detalle : comanda.getLista_productos()) {
+
+                int cantidad_Platos_Pedida = detalle.getCant_cada_producto();
+                Producto producto = detalle.getProductos_comprados();
+
+                for (ProductoIngrediente receta : producto.getLista_ingredientes()) {
+
+                    Ingrediente ingrediente = receta.getIngredientes();
+
+                    int cantidad_A_Restar = receta.getCantidad_ingrediente() * cantidad_Platos_Pedida;
+                    int stock_Disponible = ingrediente.getStock();
+
+                    if (stock_Disponible >= cantidad_A_Restar) {
+                        ingrediente.setStock(stock_Disponible - cantidad_A_Restar);
+
+                        em.merge(ingrediente);
+                    } else {
+                        System.err.println("STOCK INSUFICIENTE: " + ingrediente.getNombre());
+                        em.getTransaction().rollback();
+                        return false;
+                    }
+                }
+            } 
+            em.getTransaction().commit();
+            return true;
+
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Busca un ingrediente específico utilizando su identificador único (ID).
+     *
      * @param id Identificador del ingrediente.
      * @return El objeto Ingrediente encontrado o null si no existe.
      * @throws PersistenciaException Si ocurre un error en la busqueda.
