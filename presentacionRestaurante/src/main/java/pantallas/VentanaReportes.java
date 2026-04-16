@@ -26,6 +26,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import recursos.*;
+import reportes.GeneradorReporte;
 
 public class VentanaReportes extends JFrame {
 
@@ -270,7 +271,11 @@ public class VentanaReportes extends JFrame {
 
         btn_volver.addActionListener(e -> card_lay.show(cards, "MENU"));
         btn_pdf.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Generando PDF de " + tipo_reporte + "...");
+            if (tipo_reporte.equals("COMANDAS")) {
+                GeneradorReporte.generarPDFDesdeTabla(modelo_comandas, "REPORTE DE COMANDAS");
+            } else {
+                GeneradorReporte.generarPDFDesdeTabla(modelo_clientes, "REPORTE DE CLIENTES");
+            }
         });
 
         panel.add(btn_volver, BorderLayout.WEST);
@@ -320,4 +325,6 @@ public class VentanaReportes extends JFrame {
         Date date = (Date) spinner.getValue();
         return date.toInstant().atZone(systemDefault()).toLocalDate();
     }
+    
+    
 }

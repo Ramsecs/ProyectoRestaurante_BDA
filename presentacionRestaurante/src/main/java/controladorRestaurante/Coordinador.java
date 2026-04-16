@@ -49,6 +49,7 @@ import objetosNegocioRestaurante.MesaBO;
 import objetosNegocioRestaurante.ReporteBO;
 import observadorRestaurante.Observador;
 import pantallas.*;
+import reportes.GeneradorReporte;
 import validadores.Validaciones;
 
 /**
@@ -1002,6 +1003,19 @@ public class Coordinador implements Observador {
             // Propagamos la excepcion para que la ventana la muestre en un JOptionPane
             throw new Exception(e.getMessage());
         }
+    }
+    
+    /**
+     * Genera el archivo pdf para la ventana de reportes,
+     * muestra los registros de clientes o comandas 
+     * dependiendo de que modelo de tabla obtenga.
+     * 
+     * @param modelo
+     * @param titulo_reporte 
+     */
+    public void crearArchivoPDFParaReporte(DefaultTableModel modelo, String titulo_reporte){
+        GeneradorReporte generar_repo = new GeneradorReporte();
+        generar_repo.generarPDFDesdeTabla(modelo, titulo_reporte);
     }
     
 }
