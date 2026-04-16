@@ -14,23 +14,28 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 /**
- *Esta clase dao permite hacer las consultas directas a la BD
+ * Esta clase dao permite hacer las consultas directas a la BD
+ *
  * @author josma
  */
-public class MesaDAO implements IMesaDAO{
-   /**
-    * Variable statica para la la DAO de mesero.
-    */
-   private static MesaDAO mesaDAO;
-   /**
-    * Constructor privado.
-    */
+public class MesaDAO implements IMesaDAO {
+
+    /**
+     * Variable statica para la la DAO de mesero.
+     */
+    private static MesaDAO mesaDAO;
+
+    /**
+     * Constructor privado.
+     */
     private MesaDAO() {
 
     }
+
     /**
      * Obtiene la instancia de la DAO, si no existe la crea
-     * @return 
+     *
+     * @return
      */
     public static MesaDAO getInstanceMesaDAO() {
         if (mesaDAO == null) {
@@ -38,76 +43,99 @@ public class MesaDAO implements IMesaDAO{
         }
 
         return mesaDAO;
-    } 
+    }
+
     /**
      * Busca las mesas por id
+     *
      * @param id que pertenece a mesa
      * @return
-     * @throws PersistenciaException 
+     * @throws PersistenciaException
      */
     @Override
     public Mesa buscarPorId(Long id) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
-        try{
+        try {
             return em.find(Mesa.class, id);
-            
-        }catch(Exception e){
+
+        } catch (Exception e) {
             throw new PersistenciaException("Error al buscar la mesa" + e.getMessage());
-        }finally{
+        } finally {
             em.close();
         }
     }
+
     /**
      * Obtiene una lista de las mesas que tienen una comand abierta
+     *
      * @return
-     * @throws PersistenciaException 
+     * @throws PersistenciaException
      */
     @Override
     public List<Long> obtenerMesasOcupadas() throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
-        try{
+        try {
             //Buscamos los IDs de las mesas que tengan una comanda abierta
             String comandoJPQL = "SELECT DISTINCT c.mesa.id FROM Comanda c WHERE c.estado_comanda = :estado";
-            
+
             TypedQuery<Long> query = em.createQuery(comandoJPQL, Long.class);
             query.setParameter("estado", EstadoComanda.ABIERTA);
-            
+
             return query.getResultList();
-        }catch(Exception e){
-            System.err.println("Error al obtener las mesas ocupadas: "+ e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error al obtener las mesas ocupadas: " + e.getMessage());
             return new ArrayList<>();//Devolvemos una lista vacía para evitar errores tronadores         
-        }finally{
+        } finally {
             em.close();
-            
+
         }
     }
 
     @Override
     public void cancelarComandaPorMesa(Long id_mesa) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
-        
-        try{
+
+        try {
             em.getTransaction().begin();
-            
+
             String comandoJPQL = "UPDATE Comanda c SET c.estado_comanda = :nuevo_estado WHERE c.mesa.id = :mesa_id AND c.estado_comanda = :comanda_abierta";
-            
+
             int comanda_cancelada = em.createQuery(comandoJPQL)
-                    .setParameter("nuevo_estado",EstadoComanda.CANCELADA)
+                    .setParameter("nuevo_estado", EstadoComanda.CANCELADA)
                     .setParameter("mesa_id", id_mesa)
                     .setParameter("comanda_abierta", EstadoComanda.ABIERTA)
                     .executeUpdate();
-            
+
             em.getTransaction().commit();
             System.out.println("Se cancelo la comanda de la mesa");
-        }catch(Exception e){
+        } catch (Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
             throw new PersistenciaException("Error al cancelar la comnada " + e.getMessage());
-        }finally{
+        } finally {
             em.close();
         }
     }
-    
-    
+
+    @Override
+    public void registrarMesasMasivas(List<Mesa> mesas) throws PersistenciaException {
+        EntityManager em = ConexionBD.crearConexion();
+
+        try {
+            em.getTransaction().begin();
+            for (Mesa mesa : mesas) {
+                em.persist(mesa);
+            }
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new PersistenciaException("Error al registrar el lote de mesas: " + e.getMessage());
+        } finally {
+            em.close();
+        }
+    }
+
 }

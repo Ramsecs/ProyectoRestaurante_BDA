@@ -27,37 +27,44 @@ public class PruebasPantallas {
     public static void main(String[] args) {
         Coordinador coordinador = new Coordinador();
 
-//        List<Empleado> nuevos = new ArrayList<>();
-//        //Agregamos un Admin y un Mesero a la misma lista
-//        nuevos.add(new Administrador("admin_rest", "CODE123", "Ramses", "Admin", "García", "12345678"));
-//        nuevos.add(new Mesero("mesero_01", "CODE456", "Daniel", "López", "Méndez", "87654321"));
-//        nuevos.add(new Administrador ("admin_rest", "CODE098", "Alexa", "Quintana", "Benitez", "6441025765"));
-//        nuevos.add(new Mesero ("admin_02", "CODE321", "Daniel", "Ruiz", "Jocobi", "6441234567"));
-//        try {
-//            coordinador.registrarEmpleadosMasivo(nuevos);
-//            System.out.println("Cuentas creadas exitosamente.");
-//        } catch (Exception e) {
-//            System.out.println("Error: " + e.getMessage());
-//        }
-//
-////REGISTRAR EL @CLIENTE GENERAL 
-//        ClienteDTO cliente_general = new ClienteDTO();
-//
-//        cliente_general.setNombre("Cliente");
-//        cliente_general.setApellido_materno("No");
-//        cliente_general.setApellido_paterno("Frecuente");
-//        cliente_general.setTelefono("0000000000");
-//        cliente_general.setFecha_registro(LocalDate.now());
-//
-//        try {
-//            
-//                coordinador.registrarCliente(cliente_general);
-//                System.out.println("Cliente General creado exitosamente.");
-//            
-//        } catch (Exception e) {
-//            System.out.println("Aviso: El Cliente General ya existe o " + e.getMessage());
-//        }
+        List<Empleado> nuevos = new ArrayList<>();
+        //Agregamos un Admin y un Mesero a la misma lista
+        nuevos.add(new Administrador("admin_rest", "CODE123", "Ramses", "Admin", "García", "12345678"));
+        nuevos.add(new Mesero("mesero_01", "CODE456", "Daniel", "López", "Méndez", "87654321"));
+        nuevos.add(new Administrador("admin_rest", "CODE098", "Alexa", "Quintana", "Benitez", "6441025765"));
+        nuevos.add(new Mesero("admin_02", "CODE321", "Daniel", "Ruiz", "Jocobi", "6441234567"));
+        try {
+            coordinador.registrarEmpleadosMasivo(nuevos);
+            System.out.println("Cuentas creadas exitosamente.");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
 
+//REGISTRAR EL @CLIENTE GENERAL 
+        ClienteDTO cliente_general = new ClienteDTO();
+
+        cliente_general.setNombre("Cliente");
+        cliente_general.setApellido_materno("No");
+        cliente_general.setApellido_paterno("Frecuente");
+        cliente_general.setTelefono("0000000000");
+        cliente_general.setFecha_registro(LocalDate.now());
+
+        try {
+
+            coordinador.registrarCliente(cliente_general);
+            System.out.println("Cliente General creado exitosamente.");
+
+        } catch (Exception e) {
+            System.out.println("Aviso: El Cliente General ya existe o " + e.getMessage());
+        }
+//REGISTRAR MESAS
+
+        try {
+            coordinador.incializarMesasRestaurante(20);
+            System.out.println("Mesas creadas con exito");
+        } catch (Exception e) {
+            System.out.println("Algo fallo al insertar las mesas");
+        }
         coordinador.iniciarInicioSesion();
 
     }

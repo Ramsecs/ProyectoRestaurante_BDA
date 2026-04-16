@@ -25,6 +25,7 @@ import dtosDelRestaurante.ReporteComandaDTO;
 import entidadesEnumeradorDTO.EstadoComandaDTO;
 import entidadesEnumeradorDTO.TipoPlatilloDTO;
 import entidadesRestaurante.Empleado;
+import entidadesRestaurante.Mesa;
 import excepcionesRestaurante.NegocioException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -231,8 +232,7 @@ public class Coordinador implements Observador {
 
     /**
      * Metodo para regresar al menu administrador desde la ventana de menu
-     * ingrediente.
-     * Metodo para regresar al menu administrador 
+     * ingrediente. Metodo para regresar al menu administrador
      */
     public void regresarMenuAdmin() {
         if (ventana_menu_ingrediente != null) {
@@ -330,6 +330,22 @@ public class Coordinador implements Observador {
     //==========================================================================
     //==========================METODOS JOS JOS=================================
     //==========================================================================
+    public void incializarMesasRestaurante(int cantidad) {
+        try {
+            String mensaje = mesaBO.registrarLoteMesas(cantidad);
+            System.out.println(mensaje);
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+
+    }
+
+    /**
+     * Jala las lista y el resumen para poder mostrarlos en la ventana
+     *
+     * @param comanda_resumen es de comandas
+     * @param padre frame del jdialog
+     */
     public void prepararVentanaModificacion(ComandaListaDTO comanda_resumen, JFrame padre) {
         try {
             List<DetalleComandaDTO> detalles_actuales = comandaBO.consultarDetallesPorComanda(comanda_resumen.getId());
@@ -549,6 +565,10 @@ public class Coordinador implements Observador {
         ventana_crear_comanda.toFront();
     }
 
+    /**
+     * Regresa al menu de la Comanda.
+     */
+
     public void volverMenuComanda() {
         if (ventana_crear_comanda != null) {
             ventana_crear_comanda.dispose();
@@ -744,7 +764,7 @@ public class Coordinador implements Observador {
         } catch (NegocioException ex) {
             System.out.println("Error en Coordinador: " + ex.getMessage());
         }
-        return lista; 
+        return lista;
     }
 
     /**
@@ -965,7 +985,7 @@ public class Coordinador implements Observador {
             System.out.println("Stock actualizado para: " + ingredienteDTO.getNombre());
         } catch (NegocioException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error de Actualización", JOptionPane.ERROR_MESSAGE);
-            this.buscarIngredientes(""); 
+            this.buscarIngredientes("");
         }
     }
 
@@ -1093,11 +1113,10 @@ public class Coordinador implements Observador {
         return validar.validarTelefono(telefono);
     }
 
-    
     /**
-     * Devuelve las comandas de un periodo de tiempo 
-     * especifico a reportes de comandas.
-     * 
+     * Devuelve las comandas de un periodo de tiempo especifico a reportes de
+     * comandas.
+     *
      * @param ini
      * @param fin
      * @return Lista de reportes de comandas.
@@ -1107,10 +1126,9 @@ public class Coordinador implements Observador {
     }
 
     /**
-     * Devuelve la lista de clientes frecuentes con sus filtros de 
-     * nombre y numero de visitas minimo a la ventana de reportes
-     * de cliente frecuente.
-     * 
+     * Devuelve la lista de clientes frecuentes con sus filtros de nombre y
+     * numero de visitas minimo a la ventana de reportes de cliente frecuente.
+     *
      * @param nombre
      * @param visitas
      * @return Lista de reporte de clientes frecuentes.
@@ -1119,13 +1137,11 @@ public class Coordinador implements Observador {
         return reporteBO.obtenerReporteClientes(nombre, visitas);
     }
 
-    public void abrirReportes() {
-    
     /**
-     * Abre la ventana de reportes despues de haber 
-     * presionado el boton del menu de administrador.
+     * Abre la ventana de reportes despues de haber presionado el boton del menu
+     * de administrador.
      */
-    public void abrirReportes(){
+    public void abrirReportes() {
         if (ventana_menu_admin != null) {
             ventana_menu_admin.setVisible(false);
         }
@@ -1136,14 +1152,12 @@ public class Coordinador implements Observador {
         ventana_reportes.toFront();
     }
 
-    
-    
     /**
-     * Actualiza la cantidad de la relacion que hay entre el 
-     * ingrediente y el producto de manera que la receta se 
-     * modifica.
+     * Actualiza la cantidad de la relacion que hay entre el ingrediente y el
+     * producto de manera que la receta se modifica.
+     *
      * @param id_ingrediente
-     * @param nueva_cantidad 
+     * @param nueva_cantidad
      */
     public void actualizarCantidadIngredienteProducto(Long id_ingrediente, Integer nueva_cantidad) {
         try {
@@ -1152,15 +1166,15 @@ public class Coordinador implements Observador {
             JOptionPane.showMessageDialog(null, "No se pudo actualizar: " + e.getMessage());
         }
     }
-    
-    
+
     /**
-     * Restamos la cantidad que se requiera de ingredientes para la comanda
-     * con el stock original de cada ingrediente.
-     * 
+     * Restamos la cantidad que se requiera de ingredientes para la comanda con
+     * el stock original de cada ingrediente.
+     *
      * @param nuevaComanda
-     * @return verdadero si todos los ingredientes estan bien, falso si es que no alcanza
-     * @throws Exception 
+     * @return verdadero si todos los ingredientes estan bien, falso si es que
+     * no alcanza
+     * @throws Exception
      */
     public boolean restarStockYValidarIngredientes(ComandaDTO nuevaComanda) throws Exception {
         try {
@@ -1171,18 +1185,17 @@ public class Coordinador implements Observador {
             throw new Exception(e.getMessage());
         }
     }
-    
+
     /**
-     * Genera el archivo pdf para la ventana de reportes,
-     * muestra los registros de clientes o comandas 
-     * dependiendo de que modelo de tabla obtenga.
-     * 
+     * Genera el archivo pdf para la ventana de reportes, muestra los registros
+     * de clientes o comandas dependiendo de que modelo de tabla obtenga.
+     *
      * @param modelo
-     * @param titulo_reporte 
+     * @param titulo_reporte
      */
-    public void crearArchivoPDFParaReporte(DefaultTableModel modelo, String titulo_reporte){
+    public void crearArchivoPDFParaReporte(DefaultTableModel modelo, String titulo_reporte) {
         GeneradorReporte generar_repo = new GeneradorReporte();
         generar_repo.generarPDFDesdeTabla(modelo, titulo_reporte);
     }
-    
+
 }
