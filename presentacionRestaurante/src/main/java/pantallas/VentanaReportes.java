@@ -4,21 +4,17 @@
  */
 package pantallas;
 
+import com.toedter.calendar.JDateChooser;
 import controladorRestaurante.Coordinador;
 import dtosDelRestaurante.ReporteClienteDTO;
 import dtosDelRestaurante.ReporteComandaDTO;
 import java.awt.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import static java.time.ZoneId.systemDefault;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.swing.*;
-import static javax.swing.BorderFactory.createLineBorder;
-import javax.swing.JSpinner.DateEditor;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -26,39 +22,43 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import recursos.*;
+import reportes.GeneradorReporte;
 
 public class VentanaReportes extends JFrame {
 
     private final Coordinador coordinador;
-    // Colores basados en tus imágenes
+    
+    // Paleta de colores corporativa
     private final Color naranja_cabecera = new Color(255, 184, 77);
     private final Color rosa_volver = new Color(255, 102, 204);
     private final Color rojo_descargar = new Color(255, 82, 82);
-    private final Color gris_fondo_tabla = new Color(240, 240, 240);
 
     private JPanel cards;
     private CardLayout card_lay;
     private DefaultTableModel modelo_comandas, modelo_clientes;
-    private JSpinner spinner_fecha_inicio, spinner_fecha_fin;
+    
+    // Nuevos componentes visuales de fecha
+    private JDateChooser jd_inicio, jd_fin; 
+    
     private JLabel lbl_total_ventas;
     private TextFieldPersonalizado txt_nombre, txt_visitas;
     private Font fuente_titulo, fuente_botones, fuente_tabla;
 
     public VentanaReportes(Coordinador coordinador) {
         this.coordinador = coordinador;
-        setTitle("Módulo de Reportes");
+        setTitle("Módulo de Reportes - Gestión de Restaurante");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1100, 800);
         setLocationRelativeTo(null);
 
-        // Carga de fuentes personalizadas
+        // Carga de fuentes
         fuente_titulo = GestorFuentes.obtenerFuente("Agbalumo-Regular.ttf", 45f);
         fuente_botones = GestorFuentes.obtenerFuente("Agbalumo-Regular.ttf", 20f);
         fuente_tabla = GestorFuentes.obtenerFuente("Rabbits-Bro.ttf", 18f);
 
         initComponents();
         
-        // Carga inicial de datos
+        // Carga inicial
         SwingUtilities.invokeLater(() -> {
             actualizarTablaClientes("", 0);
             aplicarFiltroComandas();
@@ -66,7 +66,7 @@ public class VentanaReportes extends JFrame {
     }
 
     private void initComponents() {
-        PanelFondo panel_fondo = new PanelFondo(); // Usa fondo.jpg
+        PanelFondo panel_fondo = new PanelFondo();
         panel_fondo.setLayout(new GridBagLayout());
         setContentPane(panel_fondo);
 
@@ -78,6 +78,7 @@ public class VentanaReportes extends JFrame {
         cards = new JPanel(card_lay);
         cards.setOpaque(false);
 
+        // Registro de vistas
         cards.add(crearPanelSeleccion(), "MENU");
         cards.add(crearPanelReporteComandas(), "COMANDAS");
         cards.add(crearPanelReporteClientes(), "CLIENTES");
@@ -111,7 +112,7 @@ public class VentanaReportes extends JFrame {
 
         btn_clientes.addActionListener(e -> card_lay.show(cards, "CLIENTES"));
         btn_comandas.addActionListener(e -> card_lay.show(cards, "COMANDAS"));
-        btn_volver.addActionListener(e -> coordinador.regresarMenuMesero());
+        btn_volver.addActionListener(e -> coordinador.regresarMenuAdmin());
 
         return panel;
     }
@@ -124,34 +125,32 @@ public class VentanaReportes extends JFrame {
         titulo.setFont(fuente_titulo);
         panel.add(titulo, BorderLayout.NORTH);
 
-        // Panel de Filtros superior
+        // Panel de Filtros con JDateChooser
         JPanel panel_filtros = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
         panel_filtros.setOpaque(false);
         
         panel_filtros.add(crearEtiqueta("Desde:"));
-        spinner_fecha_inicio = crearSelectorFecha();
-        panel_filtros.add(spinner_fecha_inicio);
+        jd_inicio = configurarCalendario();
+        panel_filtros.add(jd_inicio);
 
         panel_filtros.add(crearEtiqueta("Hasta:"));
-        spinner_fecha_fin = crearSelectorFecha();
-        panel_filtros.add(spinner_fecha_fin);
+        jd_fin = configurarCalendario();
+        panel_filtros.add(jd_fin);
 
-        spinner_fecha_inicio.addChangeListener(e -> aplicarFiltroComandas());
-        spinner_fecha_fin.addChangeListener(e -> aplicarFiltroComandas());
+        // Actualizacion automatica al cambiar fecha
+        jd_inicio.addPropertyChangeListener("date", evt -> aplicarFiltroComandas());
+        jd_fin.addPropertyChangeListener("date", evt -> aplicarFiltroComandas());
 
-        // Configuración de Tabla
         String[] col = {"ID", "Mesa", "Fecha", "Hora", "Estado", "Cliente", "Total"};
         modelo_comandas = new DefaultTableModel(col, 0) { 
-            @Override public boolean isCellEditable(int r, int c) { 
-                return false; 
-            }
+            @Override public boolean isCellEditable(int r, int c) { return false; }
         };
+        
         JTable tabla = crearTablaEstilizada(modelo_comandas);
         JScrollPane scroll = new JScrollPane(tabla);
         scroll.getViewport().setBackground(Color.WHITE);
         scroll.setBorder(BorderFactory.createLineBorder(naranja_cabecera, 2));
 
-        // Panel Central para tabla y total
         JPanel centro = new JPanel(new BorderLayout(0, 10));
         centro.setOpaque(false);
         centro.add(panel_filtros, BorderLayout.NORTH);
@@ -167,6 +166,42 @@ public class VentanaReportes extends JFrame {
         return panel;
     }
 
+    /**
+     * Configura el componentes de seleccion de fechas 
+     * para la filtracion de registros en la tabla de reportes
+     * de comandas.
+     * 
+     * @return JDateChooser
+     */
+    private JDateChooser configurarCalendario() {
+        JDateChooser chooser = new JDateChooser();
+        chooser.setDate(new Date()); 
+        chooser.setDateFormatString("dd/MM/yyyy");
+        chooser.setPreferredSize(new Dimension(180, 40));
+        chooser.setFont(fuente_tabla);
+
+        // Buscamos el boton de forma segura recorriendo los componentes internos
+        for (Component comp : chooser.getComponents()) {
+            if (comp instanceof JButton) {
+                JButton btn = (JButton) comp;
+                btn.setBackground(naranja_cabecera);
+                btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                // Opcional: Quitar bordes molestos del boton
+                btn.setBorder(BorderFactory.createEmptyBorder());
+                btn.setContentAreaFilled(true);
+            }
+        }
+
+        return chooser;
+    }
+
+    /**
+     * Crea el panel completo de reporte de clientes frecuentes
+     * cuando se selecciona el boton de cliente frecuente 
+     * muestra este panel.
+     * 
+     * @return JPanel de reporte de cliente frecuente
+     */
     private JPanel crearPanelReporteClientes() {
         JPanel panel = new JPanel(new BorderLayout(0, 20));
         panel.setOpaque(false);
@@ -180,29 +215,25 @@ public class VentanaReportes extends JFrame {
 
         panel_filtros.add(crearEtiqueta("Nombre:"));
         txt_nombre = new TextFieldPersonalizado(15);
-        txt_nombre.setBackground(naranja_cabecera);
+        txt_nombre.setBackground(new Color(255, 245, 230));
         panel_filtros.add(txt_nombre);
 
         panel_filtros.add(crearEtiqueta("Min. Visitas:"));
         txt_visitas = new TextFieldPersonalizado(5);
-        txt_visitas.setBackground(naranja_cabecera);
+        txt_visitas.setBackground(new Color(255, 245, 230));
         panel_filtros.add(txt_visitas);
 
-        // Listener para tiempo real
         DocumentListener dl = new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { 
-                actualizar(); 
-            }
-            public void removeUpdate(DocumentEvent e) {
-                actualizar(); 
-            }
-            public void changedUpdate(DocumentEvent e) { 
-                actualizar(); 
-            }
+            public void insertUpdate(DocumentEvent e) { actualizar(); }
+            public void removeUpdate(DocumentEvent e) { actualizar(); }
+            public void changedUpdate(DocumentEvent e) { actualizar(); }
             private void actualizar() {
                 String nom = txt_nombre.getText().trim();
                 int vis = 0;
-                try { if(!txt_visitas.getText().trim().isEmpty()) vis = Integer.parseInt(txt_visitas.getText().trim()); } catch(Exception ex){}
+                try { 
+                    if(!txt_visitas.getText().trim().isEmpty()) vis = Integer.parseInt(txt_visitas.getText().trim()); 
+                } catch(Exception ex){
+                }
                 actualizarTablaClientes(nom, vis);
             }
         };
@@ -210,10 +241,13 @@ public class VentanaReportes extends JFrame {
         txt_visitas.getDocument().addDocumentListener(dl);
 
         String[] col = {"Nombre Cliente", "Visitas", "Total Gastado", "Última Compra"};
-        modelo_clientes = new DefaultTableModel(col, 0) { @Override public boolean isCellEditable(int r, int c) { return false; }};
+        modelo_clientes = new DefaultTableModel(col, 0) { 
+            @Override public boolean isCellEditable(int r, int c) { 
+                return false; 
+            }};
         JTable tabla = crearTablaEstilizada(modelo_clientes);
         JScrollPane scroll = new JScrollPane(tabla);
-        scroll.setBorder(createLineBorder(naranja_cabecera, 2));
+        scroll.setBorder(BorderFactory.createLineBorder(naranja_cabecera, 2));
 
         JPanel centro = new JPanel(new BorderLayout(0, 10));
         centro.setOpaque(false);
@@ -226,42 +260,51 @@ public class VentanaReportes extends JFrame {
         return panel;
     }
 
-    // --- METODOS DE ESTILO DE TABLA ---
+    /**
+     * Crea una tabla estilizada para las ventanas de reportes 
+     * haciendo que tenga un diseño mucho mejor.
+     * 
+     * @param modelo
+     * @return JTable tabla para la vetana de reportes
+     */
     private JTable crearTablaEstilizada(DefaultTableModel modelo) {
         JTable tabla = new JTable(modelo);
         tabla.setFont(fuente_tabla);
         tabla.setRowHeight(35);
         tabla.setSelectionBackground(new Color(255, 230, 200));
-        tabla.setShowVerticalLines(true);
+        //Cabecera de color naranja
         tabla.setGridColor(naranja_cabecera);
 
-        // Cabecera naranja como en la imagen
         JTableHeader header = tabla.getTableHeader();
         header.setPreferredSize(new Dimension(0, 45));
         header.setDefaultRenderer(new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable tabla, Object valor, boolean seleccionado, boolean has_focus, int fila, int columna) {
-                super.getTableCellRendererComponent(tabla, valor, seleccionado, has_focus, fila, columna);
+            public Component getTableCellRendererComponent(JTable t, Object v, boolean s, boolean f, int r, int c) {
+                super.getTableCellRendererComponent(t, v, s, f, r, c);
                 setBackground(naranja_cabecera);
                 setForeground(Color.WHITE);
                 setFont(fuente_tabla);
                 setHorizontalAlignment(JLabel.CENTER);
-                setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.WHITE));
                 return this;
             }
         });
 
-        // Alineación de celdas
-        DefaultTableCellRenderer center_renderer = new DefaultTableCellRenderer();
-        center_renderer.setHorizontalAlignment(JLabel.CENTER);
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         for (int i = 0; i < tabla.getColumnCount(); i++) {
-            tabla.getColumnModel().getColumn(i).setCellRenderer(center_renderer);
+            tabla.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
-
         return tabla;
     }
 
-    private JPanel crearPanelBotonesNavegacion(String tipo_reporte) {
+    /**
+     * Crea el panel para los botones de generar pdf 
+     * y volver en cada uno de los paneles de reportes.
+     * 
+     * @param tipo
+     * @return JPanel Crea el panel para los botones de volver y pdf
+     */
+    private JPanel crearPanelBotonesNavegacion(String tipo) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
 
@@ -269,8 +312,13 @@ public class VentanaReportes extends JFrame {
         BotonMenuAdministrador btn_pdf = new BotonMenuAdministrador("Descargar PDF", "/imagenes/aceptarPNG.png", rojo_descargar, 35, 35, fuente_botones);
 
         btn_volver.addActionListener(e -> card_lay.show(cards, "MENU"));
+        
         btn_pdf.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Generando PDF de " + tipo_reporte + "...");
+            if (tipo.equals("COMANDAS")) {
+                GeneradorReporte.generarPDFDesdeTabla(modelo_comandas, "REPORTE HISTÓRICO DE COMANDAS");
+            } else {
+                GeneradorReporte.generarPDFDesdeTabla(modelo_clientes, "REPORTE DE FIDELIDAD DE CLIENTES");
+            }
         });
 
         panel.add(btn_volver, BorderLayout.WEST);
@@ -278,46 +326,84 @@ public class VentanaReportes extends JFrame {
         return panel;
     }
 
+    /**
+     * Regresa una etiqueta con el tipo de fuente 
+     * que usa la ventana de la tabla.
+     * 
+     * @param texto
+     * @return JLabel de la etiqueta estilizada 
+     */
     private JLabel crearEtiqueta(String texto) {
-        JLabel l = new JLabel(texto);
-        l.setFont(fuente_tabla);
-        return l;
+        JLabel label = new JLabel(texto);
+        label.setFont(fuente_tabla);
+        return label;
     }
 
-    private JSpinner crearSelectorFecha() {
-        SpinnerDateModel model = new SpinnerDateModel(new Date(), null, null, Calendar.DAY_OF_MONTH);
-        JSpinner spinner = new JSpinner(model);
-        DateEditor editor = new DateEditor(spinner, "dd/MM/yyyy");
-        spinner.setEditor(editor);
-        spinner.setPreferredSize(new Dimension(160, 40));
-        return spinner;
-    }
-
-    // --- LOGICA DE DATOS ---
+    /**
+     * Aplica los filtros de periodos a la ventana de reportes de comandas, 
+     * muestra con filtros: fecha, hora, mesa, total, 
+     * estado, cliente y el total acumulado del periodo.
+     */
     private void aplicarFiltroComandas() {
-        LocalDate inicio = obtenerFechaDeSpinner(spinner_fecha_inicio);
-        LocalDate fin = obtenerFechaDeSpinner(spinner_fecha_fin);
-        
-        List<ReporteComandaDTO> lista = coordinador.generarReporteComandas(inicio.atStartOfDay(), fin.atTime(LocalTime.MAX));
-        modelo_comandas.setRowCount(0);
-        double total = 0;
-        for (ReporteComandaDTO r : lista) {
-            modelo_comandas.addRow(new Object[]{ "#"+r.getId(), r.getMesa_id(), r.getFecha(), r.getHora(), r.getEstado(), r.getCliente(), "$"+String.format("%.2f", r.getTotal())});
-            total += r.getTotal();
+        if (jd_inicio.getDate() == null || jd_fin.getDate() == null) return;
+
+        // Convertir Date a LocalDate para el filtrado
+        LocalDate inicio = jd_inicio.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate fin = jd_fin.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        // Validación: Fecha inicio no puede ser posterior a fecha fin
+        if (inicio.isAfter(fin)) {
+            modelo_comandas.setRowCount(0);
+            lbl_total_ventas.setText("ERROR: Rango de fechas inválido");
+            lbl_total_ventas.setForeground(Color.RED);
+            return;
+        } else {
+            lbl_total_ventas.setForeground(Color.BLACK);
         }
-        lbl_total_ventas.setText("TOTAL VENTA PERIODO: $" + String.format("%.2f", total));
+
+        // Obtener lista desde el coordinador (Capa Lógica/DAO)
+        List<ReporteComandaDTO> lista = coordinador.generarReporteComandas(inicio.atStartOfDay(), fin.atTime(LocalTime.MAX));
+        
+        modelo_comandas.setRowCount(0);
+        double totalAcumulado = 0;
+
+        for (ReporteComandaDTO comanda : lista) {
+            // Manejo del cliente "si aplica"
+            String nombreCliente = (comanda.getCliente() == null || comanda.getCliente().isEmpty()) ? "Público General" : comanda.getCliente();
+
+            modelo_comandas.addRow(new Object[]{ 
+                "#" + comanda.getId(), 
+                comanda.getMesa_id(), 
+                comanda.getFecha(), 
+                comanda.getHora(), 
+                comanda.getEstado(), 
+                nombreCliente, 
+                "$" + String.format("%.2f", comanda.getTotal())
+            });
+            
+            totalAcumulado += comanda.getTotal();
+        }
+
+        // Mostrar el total acumulado del periodo seleccionado (Requerimiento cumplido)
+        lbl_total_ventas.setText("TOTAL VENTA PERIODO: $" + String.format("%.2f", totalAcumulado));
     }
 
+    /**
+     * Actualiza la tabla de clientes usando los filtros que 
+     * aparecen en el panel de clientes frecuentes, y muestra
+     * los registros que aplican para esos mismos filtros.
+     * 
+     * @param nombre
+     * @param visitas 
+     */
     private void actualizarTablaClientes(String nombre, int visitas) {
         List<ReporteClienteDTO> lista = coordinador.generarReporteClientes(nombre, visitas);
         modelo_clientes.setRowCount(0);
-        for (ReporteClienteDTO r : lista) {
-            modelo_clientes.addRow(new Object[]{ r.getNombre_completo(), r.getVisitas(), "$"+String.format("%.2f", r.getTotal_gastado()), r.getFecha_ultima_comanda() });
+        for (ReporteClienteDTO reporte_cliente : lista) {
+            modelo_clientes.addRow(new Object[]{ 
+                reporte_cliente.getNombre_completo(), reporte_cliente.getVisitas(), 
+                "$"+String.format("%.2f", reporte_cliente.getTotal_gastado()), reporte_cliente.getFecha_ultima_comanda() 
+            });
         }
-    }
-
-    private LocalDate obtenerFechaDeSpinner(JSpinner spinner) {
-        Date date = (Date) spinner.getValue();
-        return date.toInstant().atZone(systemDefault()).toLocalDate();
     }
 }

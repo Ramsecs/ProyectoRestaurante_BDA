@@ -4,17 +4,34 @@
  */
 package objetosNegocioRestaurante;
 
+import adaptadores.ComandaAdapter;
+import conexionRestaurante.ConexionBD;
+import daosRestaurante.ClienteDAO;
+import daosRestaurante.IClienteDAO;
 import daosRestaurante.IngredienteDAO;
 import validadores.Validaciones;
 import daosRestaurante.IIngredienteDAO;
+import daosRestaurante.IMesaDAO;
+import daosRestaurante.IMeseroDAO;
+import daosRestaurante.IProductoDAO;
+import daosRestaurante.MesaDAO;
+import daosRestaurante.MeseroDAO;
+import daosRestaurante.ProductoDAO;
+import dtosDelRestaurante.ComandaDTO;
+import dtosDelRestaurante.ComandaProductoDTO;
 import dtosDelRestaurante.IngredienteBusquedaDTO;
 import dtosDelRestaurante.IngredientesDTO;
+import entidadesRestaurante.Comanda;
+import entidadesRestaurante.ComandaProducto;
 import entidadesRestaurante.Ingrediente;
+import entidadesRestaurante.Producto;
+import entidadesRestaurante.ProductoIngrediente;
 import enumEntidades.UnidadMedida;
 import excepcionesRestaurante.NegocioException;
 import excepcionesRestaurante.PersistenciaException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.EntityManager;
 
 /**
  *
@@ -30,6 +47,8 @@ public class IngredienteBO implements IIngredienteBO {
 
     /** Utilidad para validaciones de formato y reglas de negocio */
     private Validaciones validar = new Validaciones();
+    
+    private ComandaAdapter adapter = new ComandaAdapter();
 
     /** Constructor privado para evitar instanciación externa */
     private IngredienteBO() {
@@ -118,7 +137,7 @@ public class IngredienteBO implements IIngredienteBO {
             throw new NegocioException("Ocurrio un error en negocio al intentar devolver la lista de ingredientes: " + ex.getMessage());
         }
     }
-
+    
     /**
      * Actualiza el stock de un ingrediente existente.
      * 
@@ -143,4 +162,27 @@ public class IngredienteBO implements IIngredienteBO {
             throw new NegocioException("No se pudo actualizar el ingrediente: " + ex.getMessage());
         }
     }
+    
+    /**
+     * Convertimos el DTO de comanda a una entidad de dominio 
+     * para despues mandar a que valide todos los ingredientes de cada producto
+     * y que cada uno sea valido o que alcance para realizar la comanda.
+     * 
+     * @param dto
+     * @return verdadero si todos los ingredientes estan bien, falso si es que no alcanza
+     * @throws NegocioException 
+     */
+    @Override
+    public boolean restarStockIngredientesParaComanda(ComandaDTO dto) throws NegocioException {
+        // Convertir DTO a Entidad de Dominio
+        Comanda comanda = adapter.convertirDtoAEntidad(dto);
+        try{
+            
+        return ingredienteDAO.procesarStockDeComanda(comanda);
+
+        } catch (PersistenciaException e) {
+            throw new NegocioException("Error al guardar la comanda: " + e.getMessage());
+        }
+    }
+
 }

@@ -265,7 +265,7 @@ public class VentanaMenuCliente extends JFrame {
                 int fila = e.getFirstRow();
                 int columna = e.getColumn();
 
-                //sOLO SE EDITA SI ESTA DENTRO DE LAS PERMITIDAS
+                //SOLO SE EDITA SI ESTA DENTRO DE LAS CASILLAS PERMITIDAS
                 if (columna >= 0 && columna <= 4) {
                     ejecutarActualizacionDesdeTabla(fila);
                 }

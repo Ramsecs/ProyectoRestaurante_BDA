@@ -53,6 +53,7 @@ import objetosNegocioRestaurante.MesaBO;
 import objetosNegocioRestaurante.ReporteBO;
 import observadorRestaurante.Observador;
 import pantallas.*;
+import reportes.GeneradorReporte;
 import validadores.Validaciones;
 
 /**
@@ -231,10 +232,14 @@ public class Coordinador implements Observador {
     /**
      * Metodo para regresar al menu administrador desde la ventana de menu
      * ingrediente.
+     * Metodo para regresar al menu administrador 
      */
     public void regresarMenuAdmin() {
         if (ventana_menu_ingrediente != null) {
             ventana_menu_ingrediente.dispose();
+        }
+        if (ventana_reportes != null) {
+            ventana_reportes.dispose();
         }
 
         if (ventana_menu_admin != null) {
@@ -733,15 +738,13 @@ public class Coordinador implements Observador {
      * @return Una lista de ingredientes DTO con la cual podamos trabajar.
      */
     public List<IngredienteDTOLista> obtenerListaIngredientes() {
-        // Inicializa con una lista vacia, no con null
         List<IngredienteDTOLista> lista = new ArrayList<>();
         try {
             lista = ingredienteProductoBO.recuperarListaIngredientes();
         } catch (NegocioException ex) {
             System.out.println("Error en Coordinador: " + ex.getMessage());
-            // Aqui podrias mostrar un JOptionPane para avisar al usuario
         }
-        return lista; // Si falla, devuelve la lista vacia creada arriba
+        return lista; 
     }
 
     /**
@@ -920,6 +923,7 @@ public class Coordinador implements Observador {
         }
     }
 
+    @Override
     public void registrarIngrediente(IngredientesDTO ingredienteDTO) {
         try {
             ingredienteBO.registrarIngredientes(ingredienteDTO);
@@ -936,6 +940,7 @@ public class Coordinador implements Observador {
      *
      * @param filtro Texto para filtrar por nombre o unidad.
      */
+    @Override
     public void buscarIngredientes(String filtro) {
         try {
             List<IngredienteBusquedaDTO> lista = ingredienteBO.buscarIngredientes(filtro);
@@ -958,11 +963,9 @@ public class Coordinador implements Observador {
         try {
             ingredienteBO.actualizarStock(ingredienteDTO);
             System.out.println("Stock actualizado para: " + ingredienteDTO.getNombre());
-            // No refrescamos toda la tabla aquí para no perder el foco del usuario, 
-            // a menos que sea necesario.
         } catch (NegocioException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error de Actualización", JOptionPane.ERROR_MESSAGE);
-            this.buscarIngredientes(""); // Revertir cambios visuales si falló
+            this.buscarIngredientes(""); 
         }
     }
 
@@ -1090,15 +1093,39 @@ public class Coordinador implements Observador {
         return validar.validarTelefono(telefono);
     }
 
+    
+    /**
+     * Devuelve las comandas de un periodo de tiempo 
+     * especifico a reportes de comandas.
+     * 
+     * @param ini
+     * @param fin
+     * @return Lista de reportes de comandas.
+     */
     public List<ReporteComandaDTO> generarReporteComandas(LocalDateTime ini, LocalDateTime fin) {
         return reporteBO.generarReporteComandas(ini, fin);
     }
 
+    /**
+     * Devuelve la lista de clientes frecuentes con sus filtros de 
+     * nombre y numero de visitas minimo a la ventana de reportes
+     * de cliente frecuente.
+     * 
+     * @param nombre
+     * @param visitas
+     * @return Lista de reporte de clientes frecuentes.
+     */
     public List<ReporteClienteDTO> generarReporteClientes(String nombre, int visitas) {
         return reporteBO.obtenerReporteClientes(nombre, visitas);
     }
 
     public void abrirReportes() {
+    
+    /**
+     * Abre la ventana de reportes despues de haber 
+     * presionado el boton del menu de administrador.
+     */
+    public void abrirReportes(){
         if (ventana_menu_admin != null) {
             ventana_menu_admin.setVisible(false);
         }
@@ -1109,4 +1136,53 @@ public class Coordinador implements Observador {
         ventana_reportes.toFront();
     }
 
+    
+    
+    /**
+     * Actualiza la cantidad de la relacion que hay entre el 
+     * ingrediente y el producto de manera que la receta se 
+     * modifica.
+     * @param id_ingrediente
+     * @param nueva_cantidad 
+     */
+    public void actualizarCantidadIngredienteProducto(Long id_ingrediente, Integer nueva_cantidad) {
+        try {
+            ingredienteProductoBO.actualizarCantidad(id_ingrediente, nueva_cantidad);
+        } catch (NegocioException e) {
+            JOptionPane.showMessageDialog(null, "No se pudo actualizar: " + e.getMessage());
+        }
+    }
+    
+    
+    /**
+     * Restamos la cantidad que se requiera de ingredientes para la comanda
+     * con el stock original de cada ingrediente.
+     * 
+     * @param nuevaComanda
+     * @return verdadero si todos los ingredientes estan bien, falso si es que no alcanza
+     * @throws Exception 
+     */
+    public boolean restarStockYValidarIngredientes(ComandaDTO nuevaComanda) throws Exception {
+        try {
+            // Llamamos al BO para procesar todo
+            return ingredienteBO.restarStockIngredientesParaComanda(nuevaComanda);
+        } catch (NegocioException e) {
+            // Propagamos la excepcion para que la ventana la muestre en un JOptionPane
+            throw new Exception(e.getMessage());
+        }
+    }
+    
+    /**
+     * Genera el archivo pdf para la ventana de reportes,
+     * muestra los registros de clientes o comandas 
+     * dependiendo de que modelo de tabla obtenga.
+     * 
+     * @param modelo
+     * @param titulo_reporte 
+     */
+    public void crearArchivoPDFParaReporte(DefaultTableModel modelo, String titulo_reporte){
+        GeneradorReporte generar_repo = new GeneradorReporte();
+        generar_repo.generarPDFDesdeTabla(modelo, titulo_reporte);
+    }
+    
 }

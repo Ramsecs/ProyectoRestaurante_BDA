@@ -19,4 +19,6 @@ public interface IIngredienteProductoBO {
     
     public List<IngredienteDTOLista> listarDetallesProducto(Long idProducto) throws NegocioException;
     
+    public void actualizarCantidad(Long id_relacion, Integer nueva_cantidad) throws NegocioException;
+    
 }

@@ -93,13 +93,11 @@ public class Validaciones {
      * @param stock
      * @return boolean
      */
-    public boolean validarStock(Integer stock) {
-        // Verificamos que el objeto no sea nulo para evitar un NullPointerException
+    public boolean validarStock(Integer stock){
         if (stock == null) {
             return false;
         }
 
-        // Solo permitimos numeros mayores o iguales a cero
         if (stock >= 0) {
             return true;
         }
@@ -117,20 +115,17 @@ public class Validaciones {
      * @throws NegocioException 
      */
     public boolean validarRepetido(String nombre, UnidadMedida unidadMedida) throws NegocioException {
-        // Verificamos que los parámetros no sean nulos
         if (nombre == null || unidadMedida == null) {
             throw new NegocioException("Datos insuficientes para validar duplicados.");
         }
 
-        // Consultamos al DAO
         boolean existe = ingredienteDAO.existeIngrediente(nombre.trim(), unidadMedida);
 
-        // Si existe, devolvemos false
         if (existe) {
-            return false; // Significa que NO es valido porque ya esta repetido
+            return false;
         }
 
-        return true; // Es valido, no esta repetido
+        return true;
     }
     
     

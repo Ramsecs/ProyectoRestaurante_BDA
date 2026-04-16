@@ -74,14 +74,51 @@ public class IngredienteProductoDAO implements IIngredienteProductoDAO{
     public List<ProductoIngrediente> buscarPorProducto(Long id_producto) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
         try {
-            // Consulta JPQL para obtener los ingredientes de un producto específico
+            // Añadimos ORDER BY pi.ingredientes.nombre ASC
             return em.createQuery(
-                "SELECT pi FROM ProductoIngrediente pi WHERE pi.productos.id = :id", 
+                "SELECT pi FROM ProductoIngrediente pi " +
+                "WHERE pi.productos.id = :id " +
+                "ORDER BY pi.ingredientes.nombre ASC", 
                 ProductoIngrediente.class)
                 .setParameter("id", id_producto)
                 .getResultList();
         } catch (Exception e) {
             throw new PersistenciaException("Error al obtener detalles del producto: " + e.getMessage());
+        } finally {
+            em.close();
+        }
+    }
+    
+    /**
+     * Actualiza el objeto de la relacion entre ingrediente
+     * y producto, haciendo que la cantidad de
+     * cierto ingrediente cambie en base a lo que recibe en 
+     * los parametros.
+     * 
+     * @param id_relacion
+     * @param nueva_cantidad
+     * @throws PersistenciaException 
+     */
+    @Override
+    public void actualizarCantidad(Long id_relacion, Integer nueva_cantidad) throws PersistenciaException{
+        EntityManager em = ConexionBD.crearConexion();
+        try {
+            em.getTransaction().begin();
+            
+            // Buscamos la entidad ProductoIngrediente por su ID
+            ProductoIngrediente producto_ingrediente = em.find(ProductoIngrediente.class, id_relacion);
+            
+            if (producto_ingrediente != null) {
+                producto_ingrediente.setCantidad_ingrediente(nueva_cantidad);
+                em.merge(producto_ingrediente); // Sincroniza los cambios con la BD
+            } else {
+                throw new Exception("No se encontró la relación producto-ingrediente.");
+            }
+            
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            em.getTransaction().rollback();
+            throw new PersistenciaException("");
         } finally {
             em.close();
         }

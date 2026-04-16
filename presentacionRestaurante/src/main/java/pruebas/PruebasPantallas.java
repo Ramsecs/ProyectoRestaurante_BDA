@@ -40,7 +40,7 @@ public class PruebasPantallas {
 //            System.out.println("Error: " + e.getMessage());
 //        }
 //
-////REGISTRAR EL CLIENTE GENERAL 
+////REGISTRAR EL @CLIENTE GENERAL 
 //        ClienteDTO cliente_general = new ClienteDTO();
 //
 //        cliente_general.setNombre("Cliente");

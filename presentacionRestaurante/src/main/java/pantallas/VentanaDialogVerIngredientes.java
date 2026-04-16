@@ -13,6 +13,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import recursos.*;
 import java.util.List;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableRowSorter;
 /**
  *
@@ -90,7 +91,7 @@ public class VentanaDialogVerIngredientes extends JDialog {
         String[] columnas = {"Nombre", "Cantidad", "Medida"};
         
         // Usamos 0 filas iniciales y -1 en hasta_columna para que NADA sea editable
-        modelo_tabla = new ModeloTablaEditable(columnas, 0, -1);
+        modelo_tabla = new ModeloTablaEditable(columnas, 0, 1);
         
         tabla = new TablaEstilizada(modelo_tabla, fuente_rabbits_pequena);
 
@@ -121,6 +122,37 @@ public class VentanaDialogVerIngredientes extends JDialog {
         
         // Cargar los datos en la tabla
         llenarTabla();
+        
+        modelo_tabla.addTableModelListener(e -> {
+            // Solo actuamos si el cambio fue una actualizacion en una celda
+            if (e.getType() == TableModelEvent.UPDATE) {
+                int fila = e.getFirstRow();
+                int columna = e.getColumn();
+
+                // Si el cambio fue en la columna "Cantidad"
+                if (columna == 1) {
+                    try {
+                        // Obtener el nuevo valor de la tabla
+                        Object nuevoValor = modelo_tabla.getValueAt(fila, columna);
+                        Integer nuevaCantidad = Integer.parseInt(nuevoValor.toString());
+
+                        // Obtener el DTO correspondiente de la lista original
+                        int filaModelo = tabla.convertRowIndexToModel(fila);
+                        IngredienteDTOLista dto_modificado = lista_ingredientes.get(filaModelo);
+
+                        // Actualizar el DTO localmente
+                        dto_modificado.setStock(nuevaCantidad); 
+
+                        // Llamar al coordinador para persistir en la Base de datos
+                        coordinador.actualizarCantidadIngredienteProducto(dto_modificado.getId(), nuevaCantidad);
+
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(this, "Por favor ingrese un número válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
+                        llenarTabla(); // Recargamos para revertir el texto erroneo
+                    }
+                }
+            }
+        });
 
         // Configurar el Filtro de busqueda
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(modelo_tabla);
