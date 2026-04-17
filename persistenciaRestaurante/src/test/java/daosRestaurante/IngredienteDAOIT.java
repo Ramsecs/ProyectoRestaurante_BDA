@@ -5,6 +5,7 @@
 package daosRestaurante;
 
 import entidadesRestaurante.Ingrediente;
+import entidadesRestaurante.Producto;
 import enumEntidades.UnidadMedida;
 import excepcionesRestaurante.PersistenciaException;
 import java.util.List;
@@ -141,5 +142,87 @@ public class IngredienteDAOIT {
         assertThrows(PersistenciaException.class, () -> {
             ingredienteDAO.registrarIngrediente(null);
         }, "Debería lanzar una excepción al intentar registrar un nulo");
+    }
+    
+    /**
+     * Prueba el descuento de stock basado en una comanda.
+     * Crea un producto con una receta (ProductoIngrediente) y descuenta el stock
+     * multiplicando la cantidad de la receta por la cantidad de platos pedidos.
+     */
+    @Test
+    @DisplayName("Debería descontar stock correctamente al procesar una comanda")
+    void testProcesarStockDeComanda() throws PersistenciaException {
+        Ingrediente carne = ingredienteDAO.registrarIngrediente(new Ingrediente("Carne", 5000, UnidadMedida.GRAMOS));
+        
+        Producto hamburguesa = new Producto();
+        hamburguesa.setNombre("Hamburguesa Pro");
+        
+        entidadesRestaurante.ProductoIngrediente receta = new entidadesRestaurante.ProductoIngrediente();
+        receta.setIngredientes(carne);
+        receta.setCantidad_ingrediente(250);
+        hamburguesa.setLista_ingredientes(java.util.List.of(receta));
+        
+        entidadesRestaurante.Comanda comanda = new entidadesRestaurante.Comanda();
+        entidadesRestaurante.ComandaProducto detalle = new entidadesRestaurante.ComandaProducto();
+        detalle.setProductos_comprados(hamburguesa);
+        detalle.setCant_cada_producto(2);
+        comanda.setLista_productos(java.util.List.of(detalle));
+        
+        boolean exito = ingredienteDAO.procesarStockDeComanda(comanda);
+        
+        Ingrediente carneActualizada = ingredienteDAO.buscarPorId(carne.getId());
+        assertTrue(exito, "El procesamiento debería ser exitoso");
+        assertEquals(4500, carneActualizada.getStock(), "El stock debería ser 4500 (5000 - (250*2))");
+    }
+
+    /**
+     * Prueba que el sistema no descuente nada y devuelva false si no hay stock suficiente.
+     */
+    @Test
+    @DisplayName("Debería fallar el procesamiento si el stock es insuficiente")
+    void testProcesarStockInsuficiente() throws PersistenciaException {
+        Ingrediente caviar = ingredienteDAO.registrarIngrediente(new Ingrediente("Caviar", 10, UnidadMedida.GRAMOS));
+        
+        Producto platoLujo = new Producto();
+        entidadesRestaurante.ProductoIngrediente receta = new entidadesRestaurante.ProductoIngrediente();
+        receta.setIngredientes(caviar);
+        receta.setCantidad_ingrediente(100);
+        platoLujo.setLista_ingredientes(java.util.List.of(receta));
+        
+        entidadesRestaurante.Comanda comanda = new entidadesRestaurante.Comanda();
+        entidadesRestaurante.ComandaProducto detalle = new entidadesRestaurante.ComandaProducto();
+        detalle.setProductos_comprados(platoLujo);
+        detalle.setCant_cada_producto(1);
+        comanda.setLista_productos(java.util.List.of(detalle));
+        
+        boolean exito = ingredienteDAO.procesarStockDeComanda(comanda);
+        
+        assertFalse(exito, "Debería retornar false por falta de stock");
+        assertEquals(10, ingredienteDAO.buscarPorId(caviar.getId()).getStock(), "El stock no debería haber cambiado");
+    }
+
+    /**
+     * Prueba la reposición de stock cuando se cancelan productos.
+     */
+    @Test
+    @DisplayName("Debería reponer stock correctamente tras una cancelación")
+    void testReponerStockPorCancelacion() throws PersistenciaException {
+        Ingrediente pan = ingredienteDAO.registrarIngrediente(new Ingrediente("Pan", 10, UnidadMedida.PIEZA));
+        
+        Producto sandwich = new Producto();
+        entidadesRestaurante.ProductoIngrediente receta = new entidadesRestaurante.ProductoIngrediente();
+        receta.setIngredientes(pan);
+        receta.setCantidad_ingrediente(2); // 2 panes por sandwich
+        sandwich.setLista_ingredientes(java.util.List.of(receta));
+        
+        entidadesRestaurante.ComandaProducto detalleCancelado = new entidadesRestaurante.ComandaProducto();
+        detalleCancelado.setProductos_comprados(sandwich);
+        detalleCancelado.setCant_cada_producto(3); // Se cancelaron 3 sandwiches (Total 6 panes)
+
+        boolean exito = ingredienteDAO.reponerStockPorCancelacion(java.util.List.of(detalleCancelado));
+        
+        Ingrediente panRepuesto = ingredienteDAO.buscarPorId(pan.getId());
+        assertTrue(exito);
+        assertEquals(16, panRepuesto.getStock(), "El stock debería ser 16 (10 iniciales + 6 devueltos)");
     }
 }
