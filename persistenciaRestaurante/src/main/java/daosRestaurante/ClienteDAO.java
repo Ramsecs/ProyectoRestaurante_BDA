@@ -41,11 +41,9 @@ public class ClienteDAO implements IClienteDAO {
      * Mediante este metodo registramos el cliente dentro de la base de datos,
      * incluyendo los clientes frecuentes ya que siendo el cliente la clase
      * padre es posible registrar tambien el cliente frecuente
-     *
-     * @param cliente.
-     * @return Cliente.
-     * @throws excepcionesRestaurante.PersistenciaException
-     * @throws PersistenciaException.
+     * @param cliente
+     * @return
+     * @throws PersistenciaException 
      */
     @Override
     public Cliente registrarCliente(Cliente cliente) throws PersistenciaException {
@@ -74,9 +72,8 @@ public class ClienteDAO implements IClienteDAO {
      * extra), correo y teléfono.
      *
      * @param filtro_busqueda.
-     * @return List.
-     * @throws excepcionesRestaurante.PersistenciaException
-     * @throws PersistenciaException.
+     * @return 
+     * @throws PersistenciaException
      */
     @Override
     public List<Object[]> buscarCliente(String filtro_busqueda) throws PersistenciaException {
@@ -112,9 +109,8 @@ public class ClienteDAO implements IClienteDAO {
     /**
      * Mediante este metodo se permite modifcar al cliente con EntityManager.
      *
-     * @param cliente.
-     * @return Cliente.
-     * @throws excepcionesRestaurante.PersistenciaException
+     * @param cliente
+     * @return Cliente
      * @throws PersistenciaException.
      */
     @Override
@@ -139,9 +135,8 @@ public class ClienteDAO implements IClienteDAO {
      * Permite hacer la busqueda de clientes que coincida su id.
      *
      * @param id.
-     * @return Cliente.
-     * @throws excepcionesRestaurante.PersistenciaException
-     * @throws PersistenciaException.
+     * @return Cliente
+     * @throws PersistenciaException
      */
     @Override
     public Cliente buscarPorId
