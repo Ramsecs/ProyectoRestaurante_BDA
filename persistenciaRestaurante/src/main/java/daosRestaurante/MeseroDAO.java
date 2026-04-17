@@ -10,16 +10,24 @@ import excepcionesRestaurante.PersistenciaException;
 import javax.persistence.EntityManager;
 
 /**
- *
+ *DAO de mesero donde podremos hacer consultas a la bd
  * @author josma
  */
 public class MeseroDAO implements IMeseroDAO {
+    /**
+     * Variable privada para el singleton.
+     */
     private static MeseroDAO meseroDAO;
-
+    /**
+     * Constructor vacio.
+     */
     private MeseroDAO() {
 
     }
-
+    /**
+     * Metodo singleton
+     * @return 
+     */
     public static MeseroDAO getInstanceMeseroDAO() {
         if (meseroDAO == null) {
             meseroDAO = new MeseroDAO();
@@ -27,7 +35,12 @@ public class MeseroDAO implements IMeseroDAO {
 
         return meseroDAO;
     }
-
+    /**
+     * Busca el mesero por id, esto para poder asignarlo a una comanda.
+     * @param id del mesero
+     * @return
+     * @throws PersistenciaException 
+     */
     @Override
     public Mesero buscarPorId(Long id) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();

@@ -90,6 +90,11 @@ public class MesaDAO implements IMesaDAO {
 
         }
     }
+    /**
+     * Actualiza el estado de la mesa para poder agregarle ptra comanda
+     * @param id_mesa de la mesa que tiene la comanda
+     * @throws PersistenciaException 
+     */
 
     @Override
     public void cancelarComandaPorMesa(Long id_mesa) throws PersistenciaException {
@@ -112,7 +117,7 @@ public class MesaDAO implements IMesaDAO {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            throw new PersistenciaException("Error al cancelar la comnada " + e.getMessage());
+            throw new PersistenciaException("Error al cancelar la comanda " + e.getMessage());
         } finally {
             em.close();
         }

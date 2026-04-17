@@ -4,20 +4,23 @@
  */
 package entidadesRestaurante;
 
+import enumEntidades.EstadoComanda;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.*;
 
 /**
- *Relacion entre comanda y producto
+ * Relacion entre comanda y producto
+ *
  * @author RAMSES
  */
 @Entity
 public class ComandaProducto implements Serializable {
 
     /**
-     * Identificador único del registro de detalle.
-     * Generado automáticamente mediante una estrategia de identidad.
+     * Identificador único del registro de detalle. Generado automáticamente
+     * mediante una estrategia de identidad.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +28,8 @@ public class ComandaProducto implements Serializable {
 
     /**
      * Notas o especificaciones adicionales sobre el producto solicitado.
-     * Ejemplo: "Sin cebolla", "Término medio", "Coke con hielo".
-     * Campo opcional con longitud máxima de 300 caracteres.
+     * Ejemplo: "Sin cebolla", "Término medio", "Coke con hielo". Campo opcional
+     * con longitud máxima de 300 caracteres.
      */
     @Column(name = "detalles_producto", length = 300, nullable = true)
     private String detalles_producto;
@@ -38,21 +41,21 @@ public class ComandaProducto implements Serializable {
     private Integer cant_cada_producto;
 
     /**
-     * El producto específico que ha sido comprado.
-     * Relación de muchos a uno con la entidad {@link Producto}.
+     * El producto específico que ha sido comprado. Relación de muchos a uno con
+     * la entidad {@link Producto}.
      */
     @ManyToOne
     @JoinColumn(name = "id_productos", nullable = false)
     private Producto productos_comprados;
 
     /**
-     * La comanda a la cual pertenece este detalle de producto.
-     * Relación de muchos a uno con la entidad {@link Comanda}.
+     * La comanda a la cual pertenece este detalle de producto. Relación de
+     * muchos a uno con la entidad {@link Comanda}.
      */
     @ManyToOne
     @JoinColumn(name = "id_comandas", nullable = false)
     private Comanda comandas;
-    
+
     /**
      * Constructor por defecto requerido por JPA para la gestión de entidades.
      */
@@ -60,8 +63,9 @@ public class ComandaProducto implements Serializable {
     }
 
     /**
-     * Constructor para crear un nuevo detalle de producto con información operativa.
-     * 
+     * Constructor para crear un nuevo detalle de producto con información
+     * operativa.
+     *
      * @param detalles_producto Especificaciones adicionales del pedido.
      * @param cant_cada_producto Cantidad de unidades solicitadas.
      */
@@ -84,73 +88,97 @@ public class ComandaProducto implements Serializable {
     }
 
     // --- Métodos de Acceso (Getters y Setters) ---
+    /**
+     * @return El identificador del registro de detalle.
+     */
+    public Long getId() {
+        return id;
+    }
 
     /**
-     * @return El identificador del registro de detalle. 
+     * @param id El nuevo ID a asignar.
      */
-    public Long getId() { return id; }
-
-    /** 
-     * @param id El nuevo ID a asignar. 
-     */
-    public void setId(Long id) { this.id = id; }
-
-    /** 
-     * @return Las especificaciones o detalles del producto solicitado. 
-     */
-    public String getDetalles_producto() { return detalles_producto; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     /**
-     * @param detalles_producto Los detalles a asignar. 
+     * @return Las especificaciones o detalles del producto solicitado.
      */
-    public void setDetalles_producto(String detalles_producto) { this.detalles_producto = detalles_producto; }
+    public String getDetalles_producto() {
+        return detalles_producto;
+    }
 
     /**
-     * @return La cantidad de productos en este renglón de la comanda. 
+     * @param detalles_producto Los detalles a asignar.
      */
-    public Integer getCant_cada_producto() { return cant_cada_producto; }
-
-    /** 
-     * @param cant_cada_producto La cantidad a establecer. 
-     */
-    public void setCant_cada_producto(Integer cant_cada_producto) { this.cant_cada_producto = cant_cada_producto; }
+    public void setDetalles_producto(String detalles_producto) {
+        this.detalles_producto = detalles_producto;
+    }
 
     /**
-     * @return El objeto Producto asociado a este detalle. 
+     * @return La cantidad de productos en este renglón de la comanda.
      */
-    public Producto getProductos() { return productos_comprados; }
+    public Integer getCant_cada_producto() {
+        return cant_cada_producto;
+    }
 
-    /** 
-     * @param productos El producto a asociar. 
+    /**
+     * @param cant_cada_producto La cantidad a establecer.
      */
-    public void setProductos(Producto productos) { this.productos_comprados = productos; }
+    public void setCant_cada_producto(Integer cant_cada_producto) {
+        this.cant_cada_producto = cant_cada_producto;
+    }
 
-    /** 
-     * @return La Comanda asociada a este detalle. 
+    /**
+     * @return El objeto Producto asociado a este detalle.
      */
-    public Comanda getComandas() { return comandas; }
+    public Producto getProductos() {
+        return productos_comprados;
+    }
 
-    /** 
-     * @param comandas La comanda a la cual vincular este registro. 
+    /**
+     * @param productos El producto a asociar.
      */
-    public void setComandas(Comanda comandas) { this.comandas = comandas; }
+    public void setProductos(Producto productos) {
+        this.productos_comprados = productos;
+    }
+
+    /**
+     * @return La Comanda asociada a este detalle.
+     */
+    public Comanda getComandas() {
+        return comandas;
+    }
+
+    /**
+     * @param comandas La comanda a la cual vincular este registro.
+     */
+    public void setComandas(Comanda comandas) {
+        this.comandas = comandas;
+    }
+
     /**
      * Regresa el producto comprado
-     * @return 
+     *
+     * @return
      */
     public Producto getProductos_comprados() {
         return productos_comprados;
     }
+
     /**
      * Setea el producto comprado
+     *
      * @param productos_comprados pertenece a comanda
      */
     public void setProductos_comprados(Producto productos_comprados) {
         this.productos_comprados = productos_comprados;
     }
-    
+
     /**
      * Genera un código hash basado en el ID del registro.
+     *
      * @return Valor hash calculado.
      */
     @Override
@@ -162,27 +190,21 @@ public class ComandaProducto implements Serializable {
 
     /**
      * Compara este detalle con otro objeto basándose en su identificador único.
+     *
      * @param obj Objeto a comparar.
      * @return true si los IDs coinciden, false en caso contrario.
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
         final ComandaProducto other = (ComandaProducto) obj;
         return Objects.equals(this.id, other.id);
     }
-    
-    
 
-    /**
-     * Devuelve una cadena con la información descriptiva del detalle de la comanda.
-     * @return Representación textual de la entidad.
-     */
-    @Override
-    public String toString() {
-        return "ComandaProducto{" + "id=" + id + ", detalles_producto=" + detalles_producto + 
-               ", cant_cada_producto=" + cant_cada_producto + ", productos=" + productos_comprados + 
-               ", comandas=" + comandas + '}';
-    }
+
 }

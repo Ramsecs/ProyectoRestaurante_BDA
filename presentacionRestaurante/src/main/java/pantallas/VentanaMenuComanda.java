@@ -101,31 +101,8 @@ public class VentanaMenuComanda extends JFrame {
         txt_nombre.setPreferredSize(new Dimension(0, 35));
         cuadro_blanco.add(txt_nombre, gbc);
 
-        //ESTADO BÚSQUEDA-------------------------------------------------------
-        gbc.gridy = 3;
-        JLabel lbl_estado = new JLabel("Estado de Comanda");
-        lbl_estado.setFont(fuente_rabbits_mediana);
-        cuadro_blanco.add(lbl_estado, gbc);
-
-        gbc.gridy = 4;
-        ComboBoxPersonalizado<EstadoComanda> cmb_busqueda = new ComboBoxPersonalizado<>(EstadoComanda.values());
-        cmb_busqueda.setPreferredSize(new Dimension(0, 35));
-        cmb_busqueda.setFont(fuente_rabbits_pequena);
-        cmb_busqueda.setForeground(naranja);
-        cuadro_blanco.add(cmb_busqueda, gbc);
-
-        //MESA------------------------------------------------------------------
-        gbc.gridy = 5;
-        JLabel lbl_mesa = new JLabel("Número de Mesa");
-        lbl_mesa.setFont(fuente_rabbits_mediana);
-        cuadro_blanco.add(lbl_mesa, gbc);
-
-        gbc.gridy = 6;
-        txt_mesa = new TextFieldPersonalizado(20);
-        txt_mesa.setPreferredSize(new Dimension(0, 35));
-        cuadro_blanco.add(txt_mesa, gbc);
-
-        //TABLA-----------------------------------------------------------------
+        
+                //TABLA-----------------------------------------------------------------
         gbc.gridy = 7;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;

@@ -205,6 +205,12 @@ public class ProductoDAO implements IProductoDAO{
             em.close();
         }
     }
+    /**
+     * Busca un producto por id
+     * @param id del producto
+     * @return
+     * @throws PersistenciaException 
+     */
 
     @Override
     public Producto buscarPorId(Long id) throws PersistenciaException {
