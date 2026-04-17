@@ -53,7 +53,9 @@ public class EmpleadoDAO implements IEmpleadoDAO{
             }
             em.getTransaction().commit();
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             throw new PersistenciaException("Error al realizar el registro masivo");
         } finally {
             em.close();

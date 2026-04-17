@@ -374,11 +374,14 @@ public class Coordinador implements Observador {
     public void guardarCambiosComanda(Long id_comanda, List<DetalleComandaDTO> modificados,
             List<DetalleComandaDTO> eliminados, List<DetalleComandaDTO> nuevos) {
         try {
-            // 1. Mandamos llamar al BO para que procese la transacción
+            // Mandamos llamar al BO para que procese la transacción
             // El BO se encargará de validar que las cantidades sean correctas
             comandaBO.guardarCambiosComanda(id_comanda, modificados, eliminados, nuevos);
+            
+            comandaBO.agregarNuevosProductos(id_comanda, nuevos);
+            
 
-            // 2. Si no hubo excepciones, notificamos al usuario
+            // Si no hubo excepciones, notificamos al usuario
             JOptionPane.showMessageDialog(null,
                     "La comanda ha sido actualizada exitosamente.",
                     "Operación Exitosa",

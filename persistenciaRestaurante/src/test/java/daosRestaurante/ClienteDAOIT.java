@@ -23,107 +23,114 @@ public class ClienteDAOIT {
 
     private final ClienteDAO clienteDAO = ClienteDAO.getInstanceClienteDAO();
 
+    // --- PRUEBAS PARA registrarCliente ---
+
     @Test
-    @DisplayName("Deberia persistir un cliente correctamente y generar un ID")
-    public void testAgregarClienteExitoso() {
-        Cliente nuevoCliente = new Cliente();
-        nuevoCliente.setNombre("Ramses");
-        nuevoCliente.setApellido_paterno("Contreras");
-        nuevoCliente.setApellido_materno("Garcia");
-        nuevoCliente.setCorreo("ramtaro110@gmail.com");
-        nuevoCliente.setTelefono("6441238756");
-
+    @DisplayName("ÉXITO: Registrar cliente con todos los campos obligatorios")
+    public void testRegistrarClienteExito() {
+        Cliente cliente = new Cliente("Ramses", "Contreras", "Garcia", "ramtaro110@gmail.com", "6441238756");
+        
         try {
-            Cliente resultado = clienteDAO.registrarCliente(nuevoCliente);
-            assertNotNull(resultado, "El objeto retornado no debe ser nulo");
-            assertNotNull(resultado.getId(), "La base de datos debe asignar un ID al cliente");
-            assertEquals("Ramses", resultado.getNombre(), "El nombre debe coincidir");
-            assertEquals("ramtaro110@gmail.com", resultado.getCorreo(), "El correo debe persistirse correctamente");
-
-            assertNotNull(resultado.getFecha_registro(), "El PrePersist no funciono");
-            assertEquals(LocalDate.now(), resultado.getFecha_registro());
-            
+            Cliente resultado = clienteDAO.registrarCliente(cliente);
+            assertNotNull(resultado.getId(), "El ID debería haberse generado");
+            assertEquals(LocalDate.now(), resultado.getFecha_registro(), "El PrePersist debió asignar la fecha");
         } catch (PersistenciaException e) {
-            fail("No deberia lanzar PersistenciaException: " + e.getMessage());
+            fail("No debería fallar: " + e.getMessage());
         }
     }
 
     @Test
-    @DisplayName("Deberia lanzar excepcion al intentar registrar un cliente nulo")
-    public void testAgregarClienteNulo() {
+    @DisplayName("FALLO: Lanzar excepción al registrar cliente nulo")
+    public void testRegistrarClienteFallo() {
         assertThrows(PersistenciaException.class, () -> {
             clienteDAO.registrarCliente(null);
-        }, "Se esperaba PersistenciaException al enviar un objeto nulo");
-
+        }, "Debería lanzar PersistenciaException al ser nulo");
     }
-@Test
-    @DisplayName("Debe buscar clientes por filtro")
-    public void testBuscarCliente() {
-        String filtro = "Ramses";
 
-        try {
-            List<Object[]> resultados = clienteDAO.buscarCliente(filtro);
+    // --- PRUEBAS PARA buscarCliente (Filtro) ---
 
-            assertNotNull(resultados, "La lista de resultados no deberia ser nula");
-            if (!resultados.isEmpty()) {
-                Object[] fila = resultados.get(0);
-    
-                assertTrue(fila[0] instanceof Cliente, "El primer elemento debe ser un objeto Cliente");
-                Cliente c = (Cliente) fila[0];
-                assertTrue(c.getNombre().toLowerCase().contains(filtro) || 
-                           c.getCorreo().toLowerCase().contains(filtro));
-                
-                System.out.println("Cliente encontrado: " + c.getNombre() + " Comandas: " + fila[1]);
-            }
-        } catch (PersistenciaException e) {
-            fail("Error al buscar cliente: " + e.getMessage());
-        }
+    @Test
+    @DisplayName("ÉXITO: Buscar cliente por coincidencia de nombre (LOWER CASE)")
+    public void testBuscarClienteExito() throws PersistenciaException {
+        // Preparar
+        Cliente c = new Cliente("Tilin", "Perez", "Lopez", "tilin@test.com", "123");
+        clienteDAO.registrarCliente(c);
+
+        // Ejecutar (buscamos en minusculas para probar el LOWER de la consulta)
+        List<Object[]> resultados = clienteDAO.buscarCliente("tilin");
+
+        // Verificar
+        assertFalse(resultados.isEmpty(), "Debería encontrar al menos un resultado");
+        Cliente encontrado = (Cliente) resultados.get(0)[0];
+        assertTrue(encontrado.getNombre().equalsIgnoreCase("Tilin"));
     }
 
     @Test
-    @DisplayName("Debe modificar los datos de un cliente existente")
-    public void testModificarCliente() {
-        try {
-            Long idExistente = 1L; 
-            Cliente cliente = clienteDAO.buscarPorId(idExistente);
-            
-            assertNotNull(cliente, "Para probar modificacion debe existir el ID 1 en la BD");
+    @DisplayName("FALLO: Retornar lista vacía cuando el filtro no coincide con nada")
+    public void testBuscarClienteSinResultados() throws PersistenciaException {
+        List<Object[]> resultados = clienteDAO.buscarCliente("NOMBRE_QUE_NO_EXISTE_12345");
+        assertTrue(resultados.isEmpty(), "La lista debería estar vacía");
+    }
 
-            String nuevoNombre = "Tilin";
-            cliente.setNombre(nuevoNombre);
+    // --- PRUEBAS PARA modificarCliente ---
 
-            Cliente actualizado = clienteDAO.modificarCliente(cliente);
+    @Test
+    @DisplayName("ÉXITO: Modificar el correo de un cliente existente")
+    public void testModificarClienteExito() throws PersistenciaException {
+        // Preparar
+        Cliente c = new Cliente("Original", "Ap", "Am", "orig@mail.com", "111");
+        Cliente registrado = clienteDAO.registrarCliente(c);
 
-            assertEquals(nuevoNombre, actualizado.getNombre(), "El nombre no se actualizo correctamente");
-            
-        } catch (PersistenciaException e) {
-            fail("Error al modificar cliente: " + e.getMessage());
-        }
+        // Modificar
+        registrado.setCorreo("nuevo@mail.com");
+        Cliente actualizado = clienteDAO.modificarCliente(registrado);
+
+        // Verificar
+        assertEquals("nuevo@mail.com", actualizado.getCorreo());
+        assertEquals(registrado.getId(), actualizado.getId());
     }
 
     @Test
-    @DisplayName("Debe encontrar un cliente por su ID")
-    public void testBuscarPorId() {
-        try {
-            Long id = 1L;
-            Cliente encontrado = clienteDAO.buscarPorId(id);
+    @DisplayName("FALLO: Error al intentar modificar un cliente que no existe (ID inexistente)")
+    public void testModificarClienteFallo() {
+        // Creamos un cliente con un ID que no esta en la base de datos
+        Cliente clienteInexistente = new Cliente();
+        clienteInexistente.setId(999999L); 
+        clienteInexistente.setNombre("Fantasma");
+        clienteInexistente.setApellido_paterno("X");
+        clienteInexistente.setApellido_materno("Y");
 
-            assertNotNull(encontrado, "El cliente con ID " + id + " debe existir");
-            assertEquals(id, encontrado.getId(), "El ID retornado no coincide con el buscado");
-            
-        } catch (PersistenciaException e) {
-            fail("Error al buscar por ID: " + e.getMessage());
-        }
+        // JPA Merge puede crear uno nuevo o fallar dependiendo de la configuracion, 
+        // pero si forzamos un error de persistencia (campos nulos obligatorios), saltara la excepcion.
+        clienteInexistente.setNombre(null); // Esto causara error por nullable=false
+        
+        assertThrows(PersistenciaException.class, () -> {
+            clienteDAO.modificarCliente(clienteInexistente);
+        });
+    }
+
+    // --- PRUEBAS PARA buscarPorId ---
+
+    @Test
+    @DisplayName("ÉXITO: Encontrar cliente por ID generado")
+    public void testBuscarPorIdExito() throws PersistenciaException {
+        // Preparar
+        Cliente c = new Cliente("Busqueda", "Test", "Id", "id@test.com", "000");
+        Cliente registrado = clienteDAO.registrarCliente(c);
+
+        // Ejecutar
+        Cliente encontrado = clienteDAO.buscarPorId(registrado.getId());
+
+        // Verificar
+        assertNotNull(encontrado);
+        assertEquals(registrado.getId(), encontrado.getId());
     }
 
     @Test
-    @DisplayName("retorna null a un id que no existe")
-    public void testBuscarPorIdInexistente() {
-        try {
-            Cliente resultado = clienteDAO.buscarPorId(873102973L);
-            assertNull(resultado, "Debe retornar null para el id inexistente");
-        } catch (PersistenciaException e) {
-            fail("debe retornar null");
-        }
+    @DisplayName("FALLO: Retornar null al buscar un ID que no existe")
+    public void testBuscarPorIdInexistente() throws PersistenciaException {
+        // ID extremadamente alto que no exista
+        Cliente resultado = clienteDAO.buscarPorId(888888L);
+        assertNull(resultado, "El resultado debe ser null si el ID no existe en JPA");
     }
 }

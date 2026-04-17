@@ -306,5 +306,20 @@ public class ComandaBO implements IComandaBO {
             throw new NegocioException(e.getMessage());
         }
     }
+    
+  @Override
+    public void agregarNuevosProductos(Long id, List<DetalleComandaDTO> nuevos) throws NegocioException {
+        try {
+            for (DetalleComandaDTO nuevo : nuevos) {
+                // Solo intentamos restar si la cantidad es mayor a 0
+                if (nuevo.getCantidad() > 0) {
+                    comandaDAO.descontarStockPorProducto(nuevo.getId_producto(), nuevo.getCantidad());
+                }
+            }
+        } catch (PersistenciaException e) {
+            // Pasamos el mensaje específico del DAO para saber exactamente qué falló
+            throw new NegocioException(e.getMessage());
+        }
+    }
 
 }

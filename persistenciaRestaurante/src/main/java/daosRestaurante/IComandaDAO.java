@@ -24,5 +24,6 @@ public interface IComandaDAO {
     public void actualizarDetallesComanda(Long id_comanda, List<ComandaProducto> modificar,List<ComandaProducto> eliminar, List<ComandaProducto> nuevos) throws PersistenciaException;
     public List<ComandaProducto> consultarPorComanda(Long id) throws PersistenciaException;
     public ComandaProducto buscarComandaProductoPorId(Long id) throws PersistenciaException;
+    public void descontarStockPorProducto(Long idProducto, int cantidadPedida) throws PersistenciaException;
     
 }

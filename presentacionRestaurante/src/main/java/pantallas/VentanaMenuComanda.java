@@ -112,7 +112,7 @@ public class VentanaMenuComanda extends JFrame {
         modelo_tabla = new ModeloTablaEditable(columnas, 0, 1) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                // Columna 2 (Combo) y Columna 3 (Botón) deben ser editables
+                // Columna 2 (Combo) y Columna 3 (Boton) deben ser editables
                 return column == 2 || column == 3;
             }
         };

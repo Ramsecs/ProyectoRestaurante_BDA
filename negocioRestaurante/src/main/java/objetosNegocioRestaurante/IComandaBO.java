@@ -24,4 +24,5 @@ public interface IComandaBO {
     public List<ComandaListaDTO> filtrarComandasAbiertas(String filtro) throws NegocioException;
     public void guardarCambiosComanda(Long idComanda, List<DetalleComandaDTO> modificarDTO, List<DetalleComandaDTO> eliminarDTO, List<DetalleComandaDTO> nuevosDTO) throws NegocioException;
     public List<DetalleComandaDTO> consultarDetallesPorComanda(Long id_comanda) throws NegocioException; 
+    public void agregarNuevosProductos(Long id, List<DetalleComandaDTO> nuevos) throws NegocioException;
 }

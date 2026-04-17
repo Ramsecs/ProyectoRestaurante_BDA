@@ -9,6 +9,8 @@ import dtosDelRestaurante.ComandaDTO;
 import dtosDelRestaurante.DetalleComandaDTO;
 import entidadesRestaurante.Comanda;
 import entidadesRestaurante.ComandaProducto;
+import entidadesRestaurante.Ingrediente;
+import entidadesRestaurante.ProductoIngrediente;
 import enumEntidades.EstadoComanda;
 import excepcionesRestaurante.PersistenciaException;
 import java.util.List;
@@ -74,6 +76,13 @@ public class ComandaDAO implements IComandaDAO {
      * @throws PersistenciaException 
      */
 
+    /**
+     * Obtiene las comandas abiertas que tenemos registradas.
+     * 
+     * @param estado
+     * @return lista de comandas
+     * @throws PersistenciaException 
+     */
     @Override
     public List<Comanda> obtenerComandasAbiertas(EstadoComanda estado) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
@@ -98,6 +107,15 @@ public class ComandaDAO implements IComandaDAO {
      * @throws PersistenciaException 
      */
 
+    /**
+     * Actualiza el estado de la comanda que 
+     * tiene el mismo id al estado que 
+     * nosotros le damos.
+     * 
+     * @param id
+     * @param estado
+     * @throws PersistenciaException 
+     */
     @Override
     public void actualizarEstadoComanda(Long id, EstadoComanda estado) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
@@ -115,11 +133,14 @@ public class ComandaDAO implements IComandaDAO {
             em.close();
         }
     }
+
     /**
-     * Filtra las comandas de busqueda por cliente
-     * @param filtro que es el parametro para buscar el cliente
-     * @param estado_filtro estado de la comanda
-     * @return
+     * Busca las comandas abiertas por 
+     * medio de un filtro del nombre del cliente.
+     * 
+     * @param filtro
+     * @param estado_filtro
+     * @return lista de comandas
      * @throws PersistenciaException 
      */
     @Override
@@ -141,12 +162,16 @@ public class ComandaDAO implements IComandaDAO {
             em.close();
         }
     }
+
     /**
-     * Actualiza los detalles de la comanda, asi sea que se elimine un producto, se modofique o se agregue
-     * @param id_comanda por modificar
-     * @param modificar lista de los productos que se van a modoficar
-     * @param eliminar lista de los productos que se van a eliminar
-     * @param nuevos lista de los productos que se van a agregar
+     * Se actualizan los cambios de la comanda
+     * cuando se actualiza, con la lista nueva de productos
+     * y si es que se eliminaron productos tambien.
+     * 
+     * @param id_comanda
+     * @param modificar
+     * @param eliminar
+     * @param nuevos
      * @throws PersistenciaException 
      */
     @Override
@@ -192,6 +217,16 @@ public class ComandaDAO implements IComandaDAO {
      * @throws PersistenciaException 
      */
 
+    
+    /**
+     * Consulta comanda por medio del id 
+     * de la misma comanda, y regresa una 
+     * lista de comanda producto.
+     * 
+     * @param id_comanda
+     * @return lista de comanda producto
+     * @throws PersistenciaException 
+     */
     @Override
     public List<ComandaProducto> consultarPorComanda(Long id_comanda) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
@@ -213,6 +248,14 @@ public class ComandaDAO implements IComandaDAO {
      * @throws PersistenciaException 
      */
 
+    /**
+     * Buscamos la relacion que hay entre
+     * comanda y producto mediante el id.
+     * 
+     * @param id
+     * @return ComandaProducto
+     * @throws PersistenciaException 
+     */
     @Override
     public ComandaProducto buscarComandaProductoPorId(Long id) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
@@ -220,6 +263,58 @@ public class ComandaDAO implements IComandaDAO {
             return em.find(ComandaProducto.class, id);
         } catch (Exception e) {
             throw new PersistenciaException("Error al buscar el detalle: " + e.getMessage());
+        } finally {
+            em.close();
+        }
+    }
+    
+    /**
+     * Actualiza los ingredientes que se van a gastar 
+     * para los nuevos productos cuando se hace
+     * una modificacion en comanda.
+     * 
+     * @param id_producto
+     * @param cantidad_pedida
+     * @throws PersistenciaException 
+     */
+    @Override
+    public void descontarStockPorProducto(Long id_producto, int cantidad_pedida) throws PersistenciaException {
+        EntityManager em = ConexionBD.crearConexion();
+        try {
+            em.getTransaction().begin();
+
+            // Buscamos la "receta" en tu tabla intermedia ProductoIngrediente
+            List<ProductoIngrediente> vinculos = em.createQuery("SELECT pi FROM ProductoIngrediente pi WHERE pi.productos.id = :idProd", 
+                ProductoIngrediente.class)
+                .setParameter("idProd", id_producto)
+                .getResultList();
+
+            if (vinculos.isEmpty()) {
+                throw new PersistenciaException("El producto ID " + id_producto + " no tiene ingredientes asociados.");
+            }
+
+            // Procesamos cada ingrediente vinculado
+            for (ProductoIngrediente pi : vinculos) {
+                Ingrediente ing = pi.getIngredientes();
+                // cantidad necesaria = (cantidad en ProductoIngrediente) * (cuatos platos se pidieron)
+                double cantidadARestar = pi.getCantidad_ingrediente()* cantidad_pedida;
+
+                // Validacion de Stock (Evita que el sistema truene por valores negativos)
+                if (ing.getStock() < cantidadARestar) {
+                    throw new PersistenciaException("Stock insuficiente de: " + ing.getNombre() + 
+                                                    ". Requerido: " + cantidadARestar + ", Disponible: " + ing.getStock());
+                }
+
+                // Actualizacion manual del stock
+                ing.setStock((int)(ing.getStock()- cantidadARestar));
+                em.merge(ing); // Aseguramos que el cambio se guarde
+            }
+
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            // Lanzamos el error real para que la interfaz sepa que paso
+            throw new PersistenciaException("Error de Inventario: " + e.getMessage());
         } finally {
             em.close();
         }

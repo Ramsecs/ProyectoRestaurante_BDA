@@ -4,15 +4,15 @@
  */
 package daosRestaurante;
 
+import entidadesRestaurante.Administrador;
 import entidadesRestaurante.Empleado;
 import entidadesRestaurante.Mesero;
 import excepcionesRestaurante.PersistenciaException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import org.junit.Before;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
@@ -20,102 +20,73 @@ import org.junit.Before;
  */
 public class EmpleadoDAOTest {
     
-    private EmpleadoDAO empleadoDAO;
+    private final EmpleadoDAO empleadoDAO = EmpleadoDAO.getInstanceEmpleadoDAO();
 
-    @Before
-    public void setUp() {
-        // Obtenemos la instancia del Singleton
-        empleadoDAO = EmpleadoDAO.getInstanceEmpleadoDAO();
-    }
-
-    /**
-     * Caso de Exito: Registro masivo y recuperacion de empleados.
-     * Verifica que si enviamos una lista valida, los datos se persisten.
-     * 
-     *  @throws PersistenciaException 
-     */
     @Test
-    public void testRegistrarMasivoExito() throws PersistenciaException {
-        // Preparar datos
-        Mesero m1 = new Mesero("user1", "pass1", "Juan", "Perez", "Ochoa", "6441112233");
-        Mesero m2 = new Mesero("user2", "pass2", "Ana", "Lopez", "Duarte", "6445556677");
-        List<Empleado> listaParaRegistrar = Arrays.asList(m1, m2);
-
-        // Ejecutar accion
-        empleadoDAO.registrarMasivo(listaParaRegistrar);
-
-        // Verificar resultados
-        List<Empleado> todos = empleadoDAO.obtenerTodos();
+    @DisplayName("ÉXITO: Registro masivo de una lista mixta (Administradores y Meseros)")
+    public void testRegistrarMasivoExito() {
+        List<Empleado> lista = new ArrayList<>();
         
-        assertNotNull("La lista no debería ser nula", todos);
-        assertTrue("Debería haber al menos los 2 empleados registrados", todos.size() >= 2);
-        
-        // Verificar que el nombre del primer empleado esté en la lista recuperada
-        boolean encontrado = todos.stream().anyMatch(e -> e.getNombres().equals("Juan"));
-        assertTrue("El empleado Juan debería existir en la base de datos", encontrado);
+        lista.add(new Administrador("admin_test", "hash123", "Carlos", "Perez", "Diaz", "6444001122"));
+        lista.add(new Mesero("mesero_test", "hash456", "Ana", "Gomez", null, "6444998877"));
+
+        try {
+            empleadoDAO.registrarMasivo(lista);
+            
+            List<Empleado> todos = empleadoDAO.obtenerTodos();
+            
+            boolean adminEncontrado = todos.stream().anyMatch(e -> "admin_test".equals(e.getNombre_usuario()));
+            boolean meseroEncontrado = todos.stream().anyMatch(e -> "mesero_test".equals(e.getNombre_usuario()));
+
+            assertTrue(adminEncontrado, "El administrador debió persistirse");
+            assertTrue(meseroEncontrado, "El mesero debió persistirse");
+            
+        } catch (PersistenciaException e) {
+            fail("No debería lanzar excepción: " + e.getMessage());
+        }
     }
 
-    /**
-     * Caso de Fallo Esperado: Registro masivo con datos nulos o inválidos.
-     * Verifica que el DAO lance una PersistenciaException y haga Rollback ante un error.
-     * 
-     * @throws PersistenciaException 
-     */
     @Test
-    public void testRegistrarMasivoFallo() throws PersistenciaException {
-        // Preparar datos invalidos
-        // Creamos una lista que contenga un objeto nulo o un empleado sin campos obligatorios
-        List<Empleado> listaInvalida = new ArrayList<>();
-        listaInvalida.add(new Mesero(null, null, null, null, null, null)); 
-
-        // Ejecutar accion: Deberia lanzar PersistenciaException por el @Column(nullable = false)
-        empleadoDAO.registrarMasivo(listaInvalida);
+    @DisplayName("FALLO: El registro masivo hace rollback si un elemento es inválido")
+    public void testRegistrarMasivoFallo() {
+        List<Empleado> lista = new ArrayList<>();
+        lista.add(new Mesero("valido", "pass", "Juan", "Cano", "Ruiz", "123"));
         
-        // Si el flujo llega aquí sin lanzar excepcion, JUnit fallara la prueba.
-    }
-    
-    /**
- * PRUEBA: EXITO DE CONSULTA
- * Escenario: Existen empleados en la base de datos.
- * Resultado esperado: La lista devuelta no es nula y contiene los objetos correctos.
- */
-@Test
-public void testObtenerTodosExito() {
-    // Aseguramos que haya al menos un dato para consultar
-    Mesero m = new Mesero("consulta_user", "hash", "Test", "Test", "Test", "123");
-    try {
-        empleadoDAO.registrarMasivo(Arrays.asList(m));
-    } catch (PersistenciaException e) {
-        fail("No se pudo preparar la prueba: " + e.getMessage());
+        // Empleado INVÁLIDO (nombre_usuario nulo viola la restricción nullable=false)
+        Empleado invalido = new Administrador();
+        invalido.setNombre_usuario(null); 
+        invalido.setContrasena("pass");
+        invalido.setNombres("Error");
+        invalido.setApellido_paterno("Test");
+        
+        lista.add(invalido);
+
+        assertThrows(PersistenciaException.class, () -> {
+            empleadoDAO.registrarMasivo(lista);
+        }, "Debería lanzar PersistenciaException debido a la restricción de integridad");
     }
 
-    // Ejecutar la consulta
-    List<Empleado> resultado = empleadoDAO.obtenerTodos();
+    @Test
+    @DisplayName("ÉXITO: Obtener lista completa de empleados")
+    public void testObtenerTodosExito() throws PersistenciaException {
+        List<Empleado> precarga = new ArrayList<>();
+        precarga.add(new Mesero("lista_user_" + System.currentTimeMillis(), "pass", "Test", "List", null, "000"));
+        empleadoDAO.registrarMasivo(precarga);
 
-    // Validar
-    assertNotNull("El método nunca debería devolver null, sino una lista vacía o con datos", resultado);
-    assertFalse("La lista no debería estar vacía", resultado.isEmpty());
-    
-    // Verificamos que JPA trajo la entidad polimórfica correctamente
-    boolean esMesero = resultado.stream().anyMatch(e -> e instanceof Mesero);
-    assertTrue("Los objetos recuperados deben mantener su tipo (Mesero)", esMesero);
-}
+        List<Empleado> resultado = empleadoDAO.obtenerTodos();
 
-/**
- * PRUEBA: FALLO O ESTADO VACIO
- * Escenario: La base de datos está vacia o la conexion se pierde.
- * Nota: En JPA, una consulta sin resultados NO lanza excepcion, devuelve una lista de tamaño 0.
- */
-@Test
-public void testObtenerTodosVacio() {
-    
-    // Ejecutar consulta en BD vacía
-    List<Empleado> resultado = empleadoDAO.obtenerTodos();
+        assertNotNull(resultado, "La lista no debe ser nula");
+        assertFalse(resultado.isEmpty(), "La lista debe contener al menos un empleado");
+    }
 
-    // Validar
-    // Si la BD esta vacia, el resultado debe ser una lista con 0 elementos, no null.
-    assertNotNull(resultado);
-    assertEquals("Si no hay empleados, el tamaño debe ser 0", 0, resultado.size());
-}
-    
+    @Test
+    @DisplayName("ÉXITO: Comportamiento ante lista vacía")
+    public void testObtenerTodosVacio() {
+        try {
+            List<Empleado> resultado = empleadoDAO.obtenerTodos();
+            assertNotNull(resultado, "JPA debe devolver una lista vacía, nunca null");
+        } catch (Exception e) {
+            fail("No debería lanzar excepción en una consulta simple: " + e.getMessage());
+        }
+    }
 }

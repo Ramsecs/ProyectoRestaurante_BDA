@@ -128,10 +128,14 @@ public class ProductoDAO implements IProductoDAO{
         EntityManager em = ConexionBD.crearConexion();
         try {
             em.getTransaction().begin();
-            em.createQuery("UPDATE Producto p SET p.precio = :precio WHERE p.id = :id").setParameter("precio", nuevoPrecio)
+            int filas_actualizadas = em.createQuery("UPDATE Producto p SET p.precio = :precio WHERE p.id = :id").setParameter("precio", nuevoPrecio)
               .setParameter("id", id)
               .executeUpdate();
             em.getTransaction().commit();
+            
+            if (filas_actualizadas == 0) {
+                throw new PersistenciaException("No se encontro el producto con ID: " + id);
+            }
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw new PersistenciaException("Error al actualizar precio");
