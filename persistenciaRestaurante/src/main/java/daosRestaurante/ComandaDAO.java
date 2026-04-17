@@ -67,6 +67,12 @@ public class ComandaDAO implements IComandaDAO {
             em.close();
         }
     }
+    /**
+     * Obtiene las comandas que estan exclusivamente abiertas
+     * @param estado pars la comanda
+     * @return
+     * @throws PersistenciaException 
+     */
 
     @Override
     public List<Comanda> obtenerComandasAbiertas(EstadoComanda estado) throws PersistenciaException {
@@ -85,6 +91,12 @@ public class ComandaDAO implements IComandaDAO {
             em.close();
         }
     }
+    /**
+     * Actualiza el estado de la comanda
+     * @param id de la comanda al que se le va a cambiar el estado
+     * @param estado al que se va a cambiar el estado
+     * @throws PersistenciaException 
+     */
 
     @Override
     public void actualizarEstadoComanda(Long id, EstadoComanda estado) throws PersistenciaException {
@@ -103,7 +115,13 @@ public class ComandaDAO implements IComandaDAO {
             em.close();
         }
     }
-
+    /**
+     * Filtra las comandas de busqueda por cliente
+     * @param filtro que es el parametro para buscar el cliente
+     * @param estado_filtro estado de la comanda
+     * @return
+     * @throws PersistenciaException 
+     */
     @Override
     public List<Comanda> buscarComandasAbiertasPorCliente(String filtro, EstadoComanda estado_filtro) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
@@ -123,7 +141,14 @@ public class ComandaDAO implements IComandaDAO {
             em.close();
         }
     }
-
+    /**
+     * Actualiza los detalles de la comanda, asi sea que se elimine un producto, se modofique o se agregue
+     * @param id_comanda por modificar
+     * @param modificar lista de los productos que se van a modoficar
+     * @param eliminar lista de los productos que se van a eliminar
+     * @param nuevos lista de los productos que se van a agregar
+     * @throws PersistenciaException 
+     */
     @Override
     public void actualizarDetallesComanda(Long id_comanda, List<ComandaProducto> modificar, List<ComandaProducto> eliminar, List<ComandaProducto> nuevos) throws PersistenciaException {
         EntityManager em = ConexionBD.crearConexion();
@@ -160,6 +185,12 @@ public class ComandaDAO implements IComandaDAO {
             em.close();
         }
     }
+    /**
+     * Regresa todas las comandas
+     * @param id_comanda de la comanda
+     * @return
+     * @throws PersistenciaException 
+     */
 
     @Override
     public List<ComandaProducto> consultarPorComanda(Long id_comanda) throws PersistenciaException {
@@ -175,6 +206,12 @@ public class ComandaDAO implements IComandaDAO {
             em.close();
         }
     }
+    /**
+     * Este metodo regresa la relación entre la comanda y el producto
+     * @param id de la comandaProducto
+     * @return
+     * @throws PersistenciaException 
+     */
 
     @Override
     public ComandaProducto buscarComandaProductoPorId(Long id) throws PersistenciaException {
